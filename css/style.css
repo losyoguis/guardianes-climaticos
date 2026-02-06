@@ -1,9 +1,8 @@
-body{margin:0;font-family:Arial;background:#020024;color:#fff}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#000}
-.map-wrapper{position:relative;width:100%;max-width:900px;margin:auto}
-#mapa{width:100%;display:block}
-.hotspot{position:absolute;width:22px;height:22px;border-radius:50%;background:#00ffe7;
-box-shadow:0 0 15px #00ffe7;cursor:pointer;animation:pulse 2s infinite}
-@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
-.panel{position:fixed;bottom:0;width:100%;background:#000;padding:15px}
-.oculto{display:none}
+body{margin:0;font-family:'Orbitron',sans-serif;background:radial-gradient(circle,#020024,#000);color:#eaffff}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(0,0,0,.8);border-bottom:1px solid #00ffe7}
+.pantalla{display:none;padding:20px;animation:fade .5s ease}
+.pantalla.activa{display:block}
+.menu-mision button,.card,button{background:#00ffe7;border:none;border-radius:14px;padding:14px;margin:10px;font-size:1rem;cursor:pointer}
+.card{display:inline-block;width:200px}
+.guia{background:rgba(0,0,0,.6);border-left:4px solid #00ffe7;padding:10px}
+@keyframes fade{from{opacity:0}to{opacity:1}}
