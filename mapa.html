@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mapa</title>
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+<h1>🗺️ Mapa de la Ciudad</h1>
+<div id="perfil"></div>
+<div class="game-map">
+<div class="node naturaleza active" onclick="irZona('zona-naturaleza.html')">🌳<span>Naturaleza</span></div>
+<div class="path"></div>
+<div class="node ciudad locked">🏙️<span>Ciudad</span></div>
+<div class="path"></div>
+<div class="node agua locked">💧<span>Agua</span></div>
+<div class="path"></div>
+<div class="node energia locked">⚡<span>Energía</span></div>
+</div>
+</div>
+<script src="js/app.js"></script>
+</body>
+</html>
