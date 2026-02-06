@@ -1,3 +1,3 @@
-# Guardianes Climáticos – Ciudadanos Científicos
+# Guardianes Climáticos – Medellín 2035
 
-Videojuego educativo PWA para formación ambiental.
+Videojuego educativo futurista PWA.
