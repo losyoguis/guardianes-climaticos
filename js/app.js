@@ -1,3 +1,12 @@
-let guardian={zonas:[],puntos:0};const viewport=document.getElementById('mapViewport');
-document.querySelectorAll('.zona').forEach(z=>z.onclick=()=>{viewport.classList.add('zoomed');mostrarMiniMision(z.dataset.zona)});
-function mostrarMiniMision(z){const m={naturaleza:['🌳 Árboles reducen el calor',30],ciudad:['🚲 Mejor movilidad',30],agua:['💧 Cuidar el río',30],energia:['☀️ Energía solar',30]};document.getElementById('mmTitulo').textContent='Mini Misión';document.getElementById('mmTexto').textContent=m[z][0];const a=document.getElementById('mmAcciones');a.innerHTML='';const b=document.createElement('button');b.textContent='Aceptar';b.onclick=()=>{guardian.puntos+=m[z][1];document.getElementById('scoreHUD').textContent='⭐ '+guardian.puntos+' pts';document.getElementById('miniMision').classList.add('oculto')};a.appendChild(b);document.getElementById('miniMision').classList.remove('oculto')}
+let puntos=0;
+document.querySelectorAll('.hotspot').forEach(h=>{
+ h.addEventListener('click',()=>{
+   const zona=h.dataset.zona;
+   puntos+=50;
+   document.getElementById('score').textContent='⭐ '+puntos+' pts';
+   const p=document.getElementById('panel');
+   p.innerHTML='<h3>'+zona+'</h3><p>Mini misión en '+zona+'</p><button onclick="cerrar()">Cerrar</button>';
+   p.classList.remove('oculto');
+ });
+});
+function cerrar(){document.getElementById('panel').classList.add('oculto')}
