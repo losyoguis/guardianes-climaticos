@@ -2,25 +2,62 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Guardianes Climáticos – Mapa Interactivo</title>
+<title>Guardianes Climáticos de Medellín</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <header class="hud">
-  <h1>🌆 Medellín Interactivo</h1>
-  <div id="score">⭐ 0 pts</div>
+  <h1>🛡️ Guardianes Climáticos</h1>
+  <div id="progreso">Progreso: 0%</div>
 </header>
 
-<div class="map-wrapper">
-  <img src="assets/medellin_map.png" id="mapa" alt="Mapa de Medellín">
+<main id="app">
 
-  <div class="hotspot" style="top:42%;left:48%" data-zona="Centro"></div>
-  <div class="hotspot" style="top:55%;left:60%" data-zona="Poblado"></div>
-  <div class="hotspot" style="top:30%;left:35%" data-zona="Manrique"></div>
-</div>
+<section id="home" class="pantalla activa">
+  <h2>Una misión para el futuro de Medellín</h2>
+  <p class="guia">👋 Soy Guardia, tu guía ambiental. ¿Aceptas el reto?</p>
+  <div class="menu-mision">
+    <button onclick="ir('causas')">🔍 Investigar causas</button>
+    <button onclick="ir('plan')">🌱 Diseñar soluciones</button>
+  </div>
+</section>
 
-<div id="panel" class="panel oculto"></div>
+<section id="causas" class="pantalla">
+  <h2>¿Por qué cambia el clima?</h2>
+  <div class="tarjetas">
+    <div class="card" onclick="completar('combustibles')">🚗 Combustibles</div>
+    <div class="card" onclick="completar('deforestacion')">🌳 Deforestación</div>
+    <div class="card" onclick="completar('residuos')">🗑️ Residuos</div>
+  </div>
+  <button onclick="ir('home')">⬅ Volver</button>
+</section>
+
+<section id="plan" class="pantalla">
+  <h2>Plan de Acción Guardián</h2>
+  <p class="guia">Selecciona compromisos para tu salón</p>
+  <div class="checks">
+    <label><input type="checkbox"> Apagar luces</label>
+    <label><input type="checkbox"> Reducir residuos</label>
+    <label><input type="checkbox"> Cuidar el agua</label>
+  </div>
+  <input type="text" placeholder="Nombre del Plan">
+  <button onclick="ir('cierre')">🚀 Publicar plan</button>
+</section>
+
+<section id="cierre" class="pantalla">
+  <h2>¡Misión cumplida!</h2>
+  <p class="guia">Comparte tu compromiso</p>
+  <div class="menu-mision">
+    <button>🖼️ Póster</button>
+    <button>🎙️ Audio</button>
+    <button>📸 Foto</button>
+  </div>
+  <button onclick="ir('home')">🔄 Reiniciar</button>
+</section>
+
+</main>
 
 <script src="js/app.js"></script>
 </body>
