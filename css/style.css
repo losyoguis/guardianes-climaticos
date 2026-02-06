@@ -1,9 +1,9 @@
-body.futuro{margin:0;background:#020024;color:#eaffff;font-family:Arial} .map-container{height:calc(100vh - 110px);overflow:hidden;margin-top:50px}
-.top-nav,.bottom-nav{position:fixed;width:100%;background:#000;color:#00ffe7;padding:10px;display:flex;justify-content:space-between}
-.bottom-nav{bottom:0;justify-content:space-around}
-#mapViewport{transition:transform .8s}
-.zoomed .label{opacity:1}
-.label{fill:#00ffe7;opacity:0;font-size:14px}
-.zona{fill:#3498db;stroke:#fff;stroke-width:3}
-.mini-mision{position:fixed;top:30%;left:50%;transform:translateX(-50%);background:#000;border:1px solid #00ffe7;padding:15px;color:#fff}
+body{margin:0;font-family:Arial;background:#020024;color:#fff}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#000}
+.map-wrapper{position:relative;width:100%;max-width:900px;margin:auto}
+#mapa{width:100%;display:block}
+.hotspot{position:absolute;width:22px;height:22px;border-radius:50%;background:#00ffe7;
+box-shadow:0 0 15px #00ffe7;cursor:pointer;animation:pulse 2s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+.panel{position:fixed;bottom:0;width:100%;background:#000;padding:15px}
 .oculto{display:none}
