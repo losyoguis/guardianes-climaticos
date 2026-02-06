@@ -1,42 +1,17 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Medellín 2035</title>
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="css/style.css">
-</head>
-<body class="futuro">
-<div class="hud">
-<h1>🌆 Medellín 2035</h1>
-<p>La ciudad está viva</p>
-</div>
-
-<svg viewBox="0 0 900 600" class="mapa-svg">
-<path d="M0,300 Q200,50 450,250 Q700,50 900,300 L900,0 L0,0 Z" class="montanas"/>
-<path d="M450,0 C430,150 470,300 450,600" class="rio"/>
-
-<circle cx="250" cy="350" r="55" class="zona naturaleza activa" data-zona="naturaleza"/>
-<circle cx="450" cy="250" r="55" class="zona ciudad bloqueada" data-zona="ciudad"/>
-<circle cx="350" cy="480" r="55" class="zona agua bloqueada" data-zona="agua"/>
-<circle cx="650" cy="380" r="55" class="zona energia bloqueada" data-zona="energia"/>
-</svg>
-
-<div id="panelZona" class="panel oculto"></div>
-
-<div id="npc" class="npc">
-<div class="holo"></div>
-<div class="npc-msg">👋 Hola Guardián. Protejamos la ciudad.</div>
-</div>
-
-<button class="btn-logros" onclick="mostrarLogros()">🏅</button>
-<button class="btn-ranking" onclick="mostrarRanking()">📊</button>
-
-<div id="panelLogros" class="panel oculto"></div>
-<div id="panelRanking" class="panel oculto"></div>
-
-<div class="radar"></div>
-
-<script src="js/app.js"></script>
-</body>
-</html>
+<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><title>Mapa Centro Medellín</title><link rel='stylesheet' href='css/style.css'></head><body class='futuro'>
+<nav class='top-nav'><span>🌆 Medellín Centro</span><span id='scoreHUD'>⭐ 0 pts</span></nav>
+<div class='map-container'><div id='mapViewport'><svg viewBox='0 0 800 600' class='mapa-svg'>
+<path d='M380,0 C360,200 420,400 390,600' class='rio'/>
+<circle cx='420' cy='260' r='35' class='zona naturaleza' data-zona='naturaleza'/>
+<circle cx='360' cy='300' r='35' class='zona ciudad' data-zona='ciudad'/>
+<circle cx='440' cy='350' r='35' class='zona agua' data-zona='agua'/>
+<circle cx='320' cy='260' r='35' class='zona energia' data-zona='energia'/>
+<text x='420' y='215' class='label'>Plaza Botero</text>
+<text x='360' y='260' class='label'>La Alpujarra</text>
+<text x='440' y='390' class='label'>Río Medellín</text>
+<text x='320' y='215' class='label'>Centro Administrativo</text>
+</svg></div></div>
+<div id='panelZona' class='panel oculto'></div>
+<div id='miniMision' class='mini-mision oculto'><h3 id='mmTitulo'></h3><p id='mmTexto'></p><div id='mmAcciones'></div></div>
+<nav class='bottom-nav'><button>Mapa</button><button>Logros</button><button>Ranking</button></nav>
+<script src='js/app.js'></script></body></html>
