@@ -1,1 +1,27 @@
-<!DOCTYPE html><html lang='es'><head><meta charset='UTF-8'><title>Guardianes Climáticos</title><link rel='manifest' href='manifest.json'><link rel='stylesheet' href='css/style.css'></head><body class='futuro'><div class='app'><h1>🛡️ Guardianes Climáticos</h1><p>Centro de Medellín</p><button onclick="location.href='mapa.html'">Iniciar</button></div></body></html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guardianes Climáticos – Mapa Interactivo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="hud">
+  <h1>🌆 Medellín Interactivo</h1>
+  <div id="score">⭐ 0 pts</div>
+</header>
+
+<div class="map-wrapper">
+  <img src="assets/medellin_map.png" id="mapa" alt="Mapa de Medellín">
+
+  <div class="hotspot" style="top:42%;left:48%" data-zona="Centro"></div>
+  <div class="hotspot" style="top:55%;left:60%" data-zona="Poblado"></div>
+  <div class="hotspot" style="top:30%;left:35%" data-zona="Manrique"></div>
+</div>
+
+<div id="panel" class="panel oculto"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
