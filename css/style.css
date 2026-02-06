@@ -1,0 +1,6 @@
+body{font-family:Fredoka,sans-serif;background:#0f2027;color:#333}
+.app{background:white;border-radius:24px;padding:24px;max-width:420px;margin:auto;text-align:center}
+.btn{padding:15px;border-radius:20px;border:none;color:white;font-size:1rem;margin:10px}
+.naturaleza{background:#2ecc71}.ciudad{background:#3498db}.energia{background:#f39c12}
+.avatar{width:80px;height:120px;border-radius:20px;margin:auto}
+.avatar.verde{background:#2ecc71}.avatar.azul{background:#3498db}.avatar.amarillo{background:#f1c40f}
