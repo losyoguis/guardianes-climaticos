@@ -1,7 +1,3 @@
-let guardian=JSON.parse(localStorage.getItem('guardian'))||{zonas:[],logros:[],nivel:1};
-function elegirAvatar(a){guardian.avatar=a;guardar();location.href='mapa.html'}
-function guardar(){localStorage.setItem('guardian',JSON.stringify(guardian))}
-function completarZona(z){if(!guardian.zonas.includes(z)){guardian.zonas.push(z);guardian.logros.push(z);guardian.nivel++}guardar();location.href=z==='energia'?'final.html':'mapa.html'}
-function mostrarLogros(){const p=document.getElementById('panelLogros');p.innerHTML='<h2>🏅 Logros</h2>'+guardian.logros.join('<br>');p.classList.remove('oculto')}
-function mostrarRanking(){const p=document.getElementById('panelRanking');p.innerHTML='<h2>📊 Progreso</h2><p>Nivel '+guardian.nivel+'</p>';p.classList.remove('oculto')}
-document.querySelectorAll('.zona').forEach(z=>z.onclick=()=>{if(z.classList.contains('bloqueada'))return;location.href='zona-'+z.dataset.zona+'.html'});
+let guardian={zonas:[],puntos:0};const viewport=document.getElementById('mapViewport');
+document.querySelectorAll('.zona').forEach(z=>z.onclick=()=>{viewport.classList.add('zoomed');mostrarMiniMision(z.dataset.zona)});
+function mostrarMiniMision(z){const m={naturaleza:['🌳 Árboles reducen el calor',30],ciudad:['🚲 Mejor movilidad',30],agua:['💧 Cuidar el río',30],energia:['☀️ Energía solar',30]};document.getElementById('mmTitulo').textContent='Mini Misión';document.getElementById('mmTexto').textContent=m[z][0];const a=document.getElementById('mmAcciones');a.innerHTML='';const b=document.createElement('button');b.textContent='Aceptar';b.onclick=()=>{guardian.puntos+=m[z][1];document.getElementById('scoreHUD').textContent='⭐ '+guardian.puntos+' pts';document.getElementById('miniMision').classList.add('oculto')};a.appendChild(b);document.getElementById('miniMision').classList.remove('oculto')}
