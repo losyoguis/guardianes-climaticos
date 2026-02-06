@@ -1,6 +1,14 @@
-body{font-family:Fredoka,sans-serif;background:#0f2027;color:#333}
-.app{background:white;border-radius:24px;padding:24px;max-width:420px;margin:auto;text-align:center}
-.btn{padding:15px;border-radius:20px;border:none;color:white;font-size:1rem;margin:10px}
-.naturaleza{background:#2ecc71}.ciudad{background:#3498db}.energia{background:#f39c12}
-.avatar{width:80px;height:120px;border-radius:20px;margin:auto}
-.avatar.verde{background:#2ecc71}.avatar.azul{background:#3498db}.avatar.amarillo{background:#f1c40f}
+body.futuro{margin:0;font-family:Orbitron,sans-serif;background:radial-gradient(circle,#020024,#000);color:#eaffff;overflow:hidden}
+.app{background:rgba(0,0,0,.6);border:1px solid #00ffe7;border-radius:20px;padding:20px;max-width:420px;margin:40px auto;text-align:center}
+.btn{padding:14px;border-radius:16px;border:none;color:#fff}
+.naturaleza{background:#2ecc71}.ciudad{background:#3498db}.energia{background:#f1c40f}
+.mapa-svg{width:100%;max-width:420px;margin:auto}
+.montanas{fill:#06283d}.rio{stroke:#00c6ff;stroke-width:8;fill:none}
+.zona{stroke:#fff;stroke-width:3;cursor:pointer}
+.bloqueada{fill:#555}
+.panel{position:fixed;bottom:0;width:100%;background:#000;border-top:2px solid #00ffe7;padding:15px}
+.oculto{display:none}
+.npc{position:fixed;bottom:20px;left:20px;display:flex;gap:10px}
+.holo{width:60px;height:90px;background:linear-gradient(#00ffe7,transparent);border-radius:30px}
+.btn-logros,.btn-ranking{position:fixed;top:70px;background:#000;color:#00ffe7;border:1px solid #00ffe7;border-radius:12px}
+.btn-logros{right:10px}.btn-ranking{right:60px}
