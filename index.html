@@ -320,6 +320,36 @@ text-shadow:2px 2px 0 rgba(0,0,0,.08);margin-bottom:10px}
 body.dark .btn-ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:rgba(233,242,251,.92)}
 .btn[disabled]{opacity:.55;cursor:not-allowed;transform:none !important;box-shadow:none !important}
 
+/* ✅ SOLO CAMBIO: hint con candado DENTRO del botón "Selecciona el cinturón..." */
+.btn-command-info{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center;
+  gap:12px;
+  padding:14px 16px;
+  text-align:center;
+  width:100%;
+}
+.btn-command-info .lock-inline{
+  display:block;
+  width:100%;
+  padding:12px 14px;
+  border-radius:999px;
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-weight:900;
+  border:2px solid rgba(255,255,255,.25);
+  box-shadow:0 8px 0 rgba(0,0,0,.24);
+  backdrop-filter: blur(10px);
+  line-height:1.25;
+}
+.btn-command-info .select-inline{
+  display:block;
+  font-weight:900;
+  line-height:1.25;
+}
+
 /* Background themes */
 .bg-causas{background:linear-gradient(180deg,#FFF3E0 0%,#FFE0B2 100%)}
 .bg-consecuencias{background:linear-gradient(180deg,#E3F2FD 0%,#BBDEFB 100%)}
@@ -543,12 +573,22 @@ body.dark .mission-meter{background:rgba(255,255,255,.06); border-color:rgba(255
     width:46px;height:46px;border-radius:16px;
   }
 
-  /* Utility dock above belt */
+  /* ✅ FIX RESPONSIVE CINTURÓN (imagen del command): mantener proporción correcta para que no se recorte */
+  .command-menu .menu-img{
+    aspect-ratio: 16/5; /* antes 16/9 */
+  }
+
+  /* ✅ Utility dock: en pantallas SIN cinturón visible, baja para no tapar el “cinturón” (command) */
   #utility-dock{
     right:10px;
-    bottom:calc(10px + env(safe-area-inset-bottom, 0px) + var(--belt-h));
+    bottom:calc(10px + env(safe-area-inset-bottom, 0px)); /* antes: + var(--belt-h) */
     gap:10px;
   }
+  /* Cuando el cinturón SÍ está visible (misiones), súbelo por encima del cinturón */
+  body.belt-on #utility-dock{
+    bottom:calc(10px + env(safe-area-inset-bottom, 0px) + var(--belt-h));
+  }
+
   .util-btn{border-radius:16px; min-width:54px; min-height:48px; padding:10px 12px}
 
   /* Content padding: allow space for bottom belt */
@@ -579,10 +619,6 @@ body.dark .mission-meter{background:rgba(255,255,255,.06); border-color:rgba(255
   .hero{border-radius:18px}
   .hero .hero-media{aspect-ratio: 16/11}
   .hero .hero-caption{left:10px;bottom:10px;padding:8px 10px;border-radius:12px;font-size:.9rem}
-
-  /* Command image */
-  .command-menu{border-radius:18px}
-  .command-menu .menu-img{aspect-ratio: 16/9}
 
   /* Buttons full width where makes sense */
   .flow-actions .btn{width:100%;max-width:520px;justify-content:center}
@@ -621,8 +657,9 @@ body.dark .mission-meter{background:rgba(255,255,255,.06); border-color:rgba(255
 
 <div id="toast" role="status" aria-live="polite"></div>
 
-<!-- UTILIDADES: Idioma + Día/Noche -->
+<!-- UTILIDADES: Idioma + Día/Noche + ✅ Audio explicativo por sección -->
 <div id="utility-dock" aria-label="Controles rápidos">
+  <button type="button" class="util-btn" id="btn-audio" aria-label="Audio de la sección">🔊</button>
   <button type="button" class="util-btn" id="btn-lang" aria-label="Cambiar idioma">🌎 ES</button>
   <button type="button" class="util-btn" id="btn-theme" aria-label="Cambiar modo día/noche">🌙</button>
 </div>
@@ -683,7 +720,7 @@ body.dark .mission-meter{background:rgba(255,255,255,.06); border-color:rgba(255
 
   <div class="home-content">
     <div class="guardia-avatar">🌿</div>
-    <h1 class="home-title" data-i18n-html="home_title">GUARDIANES CLIMÁTICOS<br>DE MEDELLÍN</h1>
+    <h1 class="home-title" data-i18n-html="home_title">GUARDIANES CLIMÁTICOS<br>DE MEDEDELLÍN</h1>
     <p class="home-subtitle" data-i18n="home_subtitle">Una misión para el futuro de nuestra ciudad</p>
     <div class="speech-bubble" data-i18n-html="home_bubble">
       ¡Hola, explorador! Soy <strong>Guardia</strong>. Nuestra ciudad necesita tu ayuda.
@@ -759,8 +796,6 @@ body.dark .mission-meter{background:rgba(255,255,255,.06); border-color:rgba(255
     <button type="button" class="menu-hotspot hs-consecuencias" data-go="consecuencias" aria-label="Ir a Consecuencias"></button>
     <button type="button" class="menu-hotspot hs-soluciones" data-go="soluciones" aria-label="Ir a Soluciones"></button>
 
-    <div class="plan-locked-hint plan-locked-hint-el" data-i18n="plan_locked_hint">🔒 Completa Causas + Consecuencias + Soluciones para desbloquear el Plan</div>
-
     <button type="button" class="menu-hotspot hs-plan plan-entry is-hidden" data-go="plan" aria-label="Ir a Plan Guardián"></button>
     <button type="button" class="menu-plan plan-entry is-hidden" data-go="plan" aria-label="Ir a Plan Guardián" data-i18n="plan_btn">📋 PLAN GUARDIÁN</button>
   </div>
@@ -768,8 +803,9 @@ body.dark .mission-meter{background:rgba(255,255,255,.06); border-color:rgba(255
   <div class="flow-card">
     <p data-i18n-html="command_text">🛰️ Usa el <b>Cinturón</b> para moverte. Completa Causas, Consecuencias y Soluciones para desbloquear el Plan.</p>
     <div class="flow-actions">
-      <button type="button" class="btn btn-ghost" data-action="info-belt" id="btn-command-info" data-i18n="command_info_btn">
-        Selecciona el cinturón de Guardia,: Causas - Consecuencias - Soluciones
+      <button type="button" class="btn btn-ghost btn-command-info" data-action="info-belt" id="btn-command-info">
+        <span class="lock-inline plan-locked-hint-el" data-i18n="plan_locked_hint">🔒 Completa Causas + Consecuencias + Soluciones para desbloquear el Plan</span>
+        <span class="select-inline" data-i18n="command_info_btn">Selecciona el cinturón de Guardia,: Causas - Consecuencias - Soluciones</span>
       </button>
     </div>
   </div>
@@ -1195,7 +1231,8 @@ const I18N = {
     t_wrong:"Ups… intenta otra vez 🙂",
     t_saved:"+5 ⭐ ¡Compromisos guardados!",
     t_pick_3:"Elige exactamente 3 compromisos 🙂",
-    t_info_belt:"Usa el cinturón para entrar a Causas, Consecuencias o Soluciones."
+    t_info_belt:"Usa el cinturón para entrar a Causas, Consecuencias o Soluciones.",
+    t_tts_not_supported:"⚠️ Tu navegador no soporta audio de voz."
   },
 
   en: {
@@ -1336,7 +1373,8 @@ const I18N = {
     t_wrong:"Oops… try again 🙂",
     t_saved:"+5 ⭐ Promises saved!",
     t_pick_3:"Pick exactly 3 promises 🙂",
-    t_info_belt:"Use the Belt buttons to enter Causes, Consequences, or Solutions."
+    t_info_belt:"Use the Belt buttons to enter Causes, Consequences, or Solutions.",
+    t_tts_not_supported:"⚠️ Your browser doesn’t support voice audio."
   }
 };
 
@@ -1378,7 +1416,7 @@ function showToast(msg){
   toastTimer=setTimeout(()=>tEl.classList.remove("show"),2400);
 }
 
-/* Audio */
+/* Audio (points) */
 let audioCtx=null;
 let audioUnlocked=false;
 function initAudio(){
@@ -1413,6 +1451,105 @@ function playPointSound(amount=10){
   g2.gain.exponentialRampToValueAtTime(0.0001, now+0.22);
   o2.connect(g2).connect(audioCtx.destination);
   o2.start(now+0.06); o2.stop(now+0.24);
+}
+
+/* ✅ Audio explicativo por sección (ES/EN) usando Speech Synthesis */
+const NARRATION = {
+  home: {
+    es: "Bienvenido. Aquí empieza la aventura. Toca Acepto la misión para comenzar y convertirte en Guardián Climático.",
+    en: "Welcome. This is where the adventure starts. Tap I accept the mission to begin and become a Climate Guardian."
+  },
+  briefing: {
+    es: "Misión aceptada. Tu objetivo es entender las causas del cambio climático, ver sus consecuencias, proponer soluciones y crear tu Plan Guardián.",
+    en: "Mission accepted. Your goal is to understand the causes of climate change, see the consequences, propose solutions, and build your Guardian Plan."
+  },
+  alert: {
+    es: "Señal climática. Observa las señales: más calor, lluvias raras o más fuertes, y cambios en la naturaleza. Eso nos dice que el clima está cambiando.",
+    en: "Climate signal. Look for signs: more heat, strange or stronger rain, and changes in nature. That tells us the climate is changing."
+  },
+  vision: {
+    es: "Mapa de visión. Aquí pensamos como guardianes: comprender el problema, decidir acciones y actuar para cuidar Medellín.",
+    en: "Vision map. Here we think like guardians: understand the problem, choose actions, and act to protect Medellín."
+  },
+  command: {
+    es: "Cinturón de Guardia. Elige tu misión: Causas, Consecuencias o Soluciones. Completa las tres para desbloquear el Plan Guardián.",
+    en: "Guardian Belt. Choose your mission: Causes, Consequences, or Solutions. Finish all three to unlock the Guardian Plan."
+  },
+  causas: {
+    es: "Misión de Causas. Descubre qué cosas calientan el planeta, como la contaminación y los gases. Completa los retos para ganar puntos.",
+    en: "Causes mission. Discover what makes the planet warmer, like pollution and gases. Complete the challenges to earn points."
+  },
+  consecuencias: {
+    es: "Misión de Consecuencias. Aprende qué pasa cuando el clima cambia: lluvias intensas, inundaciones y riesgos en la ciudad. Completa los retos.",
+    en: "Consequences mission. Learn what happens when climate changes: heavy rain, floods, and risks in the city. Complete the challenges."
+  },
+  soluciones: {
+    es: "Misión de Soluciones. Elige acciones reales que ayudan: ahorrar energía, reciclar y usar transporte limpio. Completa los retos y gana puntos.",
+    en: "Solutions mission. Choose real actions that help: save energy, recycle, and use cleaner transport. Complete the challenges and earn points."
+  },
+  plan: {
+    es: "Plan Guardián. Aquí creas tu plan de acción final. Este plan se desbloquea cuando completas Causas, Consecuencias y Soluciones.",
+    en: "Guardian Plan. Here you create your final action plan. This plan unlocks when you finish Causes, Consequences, and Solutions."
+  },
+  cierre: {
+    es: "Misión cumplida. Felicitaciones. Ya eres un Guardián Climático. Comparte tus acciones y sigue cuidando tu ciudad.",
+    en: "Mission complete. Congratulations. You are now a Climate Guardian. Share your actions and keep protecting your city."
+  }
+};
+
+let narrationActive = false;
+
+function stopNarration(){
+  try{
+    if("speechSynthesis" in window){
+      window.speechSynthesis.cancel();
+    }
+  }catch(e){}
+  narrationActive = false;
+}
+
+function pickVoiceFor(langPrefix){
+  try{
+    const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+    if(!voices || !voices.length) return null;
+    const pref = voices.find(v => (v.lang || "").toLowerCase().startsWith(langPrefix.toLowerCase()));
+    return pref || null;
+  }catch(e){
+    return null;
+  }
+}
+
+function speakText(text){
+  if(!text) return;
+  if(!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined"){
+    showToast(t("t_tts_not_supported"));
+    return;
+  }
+
+  stopNarration();
+
+  const langCode = (currentLang === "en") ? "en-US" : "es-CO";
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = langCode;
+
+  const v = pickVoiceFor(currentLang === "en" ? "en" : "es");
+  if(v) u.voice = v;
+
+  u.rate = 0.98;
+  u.pitch = 1.04;
+  u.volume = 1;
+
+  u.onend = ()=>{ narrationActive=false; };
+  u.onerror = ()=>{ narrationActive=false; };
+
+  narrationActive = true;
+  window.speechSynthesis.speak(u);
+}
+
+function playSectionNarration(sectionId){
+  const pack = NARRATION[sectionId] || NARRATION.home;
+  const text = (pack && pack[currentLang]) ? pack[currentLang] : (pack.es || "");
+  speakText(text);
 }
 
 /* Estado */
@@ -1536,6 +1673,8 @@ function updatePlanVisibility(){
 const nav={
   current:"home",
   go(screenId, opts={}){
+    stopNarration();
+
     if(screenId==="plan" && !isPlanUnlocked()){
       showToast(t("t_plan_locked"));
       screenId="command";
@@ -1589,7 +1728,11 @@ function isMissionScreen(id){
 }
 function setTopUIVisibility(){
   const belt = document.getElementById("belt");
-  belt.style.display = (state.missionStarted && isMissionScreen(nav.current)) ? "flex" : "none";
+  const on = (state.missionStarted && isMissionScreen(nav.current));
+  belt.style.display = on ? "flex" : "none";
+
+  /* ✅ para responsive: mover/ajustar el dock según si el cinturón está visible */
+  document.body.classList.toggle("belt-on", on);
 }
 function updateBeltActive(){
   const cur=nav.current;
@@ -1664,6 +1807,7 @@ function showIntro(){
 }
 function resetApp(){
   initAudio();
+  stopNarration();
   safeRemove(localStorage,STORAGE_KEY);
   safeRemove(sessionStorage,SESSION_KEY);
 
@@ -1708,7 +1852,7 @@ function resetApp(){
   applyAllBgs();
 }
 function startMission(){
-  const hasProgress = (state.score>0 || anyCompleted());
+  const hasProgress = (state.score>0 || Object.values(state.completed).some(Boolean));
   if(!state.missionStarted){
     state.missionStarted=true;
     if(!hasProgress) addScore(10);
@@ -1897,7 +2041,7 @@ function refreshCommitCounter(){
 }
 function resetCommitUI(silent=false){
   commitsPicked.clear();
-  document.querySelectorAll(".commit-card").forEach(b=> b.classList.remove("selected"));
+  document.querySelectorAll(".commit-card").forEach(b=> b.classList.remove("selected","done"));
   refreshCommitCounter();
   if(!silent) showToast((currentLang==="en") ? "Reset!" : "¡Reiniciado!");
 }
@@ -1953,11 +2097,15 @@ function loadPrefs(){
 function updateUtilityLabels(){
   const langBtn=document.getElementById("btn-lang");
   const themeBtn=document.getElementById("btn-theme");
+  const audioBtn=document.getElementById("btn-audio");
   if(langBtn) langBtn.textContent = (currentLang==="en") ? "🌎 EN" : "🌎 ES";
   if(themeBtn){
     themeBtn.textContent = (currentTheme==="dark")
       ? ((currentLang==="en") ? "☀️ Day" : "☀️ Día")
       : ((currentLang==="en") ? "🌙 Night" : "🌙 Noche");
+  }
+  if(audioBtn){
+    audioBtn.setAttribute("aria-label", (currentLang==="en") ? "Section audio" : "Audio de la sección");
   }
 }
 function toggleTheme(){
@@ -1968,6 +2116,7 @@ function toggleTheme(){
   applyAllBgs();
 }
 function toggleLang(){
+  stopNarration();
   currentLang = (currentLang==="es") ? "en" : "es";
   safeSet(localStorage, PREF_LANG_KEY, currentLang);
   applyI18n();
@@ -1987,6 +2136,14 @@ function wireButtons(){
 
   document.getElementById("btn-theme").addEventListener("click", ()=>{ initAudio(); toggleTheme(); });
   document.getElementById("btn-lang").addEventListener("click", ()=>{ initAudio(); toggleLang(); });
+
+  document.getElementById("btn-audio").addEventListener("click", ()=>{
+    if(("speechSynthesis" in window) && window.speechSynthesis.speaking){
+      stopNarration();
+      return;
+    }
+    playSectionNarration(nav.current);
+  });
 
   document.getElementById("btn-close-intro").addEventListener("click", ()=>{ initAudio(); closeIntroToHome(); });
   document.getElementById("intro-scene").addEventListener("click",(e)=>{
@@ -2107,6 +2264,10 @@ function wireButtons(){
     let target=h; try{ target=decodeURIComponent(h); }catch(e){}
     nav.go(target,{updateHash:false});
   });
+
+  if("speechSynthesis" in window){
+    window.speechSynthesis.onvoiceschanged = ()=>{};
+  }
 }
 
 /* INIT */
@@ -2144,6 +2305,7 @@ window.addEventListener("load", ()=>{
     document.getElementById("intro-scene").classList.remove("hidden");
     document.getElementById("intro-scene").setAttribute("aria-hidden","false");
     document.getElementById("belt").style.display="none";
+    document.body.classList.remove("belt-on");
     updateProgress();
     refreshCommandMenuBadges();
     refreshPlanLock();
