@@ -80,6 +80,14 @@ body.dark .step-note{color:rgba(233,242,251,.82)}
 body.dark .chip{background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:rgba(233,242,251,.92)}
 body.dark .util-btn{background:rgba(17,24,32,.88); color:rgba(233,242,251,.95); border-color:rgba(255,255,255,.18)}
 
+/* ✅ FIX: color de fuentes legibles en modo oscuro para filas claras (vehículos) */
+body.dark .vehicle-row{ color:#0b1016; }
+body.dark .vehicle-row .vehicle-name{ color:#0b1016; }
+body.dark .vehicle-row .tiny-choice{ color:#0b1016; }
+body.dark .vehicle-row .tiny-choice.selected,
+body.dark .vehicle-row .tiny-choice.correct,
+body.dark .vehicle-row .tiny-choice.wrong{ color:#0b1016; }
+
 /* BASE */
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{min-height:100%}
@@ -1400,6 +1408,7 @@ function applyI18n(){
   });
 
   refreshMissionLocks();
+  refreshPlanLock();
   refreshCommitCounter();
   updateSeqProgress("cons");
   updateUtilityLabels();
