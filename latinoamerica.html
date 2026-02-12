@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedagogía Latinoamericana v12.0 - Presentación Interactiva</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Cormorant+Garamond:ital,wght@1,600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --neon-green: #39ff14;
+            --neon-red: #ff3d7f;
+            --neon-ocre: #D4A04A;
+            --deep-space: #050510;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(0, 242, 255, 0.2);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--deep-space); color: #e0e0e0; font-family: 'Rajdhani', sans-serif; overflow-x: hidden; line-height: 1.6; }
+        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+        header {
+            padding: 1.5rem 5%; background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px); border-bottom: 2px solid var(--neon-blue);
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000;
+        }
+
+        .logo { font-family: 'Orbitron'; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); font-size: 1.1rem; }
+
+        .main-container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+
+        /* HERO */
+        .hero { text-align: center; margin-bottom: 60px; }
+        .hero h1 { font-family: 'Orbitron'; font-size: clamp(1.8rem, 5vw, 2.8rem); margin-bottom: 15px; background: linear-gradient(to right, #fff, var(--neon-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .tesis-box {
+            background: var(--glass); border: 1px solid var(--glass-border); padding: 25px; border-radius: 12px;
+            border-left: 4px solid var(--neon-blue); text-align: left; margin: 25px 0; font-size: 1.2rem;
+            font-family: 'Cormorant Garamond', serif; font-style: italic;
+        }
+
+        /* SECCIÓN: PRESENTACIÓN INTERACTIVA */
+        .presentation-section { 
+            background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); 
+            border-radius: 20px; padding: 40px; margin-bottom: 40px; 
+        }
+        .pres-title { font-family: 'Orbitron'; color: var(--neon-ocre); text-align: center; margin-bottom: 30px; letter-spacing: 3px; }
+        .pres-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .pres-card { 
+            background: rgba(0,0,0,0.4); padding: 20px; border-radius: 10px; border-top: 3px solid var(--neon-blue);
+            transition: 0.3s;
+        }
+        .pres-card:hover { transform: scale(1.02); background: rgba(0, 242, 255, 0.05); }
+        .pres-card h3 { font-family: 'Orbitron'; font-size: 0.9rem; margin-bottom: 15px; color: var(--neon-blue); }
+        .pres-card ul { list-style: none; font-size: 0.9rem; }
+        .pres-card li { margin-bottom: 8px; padding-left: 15px; position: relative; }
+        .pres-card li::before { content: "»"; position: absolute; left: 0; color: var(--neon-blue); }
+
+        /* NAVEGACIÓN MULTIMEDIA */
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .nav-card {
+            background: var(--glass); border: 1px solid var(--glass-border); border-radius: 15px;
+            padding: 25px; text-align: center; cursor: pointer; transition: 0.3s;
+        }
+        .nav-card:hover { transform: translateY(-5px); border-color: var(--neon-blue); box-shadow: 0 0 15px rgba(0,242,255,0.2); }
+
+        /* LÍNEA DE TIEMPO */
+        .timeline-section { background: rgba(188, 19, 254, 0.05); border: 1px solid var(--neon-purple); border-radius: 20px; padding: 30px; margin-bottom: 40px; }
+        .timeline-container { display: flex; justify-content: space-between; gap: 10px; padding: 20px 0; overflow-x: auto; }
+        .time-node { flex: 1; min-width: 140px; text-align: center; cursor: pointer; }
+        .time-circle { width: 45px; height: 45px; background: #000; border: 2px solid var(--neon-purple); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--neon-purple); transition: 0.3s; font-family: 'Orbitron'; }
+        .time-node:hover .time-circle { background: var(--neon-purple); color: #000; box-shadow: 0 0 15px var(--neon-purple); }
+
+        /* GLOSARIO */
+        .interactive-section { background: rgba(0, 242, 255, 0.03); border: 1px solid var(--neon-blue); border-radius: 20px; padding: 40px; margin-bottom: 40px; }
+        .data-viewer { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; min-height: 350px; }
+        .menu-btn {
+            background: rgba(255,255,255,0.05); border: 1px solid var(--neon-blue);
+            color: #fff; padding: 15px; text-align: left; cursor: pointer; border-radius: 8px;
+            font-family: 'Rajdhani'; font-weight: bold; margin-bottom: 10px; transition: 0.3s; width: 100%;
+        }
+        .menu-btn.active, .menu-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
+        .display-panel { background: rgba(0,0,0,0.5); border: 1px solid var(--neon-purple); border-radius: 12px; padding: 30px; }
+
+        /* CUESTIONARIO */
+        .quiz-section { background: rgba(57, 255, 20, 0.03); border: 1px solid var(--neon-green); border-radius: 20px; padding: 40px; }
+        .question-card { margin-bottom: 25px; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 10px; border-left: 4px solid var(--neon-green); }
+        .submit-btn {
+            background: var(--neon-green); color: #000; border: none; padding: 15px;
+            font-family: 'Orbitron'; font-weight: bold; cursor: pointer; border-radius: 5px; width: 100%; font-size: 1.1rem; transition: 0.3s;
+        }
+
+        /* MODALES */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { width: 100%; max-width: 800px; background: #0a0a1a; padding: 30px; border: 1px solid var(--neon-blue); border-radius: 15px; position: relative; max-height: 85vh; overflow-y: auto; }
+        .close-btn { position: absolute; top: 15px; right: 15px; color: var(--neon-blue); cursor: pointer; font-family: 'Orbitron'; border: 1px solid var(--neon-blue); padding: 5px 10px; border-radius: 5px; }
+
+        @media (max-width: 768px) { .data-viewer { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+
+<header>
+    <div class="logo">PEDAGOGÍAS EN DIÁLOGO</div>
+    <button class="menu-btn" style="width:auto; margin:0; padding: 8px 15px; border-color: var(--neon-blue); color: var(--neon-blue);" onclick="openM('m-biblio')">BIBLIOGRAFÍA</button>
+</header>
+
+<main class="main-container">
+    <section class="hero">
+        <h1>Crónicas del Despertar Educativo</h1>
+        <p style="color: var(--neon-blue); letter-spacing: 3px; font-weight: bold;">IDENTIDAD, RESISTENCIA Y TRANSFORMACIÓN</p>
+        
+        <div class="tesis-box">
+            Tesis Central: La pedagogía latinoamericana no es únicamente una aplicación de modelos europeos, sino una construcción viva y en lucha donde los factores socioculturales de la región (desigualdad, diversidad étnica, memoria histórica, conflictos) transforman y re-significan las tradiciones pedagógicas foráneas.
+        </div>
+    </section>
+
+    <section class="presentation-section">
+        <h2 class="pres-title">FUNDAMENTOS DEL GUION CONCEPTUAL</h2>
+        <div class="pres-grid">
+            <div class="pres-card" style="border-color: var(--neon-blue);">
+                <h3>TRADICIÓN FRANCESA</h3>
+                <ul>
+                    <li><strong>Enfoque:</strong> Positivismo e Ilustración.</li>
+                    <li><strong>Meta:</strong> El Estado-Nación y la razón universal.</li>
+                    <li><strong>Escuela:</strong> Máquina de civilización y progreso lineal.</li>
+                </ul>
+            </div>
+            <div class="pres-card" style="border-color: var(--neon-purple);">
+                <h3>DISCURSO ALEMÁN</h3>
+                <ul>
+                    <li><strong>Enfoque:</strong> Concepto de <em>Bildung</em> (Formación).</li>
+                    <li><strong>Meta:</strong> Autonomía del sujeto y cultivo del espíritu.</li>
+                    <li><strong>Pedagogía:</strong> Disciplina científica con estatuto propio.</li>
+                </ul>
+            </div>
+            <div class="pres-card" style="border-color: var(--neon-green);">
+                <h3>FILTROS LATINOAMERICANOS</h3>
+                <ul>
+                    <li><strong>Contexto:</strong> Desigualdad social y diversidad étnica.</li>
+                    <li><strong>Resistencia:</strong> Pedagogía del Oprimido (Freire).</li>
+                    <li><strong>Giro:</strong> De la imitación a la emancipación propia.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <div class="nav-grid">
+        <div class="nav-card" onclick="openM('m-info')"><div style="font-size: 2.5rem;">📊</div><h3>Infografía</h3><p>Filtros Socioculturales</p></div>
+        <div class="nav-card" onclick="openM('m-video')"><div style="font-size: 2.5rem;">🎬</div><h3>Vídeo</h3><p>Geopolítica Educativa</p></div>
+        <div class="nav-card" onclick="openM('m-podcast')"><div style="font-size: 2.5rem;">🎙️</div><h3>Podcast</h3><p>Identidad y Praxis</p></div>
+    </div>
+
+    <section class="timeline-section">
+        <h2 style="font-family:'Orbitron'; color:var(--neon-purple); text-align:center; margin-bottom:20px;">EVOLUCIÓN DEL PENSAMIENTO</h2>
+        <div class="timeline-container">
+            <div class="time-node" onclick="showTime('Siglo XIX', 'Llegada del Positivismo Francés: Orden y currículos centralizados para el progreso del Estado-Nación.')">
+                <div class="time-circle">XIX</div><p>Positivismo</p>
+            </div>
+            <div class="time-node" onclick="showTime('Siglo XX', 'Emergencia de la Pedagogía del Oprimido (Freire): Educación como práctica de la libertad.')">
+                <div class="time-circle">XX</div><p>Liberación</p>
+            </div>
+            <div class="time-node" onclick="showTime('Siglo XXI', 'Giro Decolonial: Reconocimiento de saberes subalternos e interculturalidad.')">
+                <div class="time-circle">XXI</div><p>Decolonialidad</p>
+            </div>
+            <div class="time-node" onclick="showTime('2025+', 'Era Digital y Situada: Gestión ética de la IA bajo una mirada crítica (Ortiz, 2025).')">
+                <div class="time-circle">2025</div><p>Futuro</p>
+            </div>
+        </div>
+        <div id="timeline-display" style="margin-top:20px; text-align:center; padding:15px; background:rgba(0,0,0,0.3); border-radius:10px; min-height:80px; border: 1px dashed var(--neon-purple);">
+            Selecciona un hito histórico para explorar.
+        </div>
+    </section>
+
+    <section class="interactive-section">
+        <h2 style="font-family:'Orbitron'; color:var(--neon-blue); text-align:center; margin-bottom:30px;">EXPLORADOR DE CONCEPTOS</h2>
+        <div class="data-viewer">
+            <div class="data-menu" id="glossary-btns"></div>
+            <div class="display-panel" id="glossary-panel">
+                <div style="text-align:center; margin-top:100px; opacity:0.5;">Selecciona un eje temático para visualizar la información.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="quiz-section">
+        <h2 style="font-family:'Orbitron'; color:var(--neon-green); text-align:center; margin-bottom:30px;">RETO DE CONOCIMIENTO</h2>
+        <form id="quiz-form">
+            <div class="question-card">
+                <p><strong>1. ¿Cuál es la tesis central de la pedagogía latinoamericana según el guion?</strong></p>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q1" value="a"> La imitación exacta del modelo francés.</label>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q1" value="b"> Una construcción viva que re-significa lo foráneo desde la realidad local.</label>
+            </div>
+            <div class="question-card">
+                <p><strong>2. ¿Qué significa "Bildung" en el discurso pedagógico alemán?</strong></p>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q2" value="a"> Formación integral del ser y cultivo del espíritu.</label>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q2" value="b"> Entrenamiento técnico para el trabajo industrial.</label>
+            </div>
+            <div class="question-card">
+                <p><strong>3. ¿Qué factor sociocultural impacta directamente la educación regional?</strong></p>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q3" value="a"> La homogeneidad cultural europea.</label>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q3" value="b"> La desigualdad social y la diversidad étnica.</label>
+            </div>
+            <div class="question-card">
+                <p><strong>4. La Tradición Francesa (Positivismo) enfatizaba:</strong></p>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q4" value="a"> El orden, la razón universal y currículos centralizados.</label>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q4" value="b"> El pensamiento místico y la educación informal.</label>
+            </div>
+            <div class="question-card">
+                <p><strong>5. ¿Cómo propone Ortiz (2025) gestionar la IA en educación?</strong></p>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q5" value="a"> Eliminando los recursos digitales del aula.</label>
+                <label style="display:block; margin:10px 0;"><input type="radio" name="q5" value="b"> Mediante una gestión ética y crítica para la transformación digital.</label>
+            </div>
+            <button type="button" class="submit-btn" onclick="evaluarQuiz()">ENVIAR RESPUESTAS</button>
+        </form>
+        <div id="quiz-results" style="display:none; text-align:center; margin-top:20px; padding:20px; border: 2px solid var(--neon-green); border-radius:10px;">
+            <h2 id="res-score" style="font-family:'Orbitron';"></h2>
+            <button class="submit-btn" style="background:transparent; border:1px solid var(--neon-green); color:var(--neon-green); margin-top:15px;" onclick="resetQuiz()">REINTENTAR</button>
+        </div>
+    </section>
+</main>
+
+<div id="m-biblio" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeM()">X</span>
+        <h2 style="color:var(--neon-blue); font-family:'Orbitron'; margin-bottom:20px;">REFERENCIAS BIBLIOGRÁFICAS (APA)</h2>
+        <ul style="list-style:none;">
+            <li style="margin-bottom:15px; border-left:3px solid var(--neon-blue); padding-left:15px; font-size: 0.9rem;">
+                <strong>Castro, J. A. (2023).</strong> Formación docente y pensamiento crítico en contextos de cambio. <em>Estudios y Perspectivas Revista Científica y Académica, 5(1)</em>, 3085-3115.
+            </li>
+            <li style="margin-bottom:15px; border-left:3px solid var(--neon-purple); padding-left:15px; font-size: 0.9rem;">
+                <strong>Jiménez, F. (2021).</strong> Horizontes para la formación del profesorado en contextos de cambio educativo. <em>Revista Internacional de Educación para la Justicia Social, 10(2)</em>, 184-199.
+            </li>
+            <li style="margin-bottom:15px; border-left:3px solid var(--neon-green); padding-left:15px; font-size: 0.9rem;">
+                <strong>Márquez Moreira, A. M., & Martínez Moncayo, R. A. (2024).</strong> Tendencias Curriculares Contemporáneas. <em>Ciencia Latina Revista Científica Multidisciplinar, 8(6)</em>, 1903-1916.
+            </li>
+            <li style="margin-bottom:15px; border-left:3px solid var(--neon-blue); padding-left:15px; font-size: 0.9rem;">
+                <strong>Ortiz, D. (2025).</strong> El currículum educativo y la transformación digital: una reflexión sobre la gestión docente de los recursos digitales y la inteligencia artificial. <em>Arandu Poty, 4(1)</em>, 1-11.
+            </li>
+            <li style="margin-bottom:15px; border-left:3px solid var(--neon-purple); padding-left:15px; font-size: 0.9rem;">
+                <strong>Páez Martínez, R. M. (Coord.). (2025).</strong> <em>Tradiciones y horizontes de formación docente y pensamiento crítico.</em> CLACSO.
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div id="m-info" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeM()">X</span><iframe src="https://www.canva.com/design/DAHA7hC8WQE/uYGJ8p40HRHOpcxqmR3sfg/watch?embed" width="100%" height="450" frameborder="0"></iframe></div></div>
+<div id="m-video" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeM()">X</span><iframe src="https://www.canva.com/design/DAHA70IPqCo/4gyQEf-nz4OK8s9arqgMxA/watch?embed" width="100%" height="450" frameborder="0"></iframe></div></div>
+<div id="m-podcast" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeM()">X</span><iframe src="https://www.canva.com/design/DAHA7kuqzeE/f5a2Mk4hr9s7ViRrx3GdxQ/watch?embed" width="100%" height="450" frameborder="0"></iframe></div></div>
+
+<script>
+    function openM(id) { document.getElementById(id).classList.add('active'); }
+    function closeM() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('active')); }
+    window.onclick = (e) => { if(e.target.classList.contains('modal')) closeM(); }
+
+    function showTime(year, text) {
+        document.getElementById('timeline-display').innerHTML = `<h3 style="color:var(--neon-purple); font-family:'Orbitron';">${year}</h3><p>${text}</p>`;
+    }
+
+    const concepts = [
+        { t: "Praxis Situada", d: "La educación como acción reflexiva que responde a los conflictos y memorias de cada territorio latinoamericano.", c: "#00f2ff" },
+        { t: "Bildung", d: "Tradición alemana enfocada en la formación humana integral y la autonomía del espíritu crítico.", c: "#bc13fe" },
+        { t: "Colonialidad", d: "La persistencia de modelos de poder y saber heredados que subvaloran la identidad local frente a lo foráneo.", c: "#39ff14" }
+    ];
+
+    const gBtns = document.getElementById('glossary-btns');
+    concepts.forEach(item => {
+        const b = document.createElement('button');
+        b.className = 'menu-btn';
+        b.innerText = item.t;
+        b.onclick = () => {
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            b.classList.add('active');
+            document.getElementById('glossary-panel').innerHTML = `<h2 style="color:${item.c}; font-family:'Orbitron';">${item.t}</h2><p style="font-size:1.2rem; margin-top:20px;">${item.d}</p>`;
+        };
+        gBtns.appendChild(b);
+    });
+
+    function evaluarQuiz() {
+        const data = new FormData(document.getElementById('quiz-form'));
+        let score = 0;
+        if(data.get('q1') === 'b') score++;
+        if(data.get('q2') === 'a') score++;
+        if(data.get('q3') === 'b') score++;
+        if(data.get('q4') === 'a') score++;
+        if(data.get('q5') === 'b') score++;
+        document.getElementById('quiz-form').style.display = 'none';
+        const res = document.getElementById('quiz-results');
+        res.style.display = 'block';
+        document.getElementById('res-score').innerText = `CALIFICACIÓN: ${score.toFixed(1)} / 5.0`;
+    }
+
+    function resetQuiz() {
+        document.getElementById('quiz-form').reset();
+        document.getElementById('quiz-form').style.display = 'block';
+        document.getElementById('quiz-results').style.display = 'none';
+    }
+
+    const canvas = document.getElementById('canvas-bg');
+    const ctx = canvas.getContext('2d');
+    let pts = [];
+    function res() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.onresize = res; res();
+    for(let i=0; i<60; i++) pts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, v:Math.random()*0.5});
+    function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle = "rgba(0, 242, 255, 0.1)";
+        pts.forEach(p => { p.y -= p.v; if(p.y<0) p.y=canvas.height; ctx.beginPath(); ctx.arc(p.x, p.y, 1.2, 0, Math.PI*2); ctx.fill(); });
+        requestAnimationFrame(draw);
+    }
+    draw();
+</script>
+</body>
+</html>
