@@ -1,64 +1,2188 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Guardianes Climáticos de Medellín</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --verde-selva:#1a5e2a;
+  --verde-claro:#4CAF50;
+  --verde-neon:#00e676;
+  --naranja:#FF6D00;
+  --azul-cielo:#64B5F6;
+  --azul-oscuro:#1565C0;
+  --rojo-alerta:#EF5350;
+  --amarillo:#FFD600;
+
+  /* TEMA (LIGHT por defecto) */
+  --fondo-base:#FFF8E1;
+  --texto-base:#263238;
+  --card:#ffffff;
+  --card-soft:rgba(255,255,255,.92);
+  --stroke:rgba(0,0,0,.18);
+  --stroke-strong:#263238;
+
+  --sombra:0 4px 20px rgba(0,0,0,.15);
+  --sombra-fuerte:0 12px 44px rgba(0,0,0,.25);
+  --borde-comic:3px solid var(--stroke-strong);
+
+  /* =======================
+     ✅ IMÁGENES (ACTUALIZADAS)
+     ======================= */
+
+  /* Intro */
+  --img-intro: url("https://losyoguis.github.io/guardianes-climaticos/img/intro.png");
+
+  /* Mapa (si luego lo usas en otra sección) */
+  --img-map: url("https://losyoguis.github.io/guardianes-climaticos/img/map.png");
+
+  /* Briefing / Señal / Visión / Command */
+  --img-briefing: url("https://losyoguis.github.io/guardianes-climaticos/img/briefing.png");
+  --img-alert: url("https://losyoguis.github.io/guardianes-climaticos/img/alert.png");
+  --img-vision: url("https://losyoguis.github.io/guardianes-climaticos/img/vision.png");
+  --img-command-menu: url("https://losyoguis.github.io/guardianes-climaticos/img/command.png");
+
+  /* Misiones */
+  --img-causas: url("https://losyoguis.github.io/guardianes-climaticos/img/causas.png");
+  --img-consecuencias: url("https://losyoguis.github.io/guardianes-climaticos/img/consecuencias.png");
+  --img-sol: url("https://losyoguis.github.io/guardianes-climaticos/img/sol.png");
+
+  /* Cierre */
+  --img-cierre: url("https://losyoguis.github.io/guardianes-climaticos/img/cierre.png");
+}
+
+/* DARK MODE */
+body.dark{
+  --fondo-base:#0b1016;
+  --texto-base:#e9f2fb;
+  --card:rgba(17,24,32,.86);
+  --card-soft:rgba(17,24,32,.86);
+  --stroke:rgba(255,255,255,.14);
+  --stroke-strong:rgba(255,255,255,.22);
+  background:var(--fondo-base);
+  color:var(--texto-base);
+}
+body.dark .speech-bubble{background:rgba(17,24,32,.92); color:var(--texto-base)}
+body.dark #belt{background:rgba(17,24,32,.88); border-color:rgba(255,255,255,.14)}
+body.dark .belt-btn, body.dark .belt-icon{background:rgba(17,24,32,.86); border-color:rgba(255,255,255,.18); color:var(--texto-base)}
+body.dark .flow-card, body.dark .card-box{background:var(--card); border-color:rgba(255,255,255,.18)}
+body.dark .flow-card p, body.dark .card-box p{color:rgba(233,242,251,.92)}
+body.dark .flow-title{color:#b7f7cf}
+body.dark .flow-sub{color:rgba(233,242,251,.85)}
+body.dark .content-header p{color:rgba(233,242,251,.85)}
+body.dark .hero .hero-caption{border-color:rgba(255,255,255,.35)}
+body.dark .scene-chip{background:rgba(255,255,255,.92)}
+body.dark #toast{background:rgba(0,0,0,.75)}
+body.dark .mission-step{background:var(--card); border-color:rgba(255,255,255,.18)}
+body.dark .choice, body.dark .tiny-choice, body.dark .commit-card{background:rgba(255,255,255,.06); color:rgba(233,242,251,.95); border-color:rgba(255,255,255,.14)}
+body.dark .choice:hover, body.dark .tiny-choice:hover, body.dark .commit-card:hover{background:rgba(255,255,255,.10)}
+body.dark .step-note{color:rgba(233,242,251,.82)}
+body.dark .chip{background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:rgba(233,242,251,.92)}
+body.dark .util-btn{background:rgba(17,24,32,.88); color:rgba(233,242,251,.95); border-color:rgba(255,255,255,.18)}
+
+/* BASE */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{min-height:100%;overflow-x:hidden}
+body{
+  font-family:'Fredoka',sans-serif;
+  background:var(--fondo-base);
+  color:var(--texto-base)
+}
+.is-hidden{display:none !important}
+
+.screen{display:none !important;min-height:100vh;animation:slideIn .6s ease-out}
+.screen.active{display:block !important}
+@keyframes slideIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+
+#toast{
+  position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);
+  opacity:0;pointer-events:none;z-index:2000;
+  background:rgba(0,0,0,.72);color:#fff;padding:12px 16px;border-radius:14px;
+  border:2px solid rgba(255,255,255,.25);box-shadow:0 14px 40px rgba(0,0,0,.25);
+  font-weight:800;transition:opacity .25s ease, transform .25s ease;
+  max-width:min(92vw,560px);text-align:center
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+#loading-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1a5e2a 0%,#2E7D32 50%,#1B5E20 100%);
+display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;
+transition:opacity .8s,visibility .8s}
+#loading-screen.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.loading-guardia{width:120px;height:120px;background:var(--verde-neon);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:60px;animation:pulse 1.5s ease-in-out infinite;border:4px solid var(--amarillo);box-shadow:0 0 40px rgba(0,230,118,.4)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.loading-text{color:#fff;font-family:'Bangers',cursive;font-size:1.8rem;margin-top:20px;letter-spacing:2px;animation:fadeInOut 2s ease-in-out infinite}
+@keyframes fadeInOut{0%,100%{opacity:.5}50%{opacity:1}}
+
+#intro-scene{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:18px;
+background:radial-gradient(circle at 30% 20%, rgba(0,230,118,.22), transparent 45%),
+radial-gradient(circle at 80% 70%, rgba(255,214,0,.18), transparent 40%),
+linear-gradient(135deg, rgba(9,25,17,.92), rgba(3,10,7,.92));
+backdrop-filter: blur(8px);transition:opacity .45s ease, visibility .45s ease, transform .45s ease}
+#intro-scene.hidden{opacity:0;visibility:hidden;pointer-events:none;transform:scale(.98)}
+.scene-card{width:min(980px, 100%);border-radius:22px;border:4px solid rgba(255,255,255,.15);
+box-shadow:0 24px 90px rgba(0,0,0,.55);background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+overflow:hidden;position:relative}
+.scene-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:10px;
+background:linear-gradient(90deg, rgba(0,230,118,.25), rgba(255,214,0,.18), rgba(255,109,0,.18));
+border-bottom:1px solid rgba(255,255,255,.12)}
+.scene-title{display:flex;align-items:center;gap:10px;color:#fff;font-family:'Bangers',cursive;letter-spacing:1px;font-size:1.25rem}
+.scene-chip{padding:6px 12px;border-radius:999px;font-weight:700;color:#0b2b18;background:rgba(255,255,255,.85);
+border:2px solid rgba(0,0,0,.2);font-size:.85rem;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.scene-body{position:relative;aspect-ratio: 16/9;background:#0b1f14;overflow:hidden}
+.scene-body .img{width:100%;height:100%;background:center/cover no-repeat;transform:scale(1.06);
+animation:kenburns 9s ease-in-out infinite alternate;filter:saturate(1.05) contrast(1.05)}
+@keyframes kenburns{0%{transform:scale(1.06) translate3d(-1%, -1%, 0)}100%{transform:scale(1.12) translate3d(1%, 1%, 0)}}
+.scene-scanlines{position:absolute;inset:0;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0px,rgba(255,255,255,.05) 1px,rgba(0,0,0,0) 3px,rgba(0,0,0,0) 6px);mix-blend-mode:overlay;opacity:.35;pointer-events:none}
+.scene-glow{position:absolute;inset:-40%;background:conic-gradient(from 180deg,rgba(0,230,118,.0),rgba(0,230,118,.22),rgba(255,214,0,.18),rgba(21,101,192,.18),rgba(171,71,188,.18),rgba(0,230,118,.0));filter:blur(28px);animation:spinGlow 8s linear infinite;opacity:.55;pointer-events:none}
+@keyframes spinGlow{to{transform:rotate(360deg)}}
+.scene-holo-sweep{position:absolute;inset:-20%;background:linear-gradient(110deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.10) 20%,rgba(0,230,118,.18) 40%,rgba(255,214,0,.12) 60%,rgba(255,255,255,0) 80%);transform:translateX(-30%);animation:holoSweep 3.8s ease-in-out infinite;opacity:.55;mix-blend-mode:screen;pointer-events:none}
+@keyframes holoSweep{0%{transform:translateX(-55%) rotate(2deg)}50%{transform:translateX(10%) rotate(2deg)}100%{transform:translateX(55%) rotate(2deg)}}
+.scene-footer{padding:14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:rgba(0,0,0,.25);border-top:1px solid rgba(255,255,255,.12)}
+.scene-footer p{color:rgba(255,255,255,.92);font-size:.95rem;line-height:1.35;max-width:720px}
+.scene-btn{appearance:none;border:none;cursor:pointer;padding:12px 18px;border-radius:14px;font-family:'Bangers',cursive;
+letter-spacing:1px;font-size:1.05rem;color:#0b2b18;background:linear-gradient(135deg, var(--amarillo), #fff59d);
+box-shadow:0 8px 0 rgba(0,0,0,.35);border:3px solid rgba(0,0,0,.35);transition:transform .2s, box-shadow .2s}
+.scene-btn:hover{transform:translateY(-2px);box-shadow:0 10px 0 rgba(0,0,0,.35)}
+.scene-btn:active{transform:translateY(4px);box-shadow:0 4px 0 rgba(0,0,0,.35)}
+
+#progress-bar-container{position:fixed;top:0;left:0;right:0;height:6px;background:rgba(0,0,0,.1);z-index:1200}
+#progress-bar{height:100%;background:linear-gradient(90deg,var(--verde-neon),var(--amarillo),var(--naranja));width:0%;
+transition:width .5s ease;border-radius:0 3px 3px 0;box-shadow:0 0 10px var(--verde-neon)}
+
+#belt{position:fixed;top:14px;left:14px;right:14px;z-index:1100;display:none;align-items:center;justify-content:space-between;gap:14px;
+padding:12px 14px;border-radius:22px;background:var(--card-soft);border:2px solid rgba(0,0,0,.12);
+box-shadow:0 14px 40px rgba(0,0,0,.18);backdrop-filter: blur(12px)}
+.belt-left{display:flex;align-items:center;gap:10px;overflow:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.belt-left::-webkit-scrollbar{display:none}
+.belt-right{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.belt-btn{appearance:none;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:10px;padding:12px 18px;border-radius:18px;
+font-weight:900;font-size:1rem;background:rgba(255,255,255,.95);border:2px solid rgba(0,0,0,.18);
+box-shadow:0 6px 0 rgba(0,0,0,.10);transition:transform .2s, box-shadow .2s, border-color .2s, background .2s;white-space:nowrap;position:relative}
+.belt-btn:hover{transform:translateY(-2px);box-shadow:0 8px 0 rgba(0,0,0,.10)}
+.belt-btn:active{transform:translateY(3px);box-shadow:0 4px 0 rgba(0,0,0,.10)}
+.belt-btn.active{border-color:rgba(0,230,118,.95)}
+.belt-btn.completed{border-color:rgba(0,230,118,.95);background:rgba(232,245,233,.9)}
+.belt-btn.completed::after{
+  content:"✅";
+  position:absolute;right:-8px;top:-10px;
+  width:28px;height:28px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.95);
+  border:2px solid rgba(0,0,0,.22);
+  box-shadow:0 10px 0 rgba(0,0,0,.12), 0 0 18px rgba(0,230,118,.25);
+  font-size:1rem
+}
+@keyframes popWin{0%{transform:scale(1)}35%{transform:scale(1.12)}100%{transform:scale(1)}}
+.belt-btn.just-completed{animation:popWin .45s ease-out}
+.belt-brand{background:rgba(232,245,233,.9);border-color:rgba(76,175,80,.35);font-weight:900}
+.belt-score{display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:18px;color:#fff;background:rgba(26,94,42,.95);
+border:2px solid rgba(0,230,118,.65);font-weight:900;box-shadow:0 6px 0 rgba(0,0,0,.12);user-select:none}
+.belt-score.bump{transform:scale(1.12)}
+.belt-icon{width:52px;height:52px;border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:1.15rem;background:rgba(255,255,255,.95);
+border:2px solid rgba(0,0,0,.18);box-shadow:0 6px 0 rgba(0,0,0,.10);cursor:pointer;transition:transform .2s, box-shadow .2s, border-color .2s}
+.belt-icon:hover{transform:translateY(-2px);box-shadow:0 8px 0 rgba(0,0,0,.10)}
+.belt-icon:active{transform:translateY(3px);box-shadow:0 4px 0 rgba(0,0,0,.10)}
+.belt-icon.active{border-color:rgba(0,230,118,.95)}
+.belt-icon.danger{border-color:rgba(239,83,80,.55)}
+@media (max-width:720px){
+  #belt{top:10px;left:10px;right:10px;padding:10px 10px}
+  .belt-btn{padding:10px 14px;font-size:.9rem}
+  .belt-score{padding:10px 12px}
+  .belt-icon{width:46px;height:46px;border-radius:16px}
+}
+
+/* UTILIDADES FIJAS (IDIOMA + DÍA/NOCHE) */
+#utility-dock{
+  position:fixed; right:14px; bottom:92px; z-index:1300;
+  display:flex; flex-direction:column; gap:10px;
+}
+.util-btn{
+  border:none; cursor:pointer;
+  padding:12px 14px; border-radius:18px;
+  font-weight:900; font-size:.95rem;
+  background:rgba(255,255,255,.92);
+  border:2px solid rgba(0,0,0,.18);
+  box-shadow:0 10px 0 rgba(0,0,0,.14), 0 18px 44px rgba(0,0,0,.14);
+  backdrop-filter: blur(10px);
+  transition:transform .18s ease, box-shadow .18s ease;
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-width:56px;
+}
+.util-btn:hover{transform:translateY(-2px); box-shadow:0 12px 0 rgba(0,0,0,.14), 0 22px 50px rgba(0,0,0,.16)}
+.util-btn:active{transform:translateY(4px); box-shadow:0 6px 0 rgba(0,0,0,.14), 0 12px 36px rgba(0,0,0,.12)}
+@media (max-width:720px){
+  #utility-dock{right:10px; bottom:84px}
+  .util-btn{padding:10px 12px; border-radius:16px}
+}
+
+.flow-screen{padding:120px 18px 98px;min-height:100vh}
+.content-screen{min-height:100vh;padding:120px 20px 98px}
+
+#home{background:linear-gradient(170deg,#1a5e2a 0%,#2E7D32 40%,#43A047 70%,#66BB6A 100%);min-height:100vh;display:flex;
+flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;position:relative;overflow:hidden}
+.mountains-bg{position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.15) 100%)}
+.mountain{position:absolute;bottom:0;width:0;height:0;border-left:solid transparent;border-right:solid transparent;border-bottom:solid}
+.mountain-1{left:-5%;border-left-width:200px;border-right-width:200px;border-bottom-width:250px;border-bottom-color:#2E7D32;opacity:.5}
+.mountain-2{left:15%;border-left-width:250px;border-right-width:250px;border-bottom-width:300px;border-bottom-color:#388E3C;opacity:.4}
+.mountain-3{right:-5%;border-left-width:220px;border-right-width:220px;border-bottom-width:270px;border-bottom-color:#1B5E20;opacity:.5}
+.mountain-4{right:20%;border-left-width:180px;border-right-width:180px;border-bottom-width:220px;border-bottom-color:#2E7D32;opacity:.35}
+.clouds{position:absolute;top:0;left:0;right:0;height:200px;overflow:hidden;pointer-events:none}
+.cloud{position:absolute;background:rgba(255,255,255,.15);border-radius:50px;animation:floatCloud linear infinite}
+.cloud-1{width:200px;height:50px;top:30px;animation-duration:25s}
+.cloud-2{width:150px;height:40px;top:80px;animation-duration:35s;animation-delay:-10s}
+.cloud-3{width:180px;height:45px;top:50px;animation-duration:30s;animation-delay:-20s}
+@keyframes floatCloud{from{transform:translateX(-250px)}to{transform:translateX(calc(100vw + 250px))}}
+.floating-leaves{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.leaf{position:absolute;font-size:1.5rem;animation:fallLeaf linear infinite;opacity:.4}
+@keyframes fallLeaf{0%{transform:translateY(-50px) rotate(0deg);opacity:0}10%{opacity:.4}90%{opacity:.4}100%{transform:translateY(100vh) rotate(360deg);opacity:0}}
+.home-content{position:relative;z-index:2;max-width:740px}
+.guardia-avatar{width:140px;height:140px;background:linear-gradient(135deg,var(--verde-neon),#69F0AE);border-radius:50%;margin:0 auto 18px;display:flex;
+align-items:center;justify-content:center;font-size:72px;border:5px solid var(--amarillo);box-shadow:0 0 50px rgba(0,230,118,.3);animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.home-title{font-family:'Bangers',cursive;font-size:clamp(2.2rem,6vw,3.8rem);color:#fff;text-shadow:3px 3px 0 rgba(0,0,0,.35),0 0 20px rgba(0,0,0,.3);line-height:1.1;margin-bottom:8px}
+.home-subtitle{font-family:'Bangers',cursive;font-size:clamp(1.1rem,3vw,1.6rem);color:var(--amarillo);text-shadow:2px 2px 0 rgba(0,0,0,.3);margin-bottom:18px}
+.speech-bubble{background:#fff;border-radius:20px;padding:18px 24px;margin:0 auto 26px;max-width:560px;position:relative;border:var(--borde-comic);
+font-size:1rem;color:rgba(0,0,0,.82);box-shadow:var(--sombra);line-height:1.5}
+.speech-bubble::after{content:'';position:absolute;top:-15px;left:50%;transform:translateX(-50%);border-left:15px solid transparent;border-right:15px solid transparent;border-bottom:15px solid #fff}
+.btn-start{background:linear-gradient(135deg,var(--naranja),#FF8F00);color:#fff;border:3px solid rgba(0,0,0,.65);padding:16px 40px;font-size:1.3rem;font-family:'Bangers',cursive;letter-spacing:2px;border-radius:50px;cursor:pointer;transition:all .3s;box-shadow:0 6px 0 #BF360C,var(--sombra);position:relative;top:0}
+.btn-start:hover{top:-3px;box-shadow:0 9px 0 #BF360C,var(--sombra-fuerte)}
+.btn-start:active{top:4px;box-shadow:0 2px 0 #BF360C}
+
+.hero{max-width:1100px;margin:0 auto 18px;border-radius:22px;overflow:hidden;border:var(--borde-comic);box-shadow:0 10px 0 rgba(0,0,0,.12), var(--sombra-fuerte);position:relative;background:#0b1f14}
+.hero .hero-media{width:100%;aspect-ratio:16/8;background:center/cover no-repeat;transform:scale(1.03);animation:kenburnsHero 10s ease-in-out infinite alternate;filter:saturate(1.05) contrast(1.05)}
+@keyframes kenburnsHero{0%{transform:scale(1.03) translate3d(-.8%,-.6%,0)}100%{transform:scale(1.08) translate3d(.8%,.6%,0)}}
+.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 25% 25%, rgba(0,230,118,.22), transparent 45%),
+radial-gradient(circle at 80% 70%, rgba(255,214,0,.18), transparent 40%),
+repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0px, rgba(255,255,255,.05) 1px, rgba(0,0,0,0) 3px, rgba(0,0,0,0) 6px);
+mix-blend-mode:overlay;opacity:.35;pointer-events:none}
+.hero .hero-caption{position:absolute;left:14px;bottom:14px;padding:10px 14px;border-radius:14px;background:linear-gradient(135deg, rgba(0,0,0,.55), rgba(0,0,0,.18));
+border:2px solid rgba(255,255,255,.55);color:#fff;font-weight:700;box-shadow:0 10px 0 rgba(0,0,0,.22)}
+.hero .hero-caption b{font-family:'Bangers',cursive;letter-spacing:1px}
+
+.flow-title{font-family:'Bangers',cursive;font-size:clamp(1.8rem,5vw,2.8rem);text-align:center;color:var(--verde-selva);
+text-shadow:2px 2px 0 rgba(0,0,0,.08);margin-bottom:10px}
+.flow-sub{max-width:920px;margin:0 auto 16px;text-align:center;color:rgba(0,0,0,.55);font-weight:600}
+.flow-card{max-width:980px;margin:0 auto;background:var(--card);border-radius:22px;border:var(--borde-comic);box-shadow:var(--sombra);padding:18px 18px 22px}
+.flow-card p{line-height:1.6;color:#37474F}
+.flow-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:14px;font-weight:900;font-size:1rem;cursor:pointer;transition:all .3s;border:2px solid}
+.btn-primary{background:var(--verde-claro);color:#fff;border-color:var(--verde-selva);box-shadow:0 4px 0 var(--verde-selva);position:relative;top:0}
+.btn-primary:hover{top:-2px;box-shadow:0 6px 0 var(--verde-selva)}
+.btn-primary:active{top:2px;box-shadow:0 2px 0 var(--verde-selva)}
+.btn-orange{background:linear-gradient(135deg,var(--naranja),#FF8F00);color:#fff;border-color:#BF360C;box-shadow:0 4px 0 #BF360C;position:relative;top:0}
+.btn-orange:hover{top:-2px;box-shadow:0 6px 0 #BF360C}
+.btn-center{display:flex;justify-content:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+.btn-ghost{
+  background:rgba(255,255,255,.85);
+  border-color:rgba(0,0,0,.25);
+  color:rgba(0,0,0,.75);
+  box-shadow:0 4px 0 rgba(0,0,0,.12);
+}
+body.dark .btn-ghost{
+  background:rgba(255,255,255,.08);
+  border-color:rgba(255,255,255,.18);
+  color:rgba(233,242,251,.92);
+}
+.btn-ghost:hover{transform:translateY(-2px)}
+.btn-ghost:active{transform:translateY(2px)}
+.btn[disabled]{
+  opacity:.55; cursor:not-allowed; transform:none !important;
+  box-shadow:none !important;
+}
+
+.bg-causas{background:linear-gradient(180deg,#FFF3E0 0%,#FFE0B2 100%)}
+.bg-consecuencias{background:linear-gradient(180deg,#E3F2FD 0%,#BBDEFB 100%)}
+.bg-soluciones{background:linear-gradient(180deg,#E8F5E9 0%,#C8E6C9 100%)}
+.bg-plan{background:linear-gradient(180deg,#F3E5F5 0%,#E1BEE7 100%)}
+
+body.dark .bg-causas{background:linear-gradient(180deg,#0f141a 0%,#101c14 100%)}
+body.dark .bg-consecuencias{background:linear-gradient(180deg,#0f141a 0%,#0f1820 100%)}
+body.dark .bg-soluciones{background:linear-gradient(180deg,#0f141a 0%,#101c14 100%)}
+body.dark .bg-plan{background:linear-gradient(180deg,#0f141a 0%,#161026 100%)}
+
+.content-header{max-width:820px;margin:0 auto 18px;text-align:center}
+.content-header h2{font-family:'Bangers',cursive;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:10px}
+.content-header p{font-size:1rem;line-height:1.5;opacity:.85}
+.card-box{max-width:980px;margin:0 auto;background:var(--card);border-radius:22px;border:var(--borde-comic);box-shadow:var(--sombra);padding:18px 18px 22px}
+.card-box p{line-height:1.6;color:#37474F}
+
+/* Cinturón (pantalla command) */
+.command-menu{max-width:1100px;margin:0 auto 16px;border-radius:22px;overflow:hidden;border:var(--borde-comic);
+box-shadow:0 10px 0 rgba(0,0,0,.12), var(--sombra-fuerte);position:relative;background:#0b1f14}
+.command-menu .menu-img{width:100%;aspect-ratio: 16/5;background:center/cover no-repeat;transform:scale(1.01);filter:saturate(1.05) contrast(1.05)}
+.command-menu::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 25% 25%, rgba(0,230,118,.20), transparent 45%),
+radial-gradient(circle at 80% 70%, rgba(255,214,0,.16), transparent 40%),
+repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0px, rgba(255,255,255,.05) 1px, rgba(0,0,0,0) 3px, rgba(0,0,0,0) 6px);
+mix-blend-mode:overlay;opacity:.35;pointer-events:none}
+.menu-hotspot{position:absolute;top:12%;height:76%;width:30%;border-radius:18px;border:3px solid transparent;background:rgba(255,255,255,0);
+cursor:pointer;transition:transform .15s, border-color .15s, background .15s, box-shadow .15s; }
+.menu-hotspot:hover{transform:translateY(-2px);border-color:rgba(255,214,0,.85);background:rgba(255,255,255,.06)}
+.menu-hotspot:active{transform:translateY(2px);}
+.menu-hotspot.hs-causas{left:3%}
+.menu-hotspot.hs-consecuencias{left:35%}
+.menu-hotspot.hs-soluciones{left:67%}
+
+@keyframes doneGlow{
+  0%,100%{ box-shadow:0 0 0 6px rgba(0,230,118,.12), 0 0 24px rgba(0,230,118,.20); }
+  50%{ box-shadow:0 0 0 12px rgba(0,230,118,.18), 0 0 46px rgba(0,230,118,.30); }
+}
+.menu-hotspot.done{
+  border-color:rgba(0,230,118,.95);
+  background:rgba(0,230,118,.08);
+  animation:doneGlow 1.6s ease-in-out infinite;
+}
+.menu-hotspot.done::before{
+  content:"COMPLETADO";
+  position:absolute;left:10px;bottom:10px;
+  padding:6px 10px;border-radius:999px;
+  font-weight:900;font-size:.72rem;letter-spacing:.4px;
+  color:#0b2b18;background:rgba(255,255,255,.94);
+  border:2px solid rgba(0,0,0,.22);
+  box-shadow:0 8px 0 rgba(0,0,0,.12), 0 0 18px rgba(0,230,118,.12);
+  text-transform:uppercase;
+  pointer-events:none;
+}
+.menu-hotspot.done::after{
+  content:"✅";
+  position:absolute;right:10px;top:10px;
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.95);
+  border:2px solid rgba(0,0,0,.22);
+  box-shadow:0 10px 0 rgba(0,0,0,.12), 0 0 20px rgba(0,230,118,.18);
+  pointer-events:none;
+}
+.menu-hotspot.just-completed{animation:popWin .45s ease-out}
+
+.plan-locked-hint{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);padding:10px 16px;border-radius:999px;
+background:rgba(0,0,0,.55);color:#fff;font-weight:900;border:2px solid rgba(255,255,255,.25);box-shadow:0 12px 0 rgba(0,0,0,.24);
+backdrop-filter: blur(10px);text-align:center;max-width:min(92%, 720px)}
+.menu-plan{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);padding:10px 18px;border-radius:999px;border:3px solid rgba(255,255,255,.75);
+background:linear-gradient(135deg, rgba(171,71,188,.35), rgba(21,101,192,.25));color:#fff;font-family:'Bangers',cursive;letter-spacing:1px;font-size:1.1rem;
+cursor:pointer;box-shadow:0 12px 0 rgba(0,0,0,.28);backdrop-filter: blur(10px);transition:transform .2s, box-shadow .2s, border-color .2s;}
+.menu-plan::before{content:'';position:absolute;inset:-10px;border-radius:999px;border:2px solid rgba(206,147,216,.45);opacity:.7;animation:hsPulse 2.2s ease-in-out infinite;pointer-events:none}
+@keyframes hsPulse{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.08);opacity:.15}}
+.menu-plan:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 14px 0 rgba(0,0,0,.28);border-color:rgba(206,147,216,.95)}
+.menu-plan:active{transform:translateX(-50%) translateY(4px);box-shadow:0 6px 0 rgba(0,0,0,.28)}
+.menu-hotspot.hs-plan{position:absolute;left:32%;width:36%;top:62%;height:30%;border-radius:18px;border:3px solid transparent;background:rgba(255,255,255,0)}
+.appear{animation:riseFade .5s ease-out}
+@keyframes riseFade{from{opacity:0;transform:translateX(-50%) translateY(10px) scale(.98)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+
+/* MISIONES */
+.mission-wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.mission-step{
+  background:var(--card);
+  border-radius:22px;
+  border:var(--borde-comic);
+  box-shadow:var(--sombra);
+  padding:16px;
+}
+.step-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.step-head h3{
+  font-family:'Bangers',cursive;
+  letter-spacing:.6px;
+  font-size:1.35rem;
+}
+.chip{
+  padding:8px 12px;border-radius:999px;
+  font-weight:900;font-size:.85rem;
+  border:2px solid rgba(0,0,0,.18);
+  background:rgba(255,255,255,.75);
+}
+.chip.done{border-color:rgba(0,230,118,.85); background:rgba(232,245,233,.85)}
+.step-note{margin-top:8px;line-height:1.55;color:#37474F;font-weight:600}
+.choice-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(170px,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.choice{
+  border:2px solid rgba(0,0,0,.18);
+  border-radius:18px;
+  padding:12px 12px;
+  cursor:pointer;
+  background:rgba(255,255,255,.92);
+  font-weight:900;
+  text-align:left;
+  transition:transform .14s, border-color .14s, background .14s;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.choice:hover{transform:translateY(-2px)}
+.choice .emoji{font-size:1.3rem;line-height:1}
+.choice.selected{border-color:rgba(255,214,0,.95); background:rgba(255,253,231,.95)}
+.choice.correct{border-color:rgba(0,230,118,.95); background:rgba(232,245,233,.92)}
+.choice.wrong{border-color:rgba(239,83,80,.95); background:rgba(255,235,238,.92)}
+
+.tiny-row{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.vehicle-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  border:2px solid rgba(0,0,0,.14); border-radius:18px; padding:12px;
+  background:rgba(255,255,255,.78);
+}
+.vehicle-left{display:flex;align-items:center;gap:10px}
+.vehicle-ico{font-size:1.6rem}
+.vehicle-name{font-weight:900}
+.level-choices{display:flex;gap:8px;flex-wrap:wrap}
+.tiny-choice{
+  border:2px solid rgba(0,0,0,.18);
+  background:rgba(255,255,255,.92);
+  border-radius:999px;
+  padding:8px 12px;
+  cursor:pointer;
+  font-weight:900;
+  transition:transform .14s, background .14s, border-color .14s;
+}
+.tiny-choice:hover{transform:translateY(-1px)}
+.tiny-choice.selected{border-color:rgba(255,214,0,.95); background:rgba(255,253,231,.95)}
+.tiny-choice.correct{border-color:rgba(0,230,118,.95); background:rgba(232,245,233,.92)}
+.tiny-choice.wrong{border-color:rgba(239,83,80,.95); background:rgba(255,235,238,.92)}
+
+.seq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.seq-card{
+  border:2px solid rgba(0,0,0,.18);
+  border-radius:18px;
+  padding:12px;
+  background:rgba(255,255,255,.92);
+  cursor:pointer;
+  font-weight:900;
+  transition:transform .14s, border-color .14s, background .14s;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.seq-card:hover{transform:translateY(-2px)}
+.seq-card.done{border-color:rgba(0,230,118,.95); background:rgba(232,245,233,.92); cursor:default}
+.seq-progress{margin-top:10px;font-weight:900}
+.seq-progress b{font-family:'Bangers',cursive;letter-spacing:.6px}
+
+.commit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.commit-card{
+  border:2px solid rgba(0,0,0,.18);
+  border-radius:18px;
+  padding:12px;
+  background:rgba(255,255,255,.92);
+  cursor:pointer;
+  font-weight:900;
+  transition:transform .14s, border-color .14s, background .14s;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.commit-card:hover{transform:translateY(-2px)}
+.commit-card.selected{border-color:rgba(255,214,0,.95); background:rgba(255,253,231,.95)}
+.commit-card.done{border-color:rgba(0,230,118,.95); background:rgba(232,245,233,.92); cursor:default}
+
+.mission-footer{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px
+}
+.mission-meter{
+  font-weight:900;
+  padding:10px 12px;
+  border-radius:16px;
+  background:rgba(0,0,0,.06);
+  border:2px solid rgba(0,0,0,.12);
+}
+body.dark .mission-meter{background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.14)}
+.small-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none !important; transition:none !important;}
+  html{scroll-behavior:auto;}
+}
+
+/* CIERRE */
+#cierre{
+  background:
+    linear-gradient(170deg, rgba(21,101,192,.75) 0%, rgba(66,165,245,.65) 50%, rgba(144,202,249,.55) 100%),
+    center/cover no-repeat;
+  min-height:100vh;position:relative;overflow:hidden;
+  padding:50px 20px 70px;
+  display:flex;align-items:center;justify-content:center;
+}
+#cierre::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.48));pointer-events:none}
+.cierre-wrap{position:relative;z-index:2;color:#fff;max-width:1100px;width:100%;text-align:center}
+.cierre-title{font-family:'Bangers',cursive;font-size:clamp(2.1rem,5vw,3.2rem);margin-bottom:10px;letter-spacing:1px;text-shadow:3px 3px 0 rgba(0,0,0,.35)}
+.cierre-sub{font-size:1.1rem;line-height:1.6;opacity:.98;margin-bottom:26px;text-shadow:2px 2px 0 rgba(0,0,0,.25)}
+.end-actions{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+.end-btn{
+  border:none;cursor:pointer;min-width:min(360px, 92vw);
+  padding:18px 22px;border-radius:26px;
+  font-family:'Fredoka',sans-serif;font-weight:900;font-size:1.35rem;
+  display:inline-flex;align-items:center;justify-content:center;gap:12px;
+  border:4px solid rgba(0,0,0,.65);
+  box-shadow:0 10px 0 rgba(0,0,0,.35), 0 18px 55px rgba(0,0,0,.25);
+  transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.end-btn:hover{transform:translateY(-2px);box-shadow:0 12px 0 rgba(0,0,0,.35), 0 22px 60px rgba(0,0,0,.28)}
+.end-btn:active{transform:translateY(4px);box-shadow:0 6px 0 rgba(0,0,0,.35), 0 12px 40px rgba(0,0,0,.22)}
+.end-btn.green{background:linear-gradient(135deg, #43A047, #66BB6A);color:#fff}
+.end-btn.green2{background:linear-gradient(135deg, #2E7D32, #66BB6A);color:#fff}
+.end-btn.orange{background:linear-gradient(135deg, #FF6D00, #FF8F00);color:#fff}
+@media (min-width:980px){.end-btn{min-width:320px}}
+@media (max-width:720px){
+  .end-actions{gap:12px}
+  .end-btn{font-size:1.15rem;padding:16px 18px;border-radius:24px}
+}
+</style>
 </head>
+
 <body>
-<header class="hud">
-  <h1>🛡️ Guardianes Climáticos</h1>
-  <div id="progreso">Progreso: 0%</div>
-</header>
 
-<main id="app">
+<div id="toast" role="status" aria-live="polite"></div>
 
-<section id="home" class="pantalla activa">
-  <h2>Una misión para el futuro de Medellín</h2>
-  <p class="guia">👋 Soy Guardia, tu guía ambiental. ¿Aceptas el reto?</p>
-  <div class="menu-mision">
-    <button onclick="ir('causas')">🔍 Investigar causas</button>
-    <button onclick="ir('plan')">🌱 Diseñar soluciones</button>
+<!-- UTILIDADES: Idioma + Día/Noche (FIJO en todas las secciones) -->
+<div id="utility-dock" aria-label="Controles rápidos">
+  <button type="button" class="util-btn" id="btn-lang" aria-label="Cambiar idioma">🌎 ES</button>
+  <button type="button" class="util-btn" id="btn-theme" aria-label="Cambiar modo día/noche">🌙</button>
+</div>
+
+<div id="loading-screen">
+  <div class="loading-guardia">🌿</div>
+  <div class="loading-text" data-i18n="loading_text">Cargando misión...</div>
+</div>
+
+<div id="intro-scene" aria-hidden="false">
+  <div class="scene-card" role="dialog" aria-label="Escena inicial">
+    <div class="scene-header">
+      <div class="scene-title" data-i18n="intro_title">🛡️ GUARDIANES CLIMÁTICOS DE MEDELLÍN</div>
+      <div class="scene-chip" data-i18n="intro_chip">De espectadores a protagonistas</div>
+    </div>
+    <div class="scene-body">
+      <div class="scene-glow"></div>
+      <div class="img" data-bg="--img-intro" role="img" aria-label="Portada de la experiencia"></div>
+      <div class="scene-scanlines"></div>
+      <div class="scene-holo-sweep"></div>
+    </div>
+    <div class="scene-footer">
+      <p data-i18n-html="intro_text">👋 Soy <b>Guardia</b>. Medellín nos necesita. Toca <b>Continuar</b> para empezar.</p>
+      <button type="button" class="scene-btn" id="btn-close-intro" data-i18n="intro_continue">✨ Continuar</button>
+    </div>
   </div>
-</section>
+</div>
 
-<section id="causas" class="pantalla">
-  <h2>¿Por qué cambia el clima?</h2>
-  <div class="tarjetas">
-    <div class="card" onclick="completar('combustibles')">🚗 Combustibles</div>
-    <div class="card" onclick="completar('deforestacion')">🌳 Deforestación</div>
-    <div class="card" onclick="completar('residuos')">🗑️ Residuos</div>
+<div id="progress-bar-container"><div id="progress-bar"></div></div>
+
+<!-- ✅ CINTURÓN: SOLO se mostrará EN MISIONES -->
+<div id="belt" aria-label="Cinturón de navegación">
+  <div class="belt-left">
+    <button type="button" class="belt-btn belt-brand" data-belt="command" data-i18n="belt_command">🧭 CINTURÓN</button>
+    <button type="button" class="belt-btn" data-belt="causas" data-i18n="belt_causas">🔥 Causas</button>
+    <button type="button" class="belt-btn" data-belt="consecuencias" data-i18n="belt_consecuencias">🌊 Consecuencias</button>
+    <button type="button" class="belt-btn" data-belt="soluciones" data-i18n="belt_soluciones">💡 Soluciones</button>
+    <button type="button" class="belt-btn plan-entry is-hidden" id="belt-plan" data-belt="plan" data-i18n="belt_plan">📋 Plan</button>
   </div>
-  <button onclick="ir('home')">⬅ Volver</button>
-</section>
 
-<section id="plan" class="pantalla">
-  <h2>Plan de Acción Guardián</h2>
-  <p class="guia">Selecciona compromisos para tu salón</p>
-  <div class="checks">
-    <label><input type="checkbox"> Apagar luces</label>
-    <label><input type="checkbox"> Reducir residuos</label>
-    <label><input type="checkbox"> Cuidar el agua</label>
+  <div class="belt-right">
+    <div class="belt-score" id="belt-score" aria-label="Puntos"><span data-i18n="score_label">⭐</span> <span id="score-value">0</span></div>
+    <button type="button" class="belt-icon" data-belt="briefing" aria-label="Misión aceptada">✅</button>
+    <button type="button" class="belt-icon" data-belt="alert" aria-label="Señal climática">🚨</button>
+    <button type="button" class="belt-icon" data-belt="vision" aria-label="Mapa de visión">👁️</button>
+    <button type="button" class="belt-icon danger" data-action="reset" aria-label="Reiniciar">🔄</button>
   </div>
-  <input type="text" placeholder="Nombre del Plan">
-  <button onclick="ir('cierre')">🚀 Publicar plan</button>
-</section>
+</div>
 
-<section id="cierre" class="pantalla">
-  <h2>¡Misión cumplida!</h2>
-  <p class="guia">Comparte tu compromiso</p>
-  <div class="menu-mision">
-    <button>🖼️ Póster</button>
-    <button>🎙️ Audio</button>
-    <button>📸 Foto</button>
+<!-- HOME -->
+<div class="screen active" id="home">
+  <div class="mountains-bg">
+    <div class="mountain mountain-1"></div><div class="mountain mountain-2"></div>
+    <div class="mountain mountain-3"></div><div class="mountain mountain-4"></div>
   </div>
-  <button onclick="ir('home')">🔄 Reiniciar</button>
-</section>
+  <div class="clouds"><div class="cloud cloud-1"></div><div class="cloud cloud-2"></div><div class="cloud cloud-3"></div></div>
+  <div class="floating-leaves" id="leaves"></div>
 
-</main>
+  <div class="home-content">
+    <div class="guardia-avatar">🌿</div>
+    <h1 class="home-title" data-i18n-html="home_title">GUARDIANES CLIMÁTICOS<br>DE MEDELLÍN</h1>
+    <p class="home-subtitle" data-i18n="home_subtitle">Una misión para el futuro de nuestra ciudad</p>
+    <div class="speech-bubble" data-i18n-html="home_bubble">
+      ¡Hola, explorador! Soy <strong>Guardia</strong>. Nuestra ciudad necesita tu ayuda.
+      ¿Aceptas el reto de convertirte en <strong>Guardián Climático</strong>?
+    </div>
+    <button type="button" class="btn-start" id="btn-start-mission" data-i18n="home_accept">🚀 ¡ACEPTO LA MISIÓN!</button>
+  </div>
+</div>
 
-<script src="js/app.js"></script>
+<!-- BRIEFING -->
+<div class="screen flow-screen bg-soluciones" id="briefing">
+  <h2 class="flow-title" data-i18n="briefing_title">✅ MISIÓN ACEPTADA</h2>
+  <p class="flow-sub" data-i18n="briefing_sub">Genial... ahora vamos a entender el problema y convertirlo en acción.</p>
+
+  <div class="hero">
+    <div class="hero-media" data-bg="--img-briefing"></div>
+    <div class="hero-caption"><b data-i18n="briefing_caption_b">Briefing:</b> <span data-i18n="briefing_caption_t">Tu objetivo en 4 pasos</span></div>
+  </div>
+
+  <div class="flow-card">
+    <p data-i18n-html="briefing_text">🎯 <b>Objetivo:</b> descubrir <b>causas</b>, reconocer <b>consecuencias</b>, proponer <b>soluciones</b> y crear tu <b>Plan Guardián</b>.</p>
+    <div class="flow-actions">
+      <button type="button" class="btn btn-primary" id="btn-briefing-next" data-i18n="briefing_next">🚨 Señal climática</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALERTA -->
+<div class="screen flow-screen bg-consecuencias" id="alert">
+  <h2 class="flow-title" data-i18n="alert_title">🚨 SEÑAL CLIMÁTICA</h2>
+  <p class="flow-sub" data-i18n="alert_sub">Observa: estas señales nos dicen que el clima está cambiando.</p>
+
+  <div class="hero">
+    <div class="hero-media" data-bg="--img-alert"></div>
+    <div class="hero-caption"><b data-i18n="alert_caption_b">Señal:</b> <span data-i18n="alert_caption_t">Algo cambió… ¿lo ves?</span></div>
+  </div>
+
+  <div class="flow-card">
+    <p data-i18n-html="alert_text">👀 Cuando el planeta se calienta, cambian lluvias, temperaturas y ecosistemas. Ahora pasemos al <b>Mapa de Visión</b>.</p>
+    <div class="flow-actions">
+      <button type="button" class="btn btn-primary" id="btn-alert-next" data-i18n="alert_next">👁️ Mapa de Visión</button>
+    </div>
+  </div>
+</div>
+
+<!-- VISIÓN -->
+<div class="screen flow-screen bg-plan" id="vision">
+  <h2 class="flow-title" data-i18n="vision_title">👁️ MAPA DE VISIÓN</h2>
+  <p class="flow-sub" data-i18n="vision_sub">El futuro que construiremos depende de lo que decidamos hoy.</p>
+
+  <div class="hero">
+    <div class="hero-media" data-bg="--img-vision"></div>
+    <div class="hero-caption"><b data-i18n="vision_caption_b">Visión:</b> <span data-i18n="vision_caption_t">Comprender → Decidir → Actuar</span></div>
+  </div>
+
+  <div class="flow-card">
+    <p data-i18n-html="vision_text">🧭 Entender el problema, elegir acciones y convertir tu salón en un equipo de <b>Guardianes Climáticos</b>. Vamos al <b>Cinturón de Guardia</b>.</p>
+    <div class="flow-actions">
+      <button type="button" class="btn btn-primary" id="btn-vision-next" data-i18n="vision_next">🧭 Cinturón de Guardia</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMMAND -->
+<div class="screen flow-screen bg-causas" id="command">
+  <h2 class="flow-title" data-i18n="command_title">🧭 CINTURÓN DE GUARDIA</h2>
+  <p class="flow-sub" data-i18n="command_sub">Toca la imagen para elegir tu misión. (Causas / Consecuencias / Soluciones)</p>
+
+  <div class="command-menu" aria-label="Menú de navegación">
+    <div class="menu-img" data-bg="--img-command-menu" role="img" aria-label="Menú: Causas, Consecuencias, Soluciones"></div>
+
+    <button type="button" class="menu-hotspot hs-causas" data-go="causas" aria-label="Ir a Causas"></button>
+    <button type="button" class="menu-hotspot hs-consecuencias" data-go="consecuencias" aria-label="Ir a Consecuencias"></button>
+    <button type="button" class="menu-hotspot hs-soluciones" data-go="soluciones" aria-label="Ir a Soluciones"></button>
+
+    <div class="plan-locked-hint plan-locked-hint-el" data-i18n="plan_locked_hint">🔒 Completa Causas + Consecuencias + Soluciones para desbloquear el Plan</div>
+
+    <button type="button" class="menu-hotspot hs-plan plan-entry is-hidden" data-go="plan" aria-label="Ir a Plan Guardián"></button>
+    <button type="button" class="menu-plan plan-entry is-hidden" data-go="plan" aria-label="Ir a Plan Guardián" data-i18n="plan_btn">📋 PLAN GUARDIÁN</button>
+  </div>
+
+  <div class="flow-card">
+    <p data-i18n-html="command_text">🛰️ Usa el <b>Cinturón</b> para moverte. Completa Causas, Consecuencias y Soluciones para desbloquear el Plan.</p>
+
+    <div class="flow-actions">
+      <button type="button" class="btn btn-ghost" data-action="info-belt" id="btn-command-info" data-i18n="command_info_btn">
+        Selecciona el cinturón de Guardia,: Causas - Consecuencias - Soluciones
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CAUSAS -->
+<div class="screen content-screen bg-causas" id="causas">
+  <div class="content-header">
+    <h2 data-i18n="causas_title">🔥 MISIÓN 1: CAUSAS</h2>
+    <p data-i18n="causas_sub">Completa los retos para ganar puntos y luego marca la misión como lograda. (Navega con el Cinturón.)</p>
+  </div>
+  <div class="hero">
+    <div class="hero-media" data-bg="--img-causas"></div>
+    <div class="hero-caption"><b data-i18n="causas_caption_b">Causas:</b> <span data-i18n="causas_caption_t">¿qué sube la temperatura?</span></div>
+  </div>
+
+  <div class="mission-wrap">
+    <!-- Reto 1 -->
+    <div class="mission-step" id="causas-step-veh">
+      <div class="step-head">
+        <h3 data-i18n="c_r1_title">🎮 Reto 1: ¿Qué contamina más?</h3>
+        <span class="chip" id="causas-chip-veh" data-i18n="chip_pending">⏳ Pendiente</span>
+      </div>
+      <div class="step-note" data-i18n="c_r1_note">Elige el nivel de contaminación (por persona) para cada transporte. Luego toca “Verificar”. (+5)</div>
+
+      <div class="tiny-row" id="veh-rows">
+        <div class="vehicle-row" data-veh="car">
+          <div class="vehicle-left">
+            <div class="vehicle-ico">🚗</div>
+            <div class="vehicle-name" data-i18n="veh_car">Carro</div>
+          </div>
+          <div class="level-choices">
+            <button class="tiny-choice" data-veh="car" data-level="low" data-i18n="lvl_low">Baja</button>
+            <button class="tiny-choice" data-veh="car" data-level="mid" data-i18n="lvl_mid">Media</button>
+            <button class="tiny-choice" data-veh="car" data-level="high" data-i18n="lvl_high">Alta</button>
+          </div>
+        </div>
+
+        <div class="vehicle-row" data-veh="bus">
+          <div class="vehicle-left">
+            <div class="vehicle-ico">🚌</div>
+            <div class="vehicle-name" data-i18n="veh_bus">Bus</div>
+          </div>
+          <div class="level-choices">
+            <button class="tiny-choice" data-veh="bus" data-level="low" data-i18n="lvl_low">Baja</button>
+            <button class="tiny-choice" data-veh="bus" data-level="mid" data-i18n="lvl_mid">Media</button>
+            <button class="tiny-choice" data-veh="bus" data-level="high" data-i18n="lvl_high">Alta</button>
+          </div>
+        </div>
+
+        <div class="vehicle-row" data-veh="metro">
+          <div class="vehicle-left">
+            <div class="vehicle-ico">🚇</div>
+            <div class="vehicle-name" data-i18n="veh_metro">Metro</div>
+          </div>
+          <div class="level-choices">
+            <button class="tiny-choice" data-veh="metro" data-level="low" data-i18n="lvl_low">Baja</button>
+            <button class="tiny-choice" data-veh="metro" data-level="mid" data-i18n="lvl_mid">Media</button>
+            <button class="tiny-choice" data-veh="metro" data-level="high" data-i18n="lvl_high">Alta</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mission-footer">
+        <div class="mission-meter"><span data-i18n="points_tip">⭐ Tip:</span> <span data-i18n="c_r1_tip">El Metro suele contaminar menos por persona.</span></div>
+        <div class="small-actions">
+          <button type="button" class="btn btn-primary" data-action="check-veh" data-i18n="btn_check">✅ Verificar</button>
+          <button type="button" class="btn btn-ghost" data-action="reset-veh" data-i18n="btn_reset">↩️ Reiniciar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reto 2 -->
+    <div class="mission-step" id="causas-step-q">
+      <div class="step-head">
+        <h3 data-i18n="c_r2_title">🧠 Mini-Quiz: La “manta” invisible</h3>
+        <span class="chip" id="causas-chip-q" data-i18n="chip_pending">⏳ Pendiente</span>
+      </div>
+      <div class="step-note" data-i18n="c_r2_note">Pregunta: ¿Qué hace el CO₂ en la atmósfera? Elige 1 respuesta. (+5)</div>
+
+      <div class="choice-grid" data-quiz="causas-q">
+        <button class="choice" data-quiz-id="causas-q" data-correct="1">
+          <span class="emoji">🧥</span>
+          <span data-i18n="c_q_correct">Atrapa el calor como una manta</span>
+        </button>
+        <button class="choice" data-quiz-id="causas-q">
+          <span class="emoji">🧊</span>
+          <span data-i18n="c_q_w1">Congela la ciudad de inmediato</span>
+        </button>
+        <button class="choice" data-quiz-id="causas-q">
+          <span class="emoji">🌧️</span>
+          <span data-i18n="c_q_w2">Hace que llueva siempre todos los días</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Completar misión -->
+    <div class="mission-step">
+      <div class="step-head">
+        <h3 data-i18n="mission_finish_title">🏁 Completar misión</h3>
+        <span class="chip" id="causas-chip-m" data-i18n="chip_pending">⏳ Pendiente</span>
+      </div>
+      <div class="step-note" data-i18n="c_finish_note">Completa los 2 retos y luego marca la misión como lograda. (+20)</div>
+      <div class="mission-footer">
+        <div class="mission-meter" id="causas-progress">Retos: 0/2</div>
+        <div class="small-actions">
+          <button class="btn btn-primary" data-complete="causas" id="btn-complete-causas" disabled data-i18n="btn_complete_mission_20">🏁 Completar misión (+20)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONSECUENCIAS -->
+<div class="screen content-screen bg-consecuencias" id="consecuencias">
+  <div class="content-header">
+    <h2 data-i18n="cons_title">🌊 MISIÓN 2: CONSECUENCIAS</h2>
+    <p data-i18n="cons_sub">Descubre qué pasa cuando cambia el clima. Completa retos, gana puntos y marca la misión. (Usa el Cinturón.)</p>
+  </div>
+  <div class="hero">
+    <div class="hero-media" data-bg="--img-consecuencias"></div>
+    <div class="hero-caption"><b data-i18n="cons_caption_b">Consecuencias:</b> <span data-i18n="cons_caption_t">impactos reales en la ciudad</span></div>
+  </div>
+
+  <div class="mission-wrap">
+    <!-- Reto 1 -->
+    <div class="mission-step" id="cons-step-seq">
+      <div class="step-head">
+        <h3 data-i18n="cons_r1_title">🎮 Reto 1: Cadena de lluvia fuerte</h3>
+        <span class="chip" id="cons-chip-seq" data-i18n="chip_pending">⏳ Pendiente</span>
+      </div>
+      <div class="step-note" data-i18n="cons_r1_note">Toca las tarjetas en el orden correcto. Si fallas, ¡no pasa nada! Intenta de nuevo. (+5)</div>
+
+      <div class="seq-grid" id="seq-cons">
+        <button class="seq-card" data-seq="cons" data-step="1"><span>1️⃣</span><span data-i18n="seq1">Hace más calor</span></button>
+        <button class="seq-card" data-seq="cons" data-step="2"><span>2️⃣</span><span data-i18n="seq2">Se evapora más agua</span></button>
+        <button class="seq-card" data-seq="cons" data-step="3"><span>3️⃣</span><span data-i18n="seq3">Se forman nubes cargadas</span></button>
+        <button class="seq-card" data-seq="cons" data-step="4"><span>4️⃣</span><span data-i18n="seq4">Lluvia muy intensa → inundaciones</span></button>
+      </div>
+
+      <div class="seq-progress" id="seq-cons-progress" data-i18n-html="seq_progress">Progreso: <b>0/4</b></div>
+
+      <div class="mission-footer">
+        <div class="mission-meter"><span data-i18n="cons_r1_tip">Tip: En Medellín, la lluvia intensa puede causar deslizamientos en laderas.</span></div>
+        <div class="small-actions">
+          <button type="button" class="btn btn-ghost" data-action="reset-seq-cons" data-i18n="btn_reset">↩️ Reiniciar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reto 2 -->
+    <div class="mission-step" id="cons-step-q">
+      <div class="step-head">
+        <h3 data-i18n="cons_r2_title">🧠 Mini-Quiz: ¿Cuál es una consecuencia?</h3>
+        <span class="chip" id="cons-chip-q" data-i18n="chip_pending">⏳ Pendiente</span>
+      </div>
+      <div class="step-note" data-i18n="cons_r2_note">Elige la opción correcta. (+5)</div>
+
+      <div class="choice-grid" data-quiz="cons-q">
+        <button class="choice" data-quiz-id="cons-q" data-correct="1">
+          <span class="emoji">🌧️</span>
+          <span data-i18n="cons_q_correct">Lluvias más fuertes y rápidas</span>
+        </button>
+        <button class="choice" data-quiz-id="cons-q">
+          <span class="emoji">🌳</span>
+          <span data-i18n="cons_q_w1">Más bosques aparecen de la nada</span>
+        </button>
+        <button class="choice" data-quiz-id="cons-q">
+          <span class="emoji">❄️</span>
+          <span data-i18n="cons_q_w2">Siempre hace frío todo el año</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Completar misión -->
+    <div class="mission-step">
+      <div class="step-head">
+        <h3 data-i18n="mission_finish_title">🏁 Completar misión</h3>
+        <span class="chip" id="cons-chip-m" data-i18n="chip_pending">⏳ Pendiente</span>
+      </div>
+      <div class="step-note" data-i18n="cons_finish_note">Completa los 2 retos y luego marca la misión como lograda. (+20)</div>
+      <div class="mission-footer">
+        <div class="mission-meter" id="cons-progress">Retos: 0/2</div>
+        <div class="small-actions">
+          <button class="btn btn-primary" data-complete="consecuencias" id="btn-complete-cons" disabled data-i18n="btn_complete_mission_20">🏁 Completar misión (+20)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SOLUCIONES -->
+<div class="screen content-screen bg-soluciones" id="soluciones">
+  <div class="content-header">
+    <h2 data-i18n="sol_title">💡 MISIÓN 3: SOLUCIONES</h2>
+    <p data-i18n="sol_sub">Elige soluciones reales y posibles. Completa retos, gana puntos y marca la misión. (Usa el Cinturón.)</p>
+  </div>
+  <div class="hero">
+    <div class="hero-media" data-bg="--img-sol"></div>
+    <div class="hero-caption"><b data-i18n="sol_caption_b">Soluciones:</b> <span data-i18n="sol_caption_t">pequeñas acciones, gran impacto</span></div>
+  </div>
+
+  <div class="mission-wrap">
+    <!-- Reto 1 -->
+    <div class="mission-step" id="sol-step-commit">
+      <div class="step-head">
+        <h3 data-i18n="sol_r1_title">🎮 Reto 1: Elige 3 compromisos</h3>
+        <span class="chip" id="sol-chip-commit" data-i18n="chip_pending">⏳ Pendiente</span>
+      </div>
+      <div class="step-note" data-i18n="sol_r1_note">Toca 3 tarjetas y luego “Guardar”. (+5)</div>
+
+      <div class="commit-grid" id="commit-grid">
+        <button class="commit-card" data-commit="lights"><span>💡</span><span data-i18n="commit1">Apagar luces al salir</span></button>
+        <button class="commit-card" data-commit="recycle"><span>♻️</span><span data-i18n="commit2">Separar reciclaje</span></button>
+        <button class="commit-card" data-commit="bottle"><span>🚰</span><span data-i18n="commit3">Usar botella reutilizable</span></button>
+        <button class="commit-card" data-commit="walk"><span>🚶‍♀️</span><span data-i18n="commit4">Caminar o usar Metro</span></button>
+        <button class="commit-card" data-commit="snack"><span>🥪</span><span data-i18n="commit5">Merienda sin empaques</span></button>
+        <button class="commit-card" data-commit="plant"><span>🌱</span><span data-i18n="commit6">Cuidar una planta</span></button>
+      </div>
+
+      <div class="mission-footer">
+        <div class="mission-meter" id="commit-counter" data-i18n="commit_counter">Seleccionadas: 0/3</div>
+        <div class="small-actions">
+          <button type="button" class="btn btn-primary" data-action="save-commit" data-i18n="btn_save">✅ Guardar</button>
+          <button type="button" class="btn btn-ghost" data-action="reset-commit" data-i18n="btn_reset">↩️ Reiniciar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reto 2 -->
+    <div class="mission-step" id="sol-step-q">
+      <div class="step-head">
+        <h3 data-i18n="sol_r2_title">🧠 Mini-Quiz: Energía en el salón</h3>
+        <span class="chip" id="sol-chip-q" data-i18n="chip_pending">⏳ Pendiente</span>
+      </div>
+      <div class="step-note" data-i18n="sol_r2_note">¿Cuál acción ahorra más energía? (+5)</div>
+
+      <div class="choice-grid" data-quiz="sol-q">
+        <button class="choice" data-quiz-id="sol-q" data-correct="1">
+          <span class="emoji">💡</span>
+          <span data-i18n="sol_q_correct">Apagar luces y pantalla cuando no se usan</span>
+        </button>
+        <button class="choice" data-quiz-id="sol-q">
+          <span class="emoji">🔊</span>
+          <span data-i18n="sol_q_w1">Subir el volumen al máximo</span>
+        </button>
+        <button class="choice" data-quiz-id="sol-q">
+          <span class="emoji">🧺</span>
+          <span data-i18n="sol_q_w2">Usar más papel por diversión</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Completar misión -->
+    <div class="mission-step">
+      <div class="step-head">
+        <h3 data-i18n="mission_finish_title">🏁 Completar misión</h3>
+        <span class="chip" id="sol-chip-m" data-i18n="chip_pending">⏳ Pendiente</span>
+      </div>
+      <div class="step-note" data-i18n="sol_finish_note">Completa los 2 retos y luego marca la misión como lograda. (+20)</div>
+      <div class="mission-footer">
+        <div class="mission-meter" id="sol-progress">Retos: 0/2</div>
+        <div class="small-actions">
+          <button class="btn btn-primary" data-complete="soluciones" id="btn-complete-sol" disabled data-i18n="btn_complete_mission_20">🏁 Completar misión (+20)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLAN -->
+<div class="screen content-screen bg-plan" id="plan">
+  <div class="content-header">
+    <h2 data-i18n="plan_title">📋 MISIÓN FINAL: PLAN GUARDIÁN</h2>
+    <p data-i18n="plan_sub">Solo se desbloquea cuando completes Causas, Consecuencias y Soluciones.</p>
+  </div>
+  <div class="card-box">
+    <p id="plan-lock-msg" data-i18n="plan_lock_msg">🔒 Completa primero las 3 misiones para desbloquear el Plan.</p>
+    <div class="btn-center">
+      <button class="btn btn-orange" id="btn-complete-plan" disabled data-i18n="btn_finish_plan_40">🏁 Finalizar Plan (+40)</button>
+    </div>
+  </div>
+</div>
+
+<!-- CIERRE -->
+<div class="screen" id="cierre">
+  <div class="cierre-wrap">
+    <div class="cierre-title" data-i18n="end_title">🏆 ¡MISIÓN CUMPLIDA!</div>
+    <div class="cierre-sub" data-i18n-html="end_sub">
+      ¡Ya eres un Guardián Climático! Tu puntaje final es: <b id="final-score">0</b> ⭐
+    </div>
+
+    <div class="end-actions">
+      <button type="button" class="end-btn green" data-go="command" data-i18n="end_back_belt">🧭 Volver al Cinturón</button>
+      <button type="button" class="end-btn green2" data-go="home" data-i18n="end_back_home">🏠 Volver al inicio</button>
+      <button type="button" class="end-btn orange" data-action="reset" data-i18n="end_reset">🔄 Reiniciar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   I18N (ES/EN) – kids-friendly
+========================= */
+const I18N = {
+  es: {
+    loading_text:"Cargando misión...",
+    intro_title:"🛡️ GUARDIANES CLIMÁTICOS DE MEDELLÍN",
+    intro_chip:"De espectadores a protagonistas",
+    intro_text:'👋 Soy <b>Guardia</b>. Medellín nos necesita. Toca <b>Continuar</b> para empezar.',
+    intro_continue:"✨ Continuar",
+
+    home_title:"GUARDIANES CLIMÁTICOS<br>DE MEDELLÍN",
+    home_subtitle:"Una misión para el futuro de nuestra ciudad",
+    home_bubble:'¡Hola, explorador! Soy <strong>Guardia</strong>. Nuestra ciudad necesita tu ayuda. ¿Aceptas el reto de convertirte en <strong>Guardián Climático</strong>?',
+    home_accept:"🚀 ¡ACEPTO LA MISIÓN!",
+
+    briefing_title:"✅ MISIÓN ACEPTADA",
+    briefing_sub:"Genial... ahora vamos a entender el problema y convertirlo en acción.",
+    briefing_caption_b:"Briefing:",
+    briefing_caption_t:"Tu objetivo en 4 pasos",
+    briefing_text:'🎯 <b>Objetivo:</b> descubrir <b>causas</b>, reconocer <b>consecuencias</b>, proponer <b>soluciones</b> y crear tu <b>Plan Guardián</b>.',
+    briefing_next:"🚨 Señal climática",
+
+    alert_title:"🚨 SEÑAL CLIMÁTICA",
+    alert_sub:"Observa: estas señales nos dicen que el clima está cambiando.",
+    alert_caption_b:"Señal:",
+    alert_caption_t:"Algo cambió… ¿lo ves?",
+    alert_text:'👀 Cuando el planeta se calienta, cambian lluvias, temperaturas y ecosistemas. Ahora pasemos al <b>Mapa de Visión</b>.',
+    alert_next:"👁️ Mapa de Visión",
+
+    vision_title:"👁️ MAPA DE VISIÓN",
+    vision_sub:"El futuro que construiremos depende de lo que decidamos hoy.",
+    vision_caption_b:"Visión:",
+    vision_caption_t:"Comprender → Decidir → Actuar",
+    vision_text:'🧭 Entender el problema, elegir acciones y convertir tu salón en un equipo de <b>Guardianes Climáticos</b>. Vamos al <b>Cinturón de Guardia</b>.',
+    vision_next:"🧭 Cinturón de Guardia",
+
+    command_title:"🧭 CINTURÓN DE GUARDIA",
+    command_sub:"Toca la imagen para elegir tu misión. (Causas / Consecuencias / Soluciones)",
+    command_text:'🛰️ Usa el <b>Cinturón</b> para moverte. Completa Causas, Consecuencias y Soluciones para desbloquear el Plan.',
+    command_info_btn:"Selecciona el cinturón de Guardia,: Causas - Consecuencias - Soluciones",
+
+    belt_command:"🧭 CINTURÓN",
+    belt_causas:"🔥 Causas",
+    belt_consecuencias:"🌊 Consecuencias",
+    belt_soluciones:"💡 Soluciones",
+    belt_plan:"📋 Plan",
+    score_label:"⭐",
+
+    plan_locked_hint:"🔒 Completa Causas + Consecuencias + Soluciones para desbloquear el Plan",
+    plan_btn:"📋 PLAN GUARDIÁN",
+    plan_title:"📋 MISIÓN FINAL: PLAN GUARDIÁN",
+    plan_sub:"Solo se desbloquea cuando completes Causas, Consecuencias y Soluciones.",
+    plan_lock_msg:"🔒 Completa primero las 3 misiones para desbloquear el Plan.",
+    btn_finish_plan_40:"🏁 Finalizar Plan (+40)",
+
+    causas_title:"🔥 MISIÓN 1: CAUSAS",
+    causas_sub:"Completa los retos para ganar puntos y luego marca la misión como lograda. (Navega con el Cinturón.)",
+    causas_caption_b:"Causas:",
+    causas_caption_t:"¿qué sube la temperatura?",
+
+    cons_title:"🌊 MISIÓN 2: CONSECUENCIAS",
+    cons_sub:"Descubre qué pasa cuando cambia el clima. Completa retos, gana puntos y marca la misión. (Usa el Cinturón.)",
+    cons_caption_b:"Consecuencias:",
+    cons_caption_t:"impactos reales en la ciudad",
+
+    sol_title:"💡 MISIÓN 3: SOLUCIONES",
+    sol_sub:"Elige soluciones reales y posibles. Completa retos, gana puntos y marca la misión. (Usa el Cinturón.)",
+    sol_caption_b:"Soluciones:",
+    sol_caption_t:"pequeñas acciones, gran impacto",
+
+    chip_pending:"⏳ Pendiente",
+    chip_done:"✅ Listo",
+    mission_finish_title:"🏁 Completar misión",
+
+    points_tip:"⭐ Tip:",
+    btn_check:"✅ Verificar",
+    btn_reset:"↩️ Reiniciar",
+    btn_save:"✅ Guardar",
+    btn_complete_mission_20:"🏁 Completar misión (+20)",
+
+    /* CAUSAS retos */
+    c_r1_title:"🎮 Reto 1: ¿Qué contamina más?",
+    c_r1_note:"Elige el nivel de contaminación (por persona) para cada transporte. Luego toca “Verificar”. (+5)",
+    c_r1_tip:"El Metro suele contaminar menos por persona.",
+    veh_car:"Carro",
+    veh_bus:"Bus",
+    veh_metro:"Metro",
+    lvl_low:"Baja",
+    lvl_mid:"Media",
+    lvl_high:"Alta",
+    c_r2_title:"🧠 Mini-Quiz: La “manta” invisible",
+    c_r2_note:"Pregunta: ¿Qué hace el CO₂ en la atmósfera? Elige 1 respuesta. (+5)",
+    c_q_correct:"Atrapa el calor como una manta",
+    c_q_w1:"Congela la ciudad de inmediato",
+    c_q_w2:"Hace que llueva siempre todos los días",
+    c_finish_note:"Completa los 2 retos y luego marca la misión como lograda. (+20)",
+
+    /* CONSECUENCIAS retos */
+    cons_r1_title:"🎮 Reto 1: Cadena de lluvia fuerte",
+    cons_r1_note:"Toca las tarjetas en el orden correcto. Si fallas, ¡no pasa nada! Intenta de nuevo. (+5)",
+    cons_r1_tip:"Tip: En Medellín, la lluvia intensa puede causar deslizamientos en laderas.",
+    seq1:"Hace más calor",
+    seq2:"Se evapora más agua",
+    seq3:"Se forman nubes cargadas",
+    seq4:"Lluvia muy intensa → inundaciones",
+    seq_progress:'Progreso: <b>0/4</b>',
+    cons_r2_title:"🧠 Mini-Quiz: ¿Cuál es una consecuencia?",
+    cons_r2_note:"Elige la opción correcta. (+5)",
+    cons_q_correct:"Lluvias más fuertes y rápidas",
+    cons_q_w1:"Más bosques aparecen de la nada",
+    cons_q_w2:"Siempre hace frío todo el año",
+    cons_finish_note:"Completa los 2 retos y luego marca la misión como lograda. (+20)",
+
+    /* SOLUCIONES retos */
+    sol_r1_title:"🎮 Reto 1: Elige 3 compromisos",
+    sol_r1_note:"Toca 3 tarjetas y luego “Guardar”. (+5)",
+    commit1:"Apagar luces al salir",
+    commit2:"Separar reciclaje",
+    commit3:"Usar botella reutilizable",
+    commit4:"Caminar o usar Metro",
+    commit5:"Merienda sin empaques",
+    commit6:"Cuidar una planta",
+    commit_counter:"Seleccionadas: 0/3",
+    sol_r2_title:"🧠 Mini-Quiz: Energía en el salón",
+    sol_r2_note:"¿Cuál acción ahorra más energía? (+5)",
+    sol_q_correct:"Apagar luces y pantalla cuando no se usan",
+    sol_q_w1:"Subir el volumen al máximo",
+    sol_q_w2:"Usar más papel por diversión",
+    sol_finish_note:"Completa los 2 retos y luego marca la misión como lograda. (+20)",
+
+    /* Cierre */
+    end_title:"🏆 ¡MISIÓN CUMPLIDA!",
+    end_sub:'¡Ya eres un Guardián Climático! Tu puntaje final es: <b id="final-score">0</b> ⭐',
+    end_back_belt:"🧭 Volver al Cinturón",
+    end_back_home:"🏠 Volver al inicio",
+    end_reset:"🔄 Reiniciar",
+
+    /* Toasts */
+    t_img_warn:"⚠️ Algunas imágenes no cargaron. Fondo de respaldo activo.",
+    t_plan_locked:"🔒 Completa Causas, Consecuencias y Soluciones para desbloquear el Plan.",
+    t_plan_unlocked:"✅ ¡Plan desbloqueado! Ya puedes entrar al PLAN GUARDIÁN.",
+    t_need_challenges:"Completa los retos antes de marcar la misión. ¡Tú puedes!",
+    t_correct:"+5 ⭐ ¡Correcto!",
+    t_wrong:"Ups… intenta otra vez 🙂",
+    t_saved:"+5 ⭐ ¡Compromisos guardados!",
+    t_pick_3:"Elige exactamente 3 compromisos 🙂",
+    t_info_belt:"Usa el cinturón para entrar a Causas, Consecuencias o Soluciones."
+  },
+
+  en: {
+    loading_text:"Loading mission...",
+    intro_title:"🛡️ CLIMATE GUARDIANS OF MEDELLÍN",
+    intro_chip:"From watchers to heroes",
+    intro_text:'👋 I’m <b>Guardia</b>. Medellín needs us. Tap <b>Continue</b> to start.',
+    intro_continue:"✨ Continue",
+
+    home_title:"CLIMATE GUARDIANS<br>OF MEDELLÍN",
+    home_subtitle:"A mission for our city’s future",
+    home_bubble:'Hi, explorer! I’m <strong>Guardia</strong>. Our city needs your help. Will you accept the challenge to become a <strong>Climate Guardian</strong>?',
+    home_accept:"🚀 I ACCEPT THE MISSION!",
+
+    briefing_title:"✅ MISSION ACCEPTED",
+    briefing_sub:"Awesome… now we’ll understand the problem and turn it into action.",
+    briefing_caption_b:"Briefing:",
+    briefing_caption_t:"Your goal in 4 steps",
+    briefing_text:'🎯 <b>Goal:</b> discover <b>causes</b>, spot <b>consequences</b>, propose <b>solutions</b>, and build your <b>Guardian Plan</b>.',
+    briefing_next:"🚨 Climate signal",
+
+    alert_title:"🚨 CLIMATE SIGNAL",
+    alert_sub:"Look closely: these signs tell us the climate is changing.",
+    alert_caption_b:"Signal:",
+    alert_caption_t:"Something changed… can you see it?",
+    alert_text:'👀 When Earth warms up, rain, temperature, and ecosystems change. Next: the <b>Vision Map</b>.',
+    alert_next:"👁️ Vision Map",
+
+    vision_title:"👁️ VISION MAP",
+    vision_sub:"The future depends on what we choose today.",
+    vision_caption_b:"Vision:",
+    vision_caption_t:"Understand → Choose → Act",
+    vision_text:'🧭 Understand the problem, pick actions, and turn your class into a team of <b>Climate Guardians</b>. Let’s go to the <b>Guardian Belt</b>.',
+    vision_next:"🧭 Guardian Belt",
+
+    command_title:"🧭 GUARDIAN BELT",
+    command_sub:"Tap the image to choose your mission. (Causes / Consequences / Solutions)",
+    command_text:'🛰️ Use the <b>Belt</b> to move. Finish Causes, Consequences, and Solutions to unlock the Plan.',
+    command_info_btn:"Select the Guardian Belt: Causes - Consequences - Solutions",
+
+    belt_command:"🧭 BELT",
+    belt_causas:"🔥 Causes",
+    belt_consecuencias:"🌊 Consequences",
+    belt_soluciones:"💡 Solutions",
+    belt_plan:"📋 Plan",
+    score_label:"⭐",
+
+    plan_locked_hint:"🔒 Finish Causes + Consequences + Solutions to unlock the Plan",
+    plan_btn:"📋 GUARDIAN PLAN",
+    plan_title:"📋 FINAL MISSION: GUARDIAN PLAN",
+    plan_sub:"It unlocks only after you finish Causes, Consequences, and Solutions.",
+    plan_lock_msg:"🔒 Finish the 3 missions first to unlock the Plan.",
+    btn_finish_plan_40:"🏁 Finish Plan (+40)",
+
+    causas_title:"🔥 MISSION 1: CAUSES",
+    causas_sub:"Complete the challenges to earn points, then mark the mission as done. (Use the Belt.)",
+    causas_caption_b:"Causes:",
+    causas_caption_t:"what makes it warmer?",
+
+    cons_title:"🌊 MISSION 2: CONSEQUENCES",
+    cons_sub:"See what happens when climate changes. Do challenges, earn points, then mark the mission. (Use the Belt.)",
+    cons_caption_b:"Consequences:",
+    cons_caption_t:"real impacts in the city",
+
+    sol_title:"💡 MISSION 3: SOLUTIONS",
+    sol_sub:"Pick real, doable solutions. Do challenges, earn points, then mark the mission. (Use the Belt.)",
+    sol_caption_b:"Solutions:",
+    sol_caption_t:"small actions, big impact",
+
+    chip_pending:"⏳ Pending",
+    chip_done:"✅ Done",
+    mission_finish_title:"🏁 Finish mission",
+
+    points_tip:"⭐ Tip:",
+    btn_check:"✅ Check",
+    btn_reset:"↩️ Reset",
+    btn_save:"✅ Save",
+    btn_complete_mission_20:"🏁 Finish mission (+20)",
+
+    c_r1_title:"🎮 Challenge 1: Who pollutes more?",
+    c_r1_note:"Choose the pollution level (per person) for each transport. Then tap “Check”. (+5)",
+    c_r1_tip:"The Metro usually pollutes less per person.",
+    veh_car:"Car",
+    veh_bus:"Bus",
+    veh_metro:"Metro",
+    lvl_low:"Low",
+    lvl_mid:"Medium",
+    lvl_high:"High",
+    c_r2_title:"🧠 Mini-Quiz: The invisible “blanket”",
+    c_r2_note:"Question: What does CO₂ do in the air? Choose 1 answer. (+5)",
+    c_q_correct:"It traps heat like a blanket",
+    c_q_w1:"It freezes the city instantly",
+    c_q_w2:"It makes it rain every single day",
+    c_finish_note:"Complete both challenges, then finish the mission. (+20)",
+
+    cons_r1_title:"🎮 Challenge 1: Heavy rain chain",
+    cons_r1_note:"Tap the cards in the correct order. If you miss, it’s okay—try again. (+5)",
+    cons_r1_tip:"Tip: In Medellín, heavy rain can cause landslides on hills.",
+    seq1:"It gets hotter",
+    seq2:"More water evaporates",
+    seq3:"Big, heavy clouds form",
+    seq4:"Very strong rain → floods",
+    seq_progress:'Progress: <b>0/4</b>',
+    cons_r2_title:"🧠 Mini-Quiz: Which one is a consequence?",
+    cons_r2_note:"Choose the correct option. (+5)",
+    cons_q_correct:"Stronger, faster rains",
+    cons_q_w1:"Forests appear out of nowhere",
+    cons_q_w2:"It’s always cold all year",
+    cons_finish_note:"Complete both challenges, then finish the mission. (+20)",
+
+    sol_r1_title:"🎮 Challenge 1: Pick 3 promises",
+    sol_r1_note:"Tap 3 cards, then “Save”. (+5)",
+    commit1:"Turn off lights when leaving",
+    commit2:"Sort recycling",
+    commit3:"Use a reusable bottle",
+    commit4:"Walk or use the Metro",
+    commit5:"Snack with no wrappers",
+    commit6:"Take care of a plant",
+    commit_counter:"Selected: 0/3",
+    sol_r2_title:"🧠 Mini-Quiz: Energy in class",
+    sol_r2_note:"Which action saves the most energy? (+5)",
+    sol_q_correct:"Turn off lights and screens when not used",
+    sol_q_w1:"Max the volume",
+    sol_q_w2:"Use extra paper for fun",
+    sol_finish_note:"Complete both challenges, then finish the mission. (+20)",
+
+    end_title:"🏆 MISSION COMPLETE!",
+    end_sub:'You are a Climate Guardian! Your final score is: <b id="final-score">0</b> ⭐',
+    end_back_belt:"🧭 Back to the Belt",
+    end_back_home:"🏠 Back to Home",
+    end_reset:"🔄 Restart",
+
+    t_img_warn:"⚠️ Some images didn’t load. Backup background is on.",
+    t_plan_locked:"🔒 Finish Causes, Consequences, and Solutions to unlock the Plan.",
+    t_plan_unlocked:"✅ Plan unlocked! You can enter the GUARDIAN PLAN now.",
+    t_need_challenges:"Complete the challenges before finishing the mission. You’ve got this!",
+    t_correct:"+5 ⭐ Correct!",
+    t_wrong:"Oops… try again 🙂",
+    t_saved:"+5 ⭐ Promises saved!",
+    t_pick_3:"Pick exactly 3 promises 🙂",
+    t_info_belt:"Use the Belt buttons to enter Causes, Consequences, or Solutions."
+  }
+};
+
+const PREF_LANG_KEY="gcmed_lang_v1";
+const PREF_THEME_KEY="gcmed_theme_v1";
+
+let currentLang = "es";
+let currentTheme = "light";
+
+function t(key){
+  const pack = I18N[currentLang] || I18N.es;
+  return (pack && key in pack) ? pack[key] : (I18N.es[key] || key);
+}
+function applyI18n(){
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    el.textContent = t(key);
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach(el=>{
+    const key = el.getAttribute("data-i18n-html");
+    el.innerHTML = t(key);
+  });
+
+  refreshMissionLocks();
+  refreshCommitCounter();
+  updateSeqProgress("cons");
+  updateUtilityLabels();
+}
+
+/* =========================
+   TOAST
+========================= */
+let toastTimer=null;
+function showToast(msg){
+  const tEl=document.getElementById("toast");
+  if(!tEl) return;
+  tEl.textContent=msg;
+  tEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>tEl.classList.remove("show"),2400);
+}
+
+/* =========================
+   AUDIO
+========================= */
+let audioCtx=null;
+let audioUnlocked=false;
+function initAudio(){
+  if(audioUnlocked) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    audioUnlocked=true;
+  }catch(e){ audioUnlocked=false; }
+}
+function playPointSound(amount=10){
+  if(!audioUnlocked || !audioCtx) return;
+  const now=audioCtx.currentTime;
+  const base=520;
+  const boost=Math.min(420, Math.max(0, amount*6));
+  const o1=audioCtx.createOscillator(), g1=audioCtx.createGain();
+  o1.type="triangle";
+  o1.frequency.setValueAtTime(base, now);
+  o1.frequency.exponentialRampToValueAtTime(base+boost, now+0.08);
+  g1.gain.setValueAtTime(0.0001, now);
+  g1.gain.exponentialRampToValueAtTime(0.22, now+0.02);
+  g1.gain.exponentialRampToValueAtTime(0.0001, now+0.14);
+  o1.connect(g1).connect(audioCtx.destination);
+  o1.start(now); o1.stop(now+0.16);
+
+  const o2=audioCtx.createOscillator(), g2=audioCtx.createGain();
+  o2.type="sine";
+  o2.frequency.setValueAtTime(base+120, now+0.06);
+  o2.frequency.exponentialRampToValueAtTime(base+boost+260, now+0.14);
+  g2.gain.setValueAtTime(0.0001, now+0.06);
+  g2.gain.exponentialRampToValueAtTime(0.18, now+0.085);
+  g2.gain.exponentialRampToValueAtTime(0.0001, now+0.22);
+  o2.connect(g2).connect(audioCtx.destination);
+  o2.start(now+0.06); o2.stop(now+0.24);
+}
+
+/* =========================
+   ESTADO
+========================= */
+const STORAGE_KEY="gcmed_state_v26";
+const SESSION_KEY="gcmed_state_session_v26";
+
+const defaultState=()=>({
+  missionStarted:false,
+  score:0,
+  completed:{ causas:false, consecuencias:false, soluciones:false, plan:false },
+  tasks:{
+    causas:{veh:false, quiz:false},
+    consecuencias:{seq:false, quiz:false},
+    soluciones:{commit:false, quiz:false}
+  },
+  lastScreen:"home",
+  introClosed:false
+});
+const state=defaultState();
+
+function safeSet(store,key,val){ try{store.setItem(key,val);}catch(e){} }
+function safeGet(store,key){ try{return store.getItem(key);}catch(e){return null;} }
+function safeRemove(store,key){ try{store.removeItem(key);}catch(e){} }
+
+function anyCompleted(){ return Object.values(state.completed).some(Boolean); }
+function saveState(){
+  const payload=JSON.stringify({
+    missionStarted:state.missionStarted,
+    score:state.score,
+    completed:state.completed,
+    tasks:state.tasks,
+    lastScreen:state.lastScreen,
+    introClosed:state.introClosed
+  });
+  safeSet(localStorage,STORAGE_KEY,payload);
+  safeSet(sessionStorage,SESSION_KEY,payload);
+}
+function loadState(){
+  const raw=safeGet(sessionStorage,SESSION_KEY) || safeGet(localStorage,STORAGE_KEY);
+  if(!raw) return;
+  try{
+    const d=JSON.parse(raw);
+    state.missionStarted=!!d.missionStarted;
+    state.score=Number(d.score||0);
+    state.completed=Object.assign(state.completed,d.completed||{});
+    state.tasks = Object.assign(state.tasks, d.tasks||{});
+    state.tasks.causas = Object.assign({veh:false,quiz:false}, state.tasks.causas||{});
+    state.tasks.consecuencias = Object.assign({seq:false,quiz:false}, state.tasks.consecuencias||{});
+    state.tasks.soluciones = Object.assign({commit:false,quiz:false}, state.tasks.soluciones||{});
+
+    state.lastScreen=(typeof d.lastScreen==="string"?d.lastScreen:"home");
+    state.introClosed=!!d.introClosed;
+
+    if(state.score>0 || anyCompleted()) state.missionStarted=true;
+    if(!state.completed.plan && state.lastScreen==="cierre"){
+      state.lastScreen = state.missionStarted ? "command" : "home";
+    }
+  }catch(e){}
+}
+
+/* =========================
+   IMÁGENES (con fallback)
+========================= */
+let bgWarned=false;
+function parseCssUrl(v){
+  const m = (v||"").match(/url\((['"]?)(.*?)\1\)/i);
+  return m && m[2] ? m[2] : null;
+}
+function getVarUrl(varName){
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return parseCssUrl(raw);
+}
+function setBgEl(el, varName, fallback){
+  if(!el) return;
+  const url = getVarUrl(varName);
+  if(!url){
+    el.style.backgroundImage = fallback || "linear-gradient(135deg, rgba(0,230,118,.18), rgba(255,214,0,.18))";
+    return;
+  }
+  el.style.backgroundImage = `url("${url}")`;
+  const probe = new Image();
+  probe.onerror = () => {
+    el.style.backgroundImage = fallback || "linear-gradient(135deg, rgba(0,230,118,.18), rgba(255,214,0,.18))";
+    if(!bgWarned){ bgWarned=true; showToast(t("t_img_warn")); }
+  };
+  probe.src = url;
+}
+function applyAllBgs(){
+  document.querySelectorAll("[data-bg]").forEach(el=>{
+    const v = el.getAttribute("data-bg");
+    setBgEl(el, v, "linear-gradient(135deg, rgba(0,230,118,.18), rgba(255,214,0,.18))");
+  });
+
+  const cierre = document.getElementById("cierre");
+  if(cierre){
+    const url = getVarUrl("--img-cierre");
+    if(url){
+      cierre.style.backgroundImage =
+        `linear-gradient(170deg, rgba(21,101,192,.75) 0%, rgba(66,165,245,.65) 50%, rgba(144,202,249,.55) 100%), url("${url}")`;
+    }else{
+      cierre.style.backgroundImage =
+        `linear-gradient(170deg, rgba(21,101,192,.75) 0%, rgba(66,165,245,.65) 50%, rgba(144,202,249,.55) 100%)`;
+    }
+  }
+}
+
+/* =========================
+   PLAN unlock
+========================= */
+function isPlanUnlocked(){ return !!(state.completed.causas && state.completed.consecuencias && state.completed.soluciones); }
+let prevPlanUnlocked=false;
+function updatePlanVisibility(){
+  const unlocked=isPlanUnlocked();
+  if(unlocked && !prevPlanUnlocked){
+    document.querySelectorAll(".plan-entry").forEach(el=>{
+      el.classList.add("appear");
+      setTimeout(()=>el.classList.remove("appear"),600);
+    });
+  }
+  prevPlanUnlocked = unlocked;
+
+  document.querySelectorAll(".plan-entry").forEach(el=>el.classList.toggle("is-hidden", !unlocked));
+  document.querySelectorAll(".plan-locked-hint-el").forEach(el=>el.classList.toggle("is-hidden", unlocked));
+  if(!unlocked && nav.current==="plan"){ nav.go("command"); }
+}
+
+/* =========================
+   NAV
+========================= */
+const nav={
+  current:"home",
+  go(screenId, opts={}){
+    if(screenId==="plan" && !isPlanUnlocked()){
+      showToast(t("t_plan_locked"));
+      screenId="command";
+    }
+    if(screenId==="cierre" && !state.completed.plan){
+      screenId = state.missionStarted ? "command" : "home";
+    }
+    if(!document.getElementById(screenId)){
+      screenId = state.missionStarted ? "command" : "home";
+    }
+
+    if(screenId!=="home") state.missionStarted = true;
+
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+    document.getElementById(screenId).classList.add("active");
+
+    this.current=screenId;
+    state.lastScreen=screenId;
+
+    if(opts.updateHash!==false){
+      const newHash="#"+encodeURIComponent(screenId);
+      if(location.hash!==newHash){
+        try{ history.replaceState(null,"",newHash); }catch(e){ location.hash=newHash; }
+      }
+    }
+
+    setTopUIVisibility();
+    updateBeltActive();
+    updateProgress();
+    refreshCommandMenuBadges();
+    refreshPlanLock();
+    updatePlanVisibility();
+    refreshMissionLocks();
+
+    if(screenId==="cierre"){
+      const fs=document.getElementById("final-score");
+      if(fs) fs.textContent = String(state.score);
+    }
+
+    saveState();
+    const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({top:0, behavior: reduceMotion ? "auto" : "smooth"});
+
+    applyAllBgs();
+  }
+};
+window.nav=nav;
+
+/* =========================
+   UI (cinturón solo misiones)
+========================= */
+function isMissionScreen(id){
+  return (id==="causas" || id==="consecuencias" || id==="soluciones" || id==="plan");
+}
+function setTopUIVisibility(){
+  const belt = document.getElementById("belt");
+  belt.style.display = (state.missionStarted && isMissionScreen(nav.current)) ? "flex" : "none";
+}
+
+function updateBeltActive(){
+  const cur=nav.current;
+  document.querySelectorAll(".belt-btn[data-belt]").forEach(btn=>{
+    const tId=btn.getAttribute("data-belt");
+    btn.classList.toggle("active", tId===cur);
+    btn.classList.toggle("completed", !!state.completed[tId]);
+  });
+  document.querySelectorAll(".belt-icon[data-belt]").forEach(btn=>{
+    const tId=btn.getAttribute("data-belt");
+    btn.classList.toggle("active", tId===cur);
+  });
+}
+function updateProgress(){
+  const total=Object.values(state.completed).filter(Boolean).length;
+  document.getElementById("progress-bar").style.width = ((total/4)*100) + "%";
+}
+function refreshCommandMenuBadges(){
+  const c=document.querySelector(".menu-hotspot.hs-causas");
+  const e=document.querySelector(".menu-hotspot.hs-consecuencias");
+  const s=document.querySelector(".menu-hotspot.hs-soluciones");
+  if(c) c.classList.toggle("done", !!state.completed.causas);
+  if(e) e.classList.toggle("done", !!state.completed.consecuencias);
+  if(s) s.classList.toggle("done", !!state.completed.soluciones);
+}
+function refreshPlanLock(){
+  const ok=isPlanUnlocked();
+  const msg=document.getElementById("plan-lock-msg");
+  const btn=document.getElementById("btn-complete-plan");
+  if(!msg || !btn) return;
+  if(ok){
+    msg.textContent = (currentLang==="en")
+      ? "✅ Plan unlocked. Pick 1 action, 1 person, and 1 date."
+      : "✅ Plan desbloqueado. Define 1 acción, 1 responsable y 1 fecha.";
+    btn.disabled=false;
+  } else {
+    msg.textContent = t("plan_lock_msg");
+    btn.disabled=true;
+  }
+}
+
+/* =========================
+   SCORE
+========================= */
+let lastSoundAt=0;
+function addScore(points){
+  state.score += points;
+  document.getElementById("score-value").textContent = state.score;
+  const el=document.getElementById("belt-score");
+  if(el){
+    el.classList.add("bump");
+    setTimeout(()=>el.classList.remove("bump"),180);
+  }
+
+  const now=performance.now();
+  if(now-lastSoundAt>90){ playPointSound(points); lastSoundAt=now; }
+
+  saveState();
+}
+
+/* =========================
+   Intro / start / reset
+========================= */
+function closeIntroToHome(){
+  state.introClosed=true;
+  state.lastScreen="home";
+  saveState();
+  const intro=document.getElementById("intro-scene");
+  intro.classList.add("hidden");
+  intro.setAttribute("aria-hidden","true");
+  nav.go("home",{updateHash:true});
+}
+function showIntro(){
+  state.introClosed=false;
+  const intro=document.getElementById("intro-scene");
+  intro.classList.remove("hidden");
+  intro.setAttribute("aria-hidden","false");
+}
+function resetApp(){
+  initAudio();
+  safeRemove(localStorage,STORAGE_KEY);
+  safeRemove(sessionStorage,SESSION_KEY);
+
+  const fresh=defaultState();
+  state.missionStarted=fresh.missionStarted;
+  state.score=fresh.score;
+  state.completed=fresh.completed;
+  state.tasks=fresh.tasks;
+  state.lastScreen=fresh.lastScreen;
+  state.introClosed=fresh.introClosed;
+
+  document.getElementById("score-value").textContent="0";
+  document.getElementById("progress-bar").style.width="0%";
+
+  resetVehUI(true);
+  resetQuizUI("causas-q", true);
+  resetSeqUI("cons", true);
+  resetQuizUI("cons-q", true);
+  resetCommitUI(true);
+  resetQuizUI("sol-q", true);
+
+  refreshCommandMenuBadges();
+  refreshPlanLock();
+  updatePlanVisibility();
+  refreshMissionLocks();
+
+  showIntro();
+  try{ history.replaceState(null,"",location.pathname+location.search+"#home"); }catch(e){ location.hash="#home"; }
+
+  nav.current="home";
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("home").classList.add("active");
+
+  setTopUIVisibility();
+  updateBeltActive();
+  updateProgress();
+  saveState();
+
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({top:0, behavior: reduceMotion ? "auto" : "smooth"});
+
+  applyAllBgs();
+}
+function startMission(){
+  const hasProgress = (state.score>0 || anyCompleted());
+  if(!state.missionStarted){
+    state.missionStarted=true;
+    if(!hasProgress) addScore(10);
+  }
+  saveState();
+  nav.go("briefing");
+}
+
+/* =========================
+   Leaves
+========================= */
+function createLeaves(){
+  const container=document.getElementById("leaves");
+  const emojis=["🍃","🌿","🍂","☘️"];
+  for(let i=0;i<15;i++){
+    const leaf=document.createElement("span");
+    leaf.className="leaf";
+    leaf.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    leaf.style.left=(Math.random()*100)+"%";
+    leaf.style.animationDuration=(6+Math.random()*8)+"s";
+    leaf.style.animationDelay=(Math.random()*10)+"s";
+    leaf.style.fontSize=(1+Math.random())+"rem";
+    container.appendChild(leaf);
+  }
+}
+
+/* =========================
+   MISIÓN: locks + chips + botones
+========================= */
+function missionTasksDone(m){
+  const pack = state.tasks[m] || {};
+  return Object.values(pack).filter(Boolean).length;
+}
+function isMissionReady(m){
+  const pack = state.tasks[m] || {};
+  return Object.values(pack).every(Boolean);
+}
+function setChip(el, done){
+  if(!el) return;
+  el.textContent = done ? t("chip_done") : t("chip_pending");
+  el.classList.toggle("done", !!done);
+}
+function refreshMissionLocks(){
+  setChip(document.getElementById("causas-chip-veh"), state.tasks.causas.veh);
+  setChip(document.getElementById("causas-chip-q"), state.tasks.causas.quiz);
+  setChip(document.getElementById("causas-chip-m"), state.completed.causas);
+  const cProg = document.getElementById("causas-progress");
+  if(cProg) cProg.textContent = (currentLang==="en")
+    ? `Challenges: ${missionTasksDone("causas")}/2`
+    : `Retos: ${missionTasksDone("causas")}/2`;
+  const cBtn = document.getElementById("btn-complete-causas");
+  if(cBtn) cBtn.disabled = state.completed.causas ? true : !isMissionReady("causas");
+  if(state.completed.causas) setChip(document.getElementById("causas-chip-m"), true);
+
+  setChip(document.getElementById("cons-chip-seq"), state.tasks.consecuencias.seq);
+  setChip(document.getElementById("cons-chip-q"), state.tasks.consecuencias.quiz);
+  setChip(document.getElementById("cons-chip-m"), state.completed.consecuencias);
+  const eProg = document.getElementById("cons-progress");
+  if(eProg) eProg.textContent = (currentLang==="en")
+    ? `Challenges: ${missionTasksDone("consecuencias")}/2`
+    : `Retos: ${missionTasksDone("consecuencias")}/2`;
+  const eBtn = document.getElementById("btn-complete-cons");
+  if(eBtn) eBtn.disabled = state.completed.consecuencias ? true : !isMissionReady("consecuencias");
+  if(state.completed.consecuencias) setChip(document.getElementById("cons-chip-m"), true);
+
+  setChip(document.getElementById("sol-chip-commit"), state.tasks.soluciones.commit);
+  setChip(document.getElementById("sol-chip-q"), state.tasks.soluciones.quiz);
+  setChip(document.getElementById("sol-chip-m"), state.completed.soluciones);
+  const sProg = document.getElementById("sol-progress");
+  if(sProg) sProg.textContent = (currentLang==="en")
+    ? `Challenges: ${missionTasksDone("soluciones")}/2`
+    : `Retos: ${missionTasksDone("soluciones")}/2`;
+  const sBtn = document.getElementById("btn-complete-sol");
+  if(sBtn) sBtn.disabled = state.completed.soluciones ? true : !isMissionReady("soluciones");
+  if(state.completed.soluciones) setChip(document.getElementById("sol-chip-m"), true);
+}
+
+/* =========================
+   CAUSAS – Reto 1 (vehículos)
+========================= */
+const vehPick = {car:null,bus:null,metro:null};
+function clearVehMarks(){
+  document.querySelectorAll('.tiny-choice[data-veh]').forEach(b=>{
+    b.classList.remove("correct","wrong");
+  });
+}
+function resetVehUI(silent=false){
+  vehPick.car=vehPick.bus=vehPick.metro=null;
+  document.querySelectorAll('.tiny-choice[data-veh]').forEach(b=>b.classList.remove("selected","correct","wrong"));
+  if(!silent) showToast((currentLang==="en") ? "Reset!" : "¡Reiniciado!");
+}
+function updateVehSelected(){
+  document.querySelectorAll('.tiny-choice[data-veh]').forEach(b=>{
+    const v=b.getAttribute("data-veh");
+    const lvl=b.getAttribute("data-level");
+    b.classList.toggle("selected", vehPick[v]===lvl);
+  });
+}
+function checkVeh(){
+  if(state.tasks.causas.veh) { showToast((currentLang==="en") ? "Already done ✅" : "Ya está listo ✅"); return; }
+  const ans={car:"high",bus:"mid",metro:"low"};
+  clearVehMarks();
+  let ok=true;
+
+  ["car","bus","metro"].forEach(v=>{
+    const chosen=vehPick[v];
+    if(!chosen){ ok=false; return; }
+    const btn = document.querySelector(`.tiny-choice[data-veh="${v}"][data-level="${chosen}"]`);
+    if(chosen===ans[v]) btn && btn.classList.add("correct");
+    else { ok=false; btn && btn.classList.add("wrong"); }
+  });
+
+  if(ok){
+    state.tasks.causas.veh=true;
+    addScore(5);
+    showToast(t("t_correct"));
+    saveState();
+    refreshMissionLocks();
+  }else{
+    showToast(t("t_wrong"));
+  }
+}
+
+/* =========================
+   QUIZ
+========================= */
+function resetQuizUI(quizId, silent=false){
+  document.querySelectorAll(`.choice[data-quiz-id="${quizId}"]`).forEach(b=>{
+    b.classList.remove("selected","correct","wrong");
+  });
+  if(!silent) showToast((currentLang==="en") ? "Quiz reset!" : "¡Quiz reiniciado!");
+}
+function markQuizDone(quizId){
+  if(quizId==="causas-q") state.tasks.causas.quiz=true;
+  if(quizId==="cons-q") state.tasks.consecuencias.quiz=true;
+  if(quizId==="sol-q") state.tasks.soluciones.quiz=true;
+  addScore(5);
+  showToast(t("t_correct"));
+  saveState();
+  refreshMissionLocks();
+}
+
+/* =========================
+   CONSECUENCIAS – secuencia
+========================= */
+const seqState = { cons:{expected:1, done:false} };
+function updateSeqProgress(kind){
+  const box=document.getElementById(`seq-${kind}-progress`);
+  if(!box) return;
+  const expected = seqState[kind].expected;
+  const doneCount = Math.max(0, expected-1);
+  box.innerHTML = (currentLang==="en")
+    ? `Progress: <b>${doneCount}/4</b>`
+    : `Progreso: <b>${doneCount}/4</b>`;
+}
+function resetSeqUI(kind, silent=false){
+  seqState[kind].expected=1;
+  seqState[kind].done=false;
+  document.querySelectorAll(`.seq-card[data-seq="${kind}"]`).forEach(b=>{
+    b.classList.remove("done");
+    b.disabled=false;
+  });
+  updateSeqProgress(kind);
+  if(!silent) showToast((currentLang==="en") ? "Reset!" : "¡Reiniciado!");
+}
+function handleSeqTap(btn){
+  const kind=btn.getAttribute("data-seq");
+  if(state.tasks.consecuencias.seq) return;
+  const step=Number(btn.getAttribute("data-step"));
+  const expected=seqState[kind].expected;
+
+  if(step===expected){
+    btn.classList.add("done");
+    btn.disabled=true;
+    seqState[kind].expected++;
+    updateSeqProgress(kind);
+
+    if(seqState[kind].expected===5){
+      state.tasks.consecuencias.seq=true;
+      addScore(5);
+      showToast(t("t_correct"));
+      saveState();
+      refreshMissionLocks();
+    }
+  }else{
+    showToast(t("t_wrong"));
+    resetSeqUI(kind, true);
+  }
+}
+
+/* =========================
+   SOLUCIONES – compromisos
+========================= */
+const commitsPicked = new Set();
+function refreshCommitCounter(){
+  const el=document.getElementById("commit-counter");
+  if(!el) return;
+  const n=commitsPicked.size;
+  el.textContent = (currentLang==="en") ? `Selected: ${n}/3` : `Seleccionadas: ${n}/3`;
+}
+function resetCommitUI(silent=false){
+  commitsPicked.clear();
+  document.querySelectorAll(".commit-card").forEach(b=>{
+    b.classList.remove("selected");
+  });
+  refreshCommitCounter();
+  if(!silent) showToast((currentLang==="en") ? "Reset!" : "¡Reiniciado!");
+}
+function saveCommits(){
+  if(state.tasks.soluciones.commit){ showToast((currentLang==="en") ? "Already saved ✅" : "Ya guardado ✅"); return; }
+  if(commitsPicked.size!==3){
+    showToast(t("t_pick_3"));
+    return;
+  }
+  state.tasks.soluciones.commit=true;
+  addScore(5);
+  showToast(t("t_saved"));
+  saveState();
+  refreshMissionLocks();
+  document.querySelectorAll(".commit-card").forEach(b=>{
+    if(commitsPicked.has(b.getAttribute("data-commit"))){
+      b.classList.add("done");
+    }
+  });
+}
+
+/* =========================
+   Completar misiones
+========================= */
+function completeMission(key){
+  if(state.completed[key]) return;
+
+  if(key==="causas" && !isMissionReady("causas")){ showToast(t("t_need_challenges")); return; }
+  if(key==="consecuencias" && !isMissionReady("consecuencias")){ showToast(t("t_need_challenges")); return; }
+  if(key==="soluciones" && !isMissionReady("soluciones")){ showToast(t("t_need_challenges")); return; }
+
+  state.completed[key]=true;
+  addScore(20);
+  updateProgress();
+  refreshCommandMenuBadges();
+  refreshPlanLock();
+  const wasLocked=!prevPlanUnlocked;
+  updatePlanVisibility();
+  saveState();
+
+  if(isPlanUnlocked() && wasLocked){
+    showToast(t("t_plan_unlocked"));
+  }
+  nav.go("command");
+}
+
+/* =========================
+   Tema + idioma
+========================= */
+function loadPrefs(){
+  const sLang = safeGet(localStorage, PREF_LANG_KEY);
+  const sTheme = safeGet(localStorage, PREF_THEME_KEY);
+  currentLang = (sLang==="en" || sLang==="es") ? sLang : "es";
+  currentTheme = (sTheme==="dark" || sTheme==="light") ? sTheme : "light";
+  document.body.classList.toggle("dark", currentTheme==="dark");
+}
+function updateUtilityLabels(){
+  const langBtn=document.getElementById("btn-lang");
+  const themeBtn=document.getElementById("btn-theme");
+  if(langBtn) langBtn.textContent = (currentLang==="en") ? "🌎 EN" : "🌎 ES";
+  if(themeBtn){
+    themeBtn.textContent = (currentTheme==="dark")
+      ? ((currentLang==="en") ? "☀️ Day" : "☀️ Día")
+      : ((currentLang==="en") ? "🌙 Night" : "🌙 Noche");
+  }
+}
+function toggleTheme(){
+  currentTheme = (currentTheme==="dark") ? "light" : "dark";
+  document.body.classList.toggle("dark", currentTheme==="dark");
+  safeSet(localStorage, PREF_THEME_KEY, currentTheme);
+  updateUtilityLabels();
+  applyAllBgs();
+}
+function toggleLang(){
+  currentLang = (currentLang==="es") ? "en" : "es";
+  safeSet(localStorage, PREF_LANG_KEY, currentLang);
+  applyI18n();
+  refreshPlanLock();
+  applyAllBgs();
+}
+
+/* =========================
+   Eventos
+========================= */
+function wireButtons(){
+  const unlock=()=>{
+    initAudio();
+    document.removeEventListener("pointerdown", unlock);
+    document.removeEventListener("keydown", unlock);
+  };
+  document.addEventListener("pointerdown", unlock, {passive:true});
+  document.addEventListener("keydown", unlock);
+
+  document.getElementById("btn-theme").addEventListener("click", ()=>{ initAudio(); toggleTheme(); });
+  document.getElementById("btn-lang").addEventListener("click", ()=>{ initAudio(); toggleLang(); });
+
+  document.getElementById("btn-close-intro").addEventListener("click", ()=>{ initAudio(); closeIntroToHome(); });
+  document.getElementById("intro-scene").addEventListener("click",(e)=>{
+    if(e.target.id==="intro-scene"){ initAudio(); closeIntroToHome(); }
+  });
+
+  document.getElementById("btn-start-mission").addEventListener("click", ()=>startMission());
+  document.getElementById("btn-briefing-next").addEventListener("click", ()=>nav.go("alert"));
+  document.getElementById("btn-alert-next").addEventListener("click", ()=>nav.go("vision"));
+  document.getElementById("btn-vision-next").addEventListener("click", ()=>nav.go("command"));
+
+  document.getElementById("btn-complete-plan").addEventListener("click", ()=>{
+    if(state.completed.plan) return;
+    state.completed.plan=true;
+    addScore(40);
+    updateProgress();
+    refreshCommandMenuBadges();
+    refreshPlanLock();
+    saveState();
+    nav.go("cierre");
+  });
+
+  document.addEventListener("click",(e)=>{
+    const resetBtn=e.target.closest('[data-action="reset"]');
+    if(resetBtn){ e.preventDefault(); e.stopPropagation(); resetApp(); return; }
+
+    const infoBtn=e.target.closest('[data-action="info-belt"]');
+    if(infoBtn){ e.preventDefault(); e.stopPropagation(); showToast(t("t_info_belt")); return; }
+
+    const tiny=e.target.closest(".tiny-choice[data-veh]");
+    if(tiny){
+      e.preventDefault(); e.stopPropagation();
+      if(state.tasks.causas.veh) return;
+      const v=tiny.getAttribute("data-veh");
+      const lvl=tiny.getAttribute("data-level");
+      vehPick[v]=lvl;
+      updateVehSelected();
+      return;
+    }
+
+    const act=e.target.closest("[data-action]");
+    if(act){
+      const a=act.getAttribute("data-action");
+      if(a==="check-veh"){ e.preventDefault(); e.stopPropagation(); checkVeh(); return; }
+      if(a==="reset-veh"){ e.preventDefault(); e.stopPropagation(); resetVehUI(); return; }
+      if(a==="reset-seq-cons"){ e.preventDefault(); e.stopPropagation(); resetSeqUI("cons"); return; }
+      if(a==="save-commit"){ e.preventDefault(); e.stopPropagation(); saveCommits(); return; }
+      if(a==="reset-commit"){ e.preventDefault(); e.stopPropagation(); resetCommitUI(); return; }
+    }
+
+    const seqCard=e.target.closest(".seq-card[data-seq]");
+    if(seqCard){
+      e.preventDefault(); e.stopPropagation();
+      handleSeqTap(seqCard);
+      return;
+    }
+
+    const commitCard=e.target.closest(".commit-card[data-commit]");
+    if(commitCard){
+      e.preventDefault(); e.stopPropagation();
+      if(state.tasks.soluciones.commit) return;
+      const id=commitCard.getAttribute("data-commit");
+      if(commitsPicked.has(id)){ commitsPicked.delete(id); }
+      else{
+        if(commitsPicked.size>=3){ showToast(t("t_pick_3")); return; }
+        commitsPicked.add(id);
+      }
+      commitCard.classList.toggle("selected", commitsPicked.has(id));
+      refreshCommitCounter();
+      return;
+    }
+
+    const choice=e.target.closest(".choice[data-quiz-id]");
+    if(choice){
+      e.preventDefault(); e.stopPropagation();
+      const quizId=choice.getAttribute("data-quiz-id");
+
+      if((quizId==="causas-q" && state.tasks.causas.quiz) ||
+         (quizId==="cons-q" && state.tasks.consecuencias.quiz) ||
+         (quizId==="sol-q" && state.tasks.soluciones.quiz)){
+        showToast((currentLang==="en") ? "Already done ✅" : "Ya está listo ✅");
+        return;
+      }
+
+      document.querySelectorAll(`.choice[data-quiz-id="${quizId}"]`).forEach(b=>{
+        b.classList.remove("selected","correct","wrong");
+      });
+      choice.classList.add("selected");
+      const isCorrect = choice.hasAttribute("data-correct");
+      if(isCorrect){
+        choice.classList.add("correct");
+        markQuizDone(quizId);
+      }else{
+        choice.classList.add("wrong");
+        showToast(t("t_wrong"));
+      }
+      return;
+    }
+
+    const completeBtn=e.target.closest("[data-complete]");
+    if(completeBtn){
+      e.preventDefault(); e.stopPropagation();
+      const key=completeBtn.getAttribute("data-complete");
+      completeMission(key);
+      return;
+    }
+
+    const goBtn=e.target.closest("[data-go]");
+    if(goBtn){ e.preventDefault(); e.stopPropagation(); nav.go(goBtn.getAttribute("data-go")); return; }
+
+    const beltBtn=e.target.closest("[data-belt]");
+    if(beltBtn){ e.preventDefault(); e.stopPropagation(); nav.go(beltBtn.getAttribute("data-belt")); return; }
+  });
+
+  window.addEventListener("hashchange", ()=>{
+    const h=(location.hash||"").replace("#","").trim();
+    if(!h) return;
+    let target=h; try{ target=decodeURIComponent(h); }catch(e){}
+    nav.go(target,{updateHash:false});
+  });
+}
+
+/* =========================
+   INIT
+========================= */
+window.addEventListener("load", ()=>{
+  loadPrefs();
+  loadState();
+
+  document.getElementById("score-value").textContent = state.score;
+  prevPlanUnlocked = isPlanUnlocked();
+
+  createLeaves();
+  wireButtons();
+  applyAllBgs();
+  applyI18n();
+
+  if(state.tasks.causas.veh){
+    setChip(document.getElementById("causas-chip-veh"), true);
+  }
+  if(state.tasks.causas.quiz){
+    setChip(document.getElementById("causas-chip-q"), true);
+  }
+  if(state.tasks.consecuencias.seq){
+    setChip(document.getElementById("cons-chip-seq"), true);
+    document.querySelectorAll('.seq-card[data-seq="cons"]').forEach(b=>{
+      b.classList.add("done"); b.disabled=true;
+    });
+    seqState.cons.expected=5;
+    updateSeqProgress("cons");
+  }else{
+    updateSeqProgress("cons");
+  }
+  if(state.tasks.consecuencias.quiz){
+    setChip(document.getElementById("cons-chip-q"), true);
+  }
+  if(state.tasks.soluciones.commit){
+    setChip(document.getElementById("sol-chip-commit"), true);
+    document.querySelectorAll(".commit-card").forEach(b=>b.classList.add("done"));
+  }
+  if(state.tasks.soluciones.quiz){
+    setChip(document.getElementById("sol-chip-q"), true);
+  }
+
+  refreshMissionLocks();
+  refreshPlanLock();
+  updatePlanVisibility();
+
+  setTimeout(()=>document.getElementById("loading-screen").classList.add("hidden"),650);
+
+  if(!state.introClosed){
+    state.lastScreen="home";
+    nav.go("home",{updateHash:true});
+    document.getElementById("intro-scene").classList.remove("hidden");
+    document.getElementById("intro-scene").setAttribute("aria-hidden","false");
+    document.getElementById("belt").style.display="none";
+    updateProgress();
+    refreshCommandMenuBadges();
+    refreshPlanLock();
+    updatePlanVisibility();
+    return;
+  }
+
+  let hash=(location.hash||"").replace("#","").trim();
+  let hashScreen=hash ? decodeURIComponent(hash) : null;
+
+  if(hashScreen==="plan" && !isPlanUnlocked()){
+    hashScreen="command";
+    showToast(t("t_plan_locked"));
+    try{ history.replaceState(null,"",location.pathname+location.search+"#command"); }catch(e){ location.hash="#command"; }
+  }
+  if(hashScreen==="cierre" && !state.completed.plan){
+    hashScreen="command";
+    try{ history.replaceState(null,"",location.pathname+location.search+"#command"); }catch(e){ location.hash="#command"; }
+  }
+
+  if(hashScreen && document.getElementById(hashScreen)){
+    nav.go(hashScreen,{updateHash:false});
+  }else if(state.lastScreen && document.getElementById(state.lastScreen)){
+    nav.go(state.lastScreen,{updateHash:true});
+  }else{
+    nav.go("home",{updateHash:true});
+  }
+
+  document.getElementById("intro-scene").classList.add("hidden");
+  document.getElementById("intro-scene").setAttribute("aria-hidden","true");
+
+  setTopUIVisibility();
+  updateProgress();
+  refreshCommandMenuBadges();
+  refreshPlanLock();
+  updatePlanVisibility();
+  refreshMissionLocks();
+});
+</script>
+
 </body>
 </html>
