@@ -2,7 +2,7 @@
    Guardianes Climáticos — Rúbrica + explicación gamificación
    - Botón flotante siempre visible
    - Modal accesible (ESC, click afuera)
-   - Pensado para niños ~10 años (5°)
+   - Pensado para primaria (lenguaje simple)
    ========================================================= */
 
 (function () {
@@ -182,7 +182,7 @@
     overlay.innerHTML = `
       <div class="gc-rubrica-dialog" tabindex="-1">
         <div class="gc-rubrica-head">
-          <div class="gc-rubrica-title">🧩 Guía de juego + Rúbrica (10 años)</div>
+          <div class="gc-rubrica-title">🧩 Guía de juego + Rúbrica</div>
           <div class="gc-rubrica-actions">
             <button type="button" class="gc-rubrica-btn" data-gc-rubrica="print" aria-label="Imprimir">🖨️</button>
             <button type="button" class="gc-rubrica-btn" data-gc-rubrica="close" aria-label="Cerrar">✖️</button>
@@ -305,24 +305,71 @@
 
     function printRubrica() {
       try {
-        var content = overlay.querySelector('.gc-rubrica-body').innerHTML;
-        var w = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700');
-        if (!w) return;
+        var contentEl = overlay.querySelector('.gc-rubrica-body');
+        if (!contentEl) return;
+        var content = contentEl.innerHTML;
+
+        // Prefer printing via a hidden iframe (avoids popup blockers and is more consistent)
+        var iframe = document.createElement('iframe');
+        iframe.setAttribute('aria-hidden', 'true');
+        iframe.tabIndex = -1;
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        iframe.style.opacity = '0';
+        document.body.appendChild(iframe);
+
         var css = `
-          body{font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding:18px;}
-          h3{margin:12px 0 8px}
-          p,li{line-height:1.35}
-          .gc-rubrica-kids, .gc-rubrica-scorehint{border:1px solid #ddd;border-radius:12px;padding:12px;margin:10px 0}
-          table{border-collapse:collapse;width:100%;font-size:12.5px}
-          th,td{border:1px solid #ddd;padding:8px;vertical-align:top}
-          th{background:#f7f7f7}
-          .gc-rubrica-table-wrap{border:none;overflow:visible}
+          @page{margin:14mm;}
+          body{font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; padding:0; color:#111;}
+          h3{margin:12px 0 8px;}
+          p,li{line-height:1.35;}
+          .gc-rubrica-kids, .gc-rubrica-scorehint{border:1px solid #ddd;border-radius:12px;padding:12px;margin:10px 0;}
+          table{border-collapse:collapse;width:100%;font-size:12.5px;}
+          th,td{border:1px solid #ddd;padding:8px;vertical-align:top;}
+          th{background:#f7f7f7;}
+          .gc-rubrica-table-wrap{border:none;overflow:visible;}
         `;
-        w.document.open();
-        w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Rúbrica — Guardianes Climáticos</title><style>${css}</style></head><body>${content}</body></html>`);
-        w.document.close();
-        w.focus();
-        w.print();
+
+        var doc = iframe.contentWindow && iframe.contentWindow.document;
+        if (!doc) {
+          iframe.remove();
+          return;
+        }
+        doc.open();
+        doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>Rúbrica — Guardianes Climáticos</title><style>${css}</style></head><body>${content}</body></html>`);
+        doc.close();
+
+        // Print (kept synchronous to preserve "user gesture" in most browsers)
+        var printed = false;
+        try {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+          printed = true;
+        } catch (e) {
+          printed = false;
+        }
+
+        // Fallback: popup window (in case iframe printing is blocked)
+        if (!printed) {
+          try {
+            var w = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700');
+            if (w) {
+              w.document.open();
+              w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Rúbrica — Guardianes Climáticos</title><style>${css}</style></head><body>${content}</body></html>`);
+              w.document.close();
+              w.focus();
+              w.print();
+            }
+          } catch (e2) {}
+        }
+
+        setTimeout(function () {
+          try { iframe.remove(); } catch (e3) {}
+        }, 900);
       } catch (e) {
         // Silent fail
       }
