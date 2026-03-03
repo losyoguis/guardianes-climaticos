@@ -1,2 +1,2 @@
-self.addEventListener('install',e=>{e.waitUntil(caches.open('g2035').then(c=>c.addAll(['index.html','js/rubrica.js'])))});
+self.addEventListener('install',e=>{e.waitUntil(caches.open('g2036').then(c=>c.addAll(['index.html','js/rubrica.js'])))});
 self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))})
