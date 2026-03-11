@@ -580,7 +580,25 @@
   </div>
 </div>
 
+
+<script>
+(function(){
+  function forceShowApp(){
+    var loader = document.getElementById('loading-screen');
+    if(loader) loader.classList.add('hidden');
+    if(!document.querySelector('.screen.active')){
+      var home = document.getElementById('home');
+      if(home) home.classList.add('active');
+    }
+  }
+  window.addEventListener('error', function(){ setTimeout(forceShowApp, 0); });
+  window.addEventListener('unhandledrejection', function(){ setTimeout(forceShowApp, 0); });
+  window.setTimeout(forceShowApp, 4500);
+})();
+</script>
+
 <script src="js/main.js"></script>
+
     <script src="js/pwa.js"></script>
 
 <!-- ✅ Botón siempre visible: Guía + Rúbrica (10 años) -->

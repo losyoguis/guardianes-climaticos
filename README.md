@@ -27,3 +27,8 @@ Versión depurada del proyecto PWA educativa.
 - El JavaScript principal se movió a `js/main.js`.
 - `js/app.js` queda solo como compatibilidad para rutas antiguas/redirecciones.
 
+
+
+## Ajuste de arranque (boot)
+- Se reforzó el inicio de la app para que no quede bloqueada en la pantalla de carga si falla un módulo secundario.
+- El Service Worker ahora prioriza red para HTML, CSS y JS, reduciendo el riesgo de versiones viejas en caché.
