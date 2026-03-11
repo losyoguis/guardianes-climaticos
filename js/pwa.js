@@ -50,7 +50,27 @@
 
   window.addEventListener('load', () => {
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('SW no registrado', err));
+      navigator.serviceWorker.getRegistrations()
+        .then(regs => Promise.all(regs.map(reg => reg.update().catch(()=>null))))
+        .catch(()=>null);
+
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(reg => {
+          reg.update().catch(()=>null);
+          if(reg.waiting){
+            reg.waiting.postMessage({ type:'SKIP_WAITING' });
+          }
+          reg.addEventListener('updatefound', () => {
+            const installing = reg.installing;
+            if(!installing) return;
+            installing.addEventListener('statechange', () => {
+              if(installing.state === 'installed' && navigator.serviceWorker.controller){
+                toast('La app se actualizó. Recarga si ves una versión anterior.');
+              }
+            });
+          });
+        })
+        .catch(err => console.warn('SW no registrado', err));
     }
     const isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     if(isiOS && !isStandalone){
