@@ -1,1 +1,77 @@
-{"name":"Guardianes Climáticos","short_name":"Guardianes","start_url":"index.html","display":"standalone","theme_color":"#00ffe7","background_color":"#020024"}
+{
+  "id": "./index.html",
+  "name": "Guardianes Climáticos de Medellín",
+  "short_name": "Guardianes",
+  "description": "App educativa gamificada para comprender causas, consecuencias y soluciones frente al cambio climático en Medellín.",
+  "lang": "es-CO",
+  "dir": "ltr",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "window-controls-overlay"
+  ],
+  "orientation": "portrait-primary",
+  "theme_color": "#1a5e2a",
+  "background_color": "#f4fff5",
+  "categories": [
+    "education",
+    "kids",
+    "games"
+  ],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Misiones",
+      "short_name": "Misiones",
+      "description": "Entrar a las misiones principales",
+      "url": "./index.html#command",
+      "icons": [
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Plan Guardián",
+      "short_name": "Plan",
+      "description": "Ir directo al Plan Guardián",
+      "url": "./index.html#plan",
+      "icons": [
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
