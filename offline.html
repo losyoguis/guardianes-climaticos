@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Sin conexión | Guardianes Climáticos</title>
+<meta name="theme-color" content="#1a5e2a" />
+<style>
+  :root{--verde:#1a5e2a;--verde2:#4CAF50;--fondo:#f4fff5;--texto:#14361d;--card:#ffffff;--borde:#d4ead9}
+  *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#effff2,#e1f8e6);color:var(--texto);display:grid;min-height:100svh;place-items:center;padding:24px}
+  .card{width:min(100%,560px);background:var(--card);border:1px solid var(--borde);border-radius:24px;padding:24px;box-shadow:0 20px 48px rgba(0,0,0,.08);text-align:center}
+  img{width:96px;height:96px;border-radius:24px;display:block;margin:0 auto 16px auto}
+  h1{margin:0 0 10px;font-size:clamp(1.5rem,4vw,2rem)}
+  p{margin:0 0 16px;line-height:1.5}
+  .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  button,a{appearance:none;border:none;background:var(--verde);color:#fff;padding:12px 18px;border-radius:999px;font-weight:700;text-decoration:none;cursor:pointer}
+  .ghost{background:#edf7ef;color:var(--verde);border:1px solid #cde6d2}
+</style>
+</head>
+<body>
+  <main class="card">
+    <img src="icons/icon-192.png" alt="Guardianes Climáticos" />
+    <h1>Estás sin conexión</h1>
+    <p>La app sigue funcionando con el contenido guardado en este dispositivo. Si alguna pantalla nueva no carga, vuelve al inicio o reintenta cuando tengas internet.</p>
+    <div class="actions">
+      <a href="./index.html">Ir al inicio</a>
+      <button class="ghost" onclick="location.reload()">Reintentar</button>
+    </div>
+  </main>
+</body>
+</html>
