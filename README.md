@@ -21,14 +21,8 @@ Versión depurada del proyecto PWA educativa.
 - Actualización del Service Worker para una caché más limpia.
 - Conservación de compatibilidad con enlaces heredados.
 
-## Versión modular
-- `index.html` quedó como punto de entrada principal.
-- El CSS principal se movió a `css/main.css`.
-- El JavaScript principal se movió a `js/main.js`.
-- `js/app.js` queda solo como compatibilidad para rutas antiguas/redirecciones.
 
-
-
-## Ajuste de arranque (boot)
-- Se reforzó el inicio de la app para que no quede bloqueada en la pantalla de carga si falla un módulo secundario.
-- El Service Worker ahora prioriza red para HTML, CSS y JS, reduciendo el riesgo de versiones viejas en caché.
+## Versión estable restaurada
+- Se conservó la arquitectura original de `index.html` para evitar daños visuales o de rutas.
+- Se agregó un fallback mínimo para que la pantalla de carga no quede bloqueada si ocurre un error.
+- Se actualizó la versión de caché del Service Worker para evitar que el navegador sirva recursos viejos.

@@ -1,11 +1,14 @@
-const CACHE_VERSION = "guardianes-v6-freshboot";
-const PRECACHE = [
+const CACHE_VERSION = "guardianes-v5-stable";
+const APP_SHELL = [
   "./",
+  "./index.html",
+  "./mapa.html",
   "./manifest.json",
   "./offline.html",
   "./service-worker.js",
-  "./js/pwa.js",
+  "./js/app.js",
   "./js/rubrica.js",
+  "./js/pwa.js",
   "./favicon.ico",
   "./icons/icon-180.png",
   "./icons/icon-192.png",
@@ -24,53 +27,19 @@ const PRECACHE = [
   "./assets/medellin_map.png"
 ];
 
-function networkFirst(request, fallback) {
-  return fetch(request)
-    .then(response => {
-      const copy = response.clone();
-      caches.open(CACHE_VERSION).then(cache => cache.put(request, copy));
-      return response;
-    })
-    .catch(async () => (await caches.match(request)) || (fallback ? await caches.match(fallback) : null));
-}
-
-function cacheFirst(request) {
-  return caches.match(request).then(cached => {
-    if(cached) return cached;
-    return fetch(request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE_VERSION).then(cache => cache.put(request, copy));
-      return response;
-    });
-  });
-}
-
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_VERSION)
-      .then(cache => cache.addAll(PRECACHE))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil(caches.open(CACHE_VERSION).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_VERSION).map(key => caches.delete(key))))
-      .then(() => self.clients.claim())
+    caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_VERSION).map(key => caches.delete(key)))).then(() => self.clients.claim())
   );
-});
-
-self.addEventListener("message", event => {
-  if(event.data && event.data.type === "SKIP_WAITING"){
-    self.skipWaiting();
-  }
 });
 
 self.addEventListener("fetch", event => {
   const req = event.request;
   if (req.method !== "GET") return;
-
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) {
     event.respondWith(fetch(req).catch(() => caches.match(req)));
@@ -78,21 +47,46 @@ self.addEventListener("fetch", event => {
   }
 
   if (req.mode === "navigate") {
-    event.respondWith(networkFirst(req, "./index.html"));
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then(cache => cache.put(req, copy));
+          return res;
+        })
+        .catch(async () => (await caches.match(req)) || (await caches.match("./index.html")) || (await caches.match("./offline.html")))
+    );
     return;
   }
 
-  if (["script","style","worker"].includes(req.destination)) {
-    event.respondWith(networkFirst(req));
+  if (["style","script","worker","font"].includes(req.destination)) {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE_VERSION).then(cache => cache.put(req, copy));
+          return res;
+        })
+        .catch(async () => (await caches.match(req)))
+    );
     return;
   }
 
-  if (["image","font"].includes(req.destination)) {
-    event.respondWith(cacheFirst(req));
+  if (req.destination === "image") {
+    event.respondWith(
+      caches.match(req).then(cached => {
+        const networkFetch = fetch(req)
+          .then(res => {
+            const copy = res.clone();
+            caches.open(CACHE_VERSION).then(cache => cache.put(req, copy));
+            return res;
+          })
+          .catch(() => cached);
+        return cached || networkFetch;
+      })
+    );
     return;
   }
 
-  event.respondWith(
-    fetch(req).catch(async () => (await caches.match(req)) || (await caches.match("./offline.html")))
-  );
+  event.respondWith(fetch(req).catch(() => caches.match(req)));
 });
