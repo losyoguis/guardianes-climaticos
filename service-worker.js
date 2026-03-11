@@ -1,4 +1,4 @@
-const CACHE_VERSION = "guardianes-v3-offline";
+const CACHE_VERSION = "guardianes-v4-clean";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,9 +6,9 @@ const APP_SHELL = [
   "./manifest.json",
   "./offline.html",
   "./service-worker.js",
+  "./js/app.js",
   "./js/rubrica.js",
   "./js/pwa.js",
-  "./css/style.css",
   "./favicon.ico",
   "./icons/icon-180.png",
   "./icons/icon-192.png",

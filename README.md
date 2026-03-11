@@ -1,3 +1,22 @@
-# Guardianes Climáticos – Medellín 2035
+# Guardianes Climáticos de Medellín
 
-Videojuego educativo futurista PWA.
+Versión depurada del proyecto PWA educativa.
+
+## Archivo principal
+- `index.html` → experiencia principal completa
+
+## Archivos activos
+- `manifest.json`
+- `service-worker.js`
+- `offline.html`
+- `js/pwa.js`
+- `js/rubrica.js`
+- `js/app.js` (compatibilidad para rutas heredadas)
+- `img/`
+- `icons/`
+
+## Ajustes realizados
+- Limpieza de archivos residuales y duplicados innecesarios.
+- Conversión de rutas antiguas en redirecciones seguras hacia `index.html`.
+- Actualización del Service Worker para una caché más limpia.
+- Conservación de compatibilidad con enlaces heredados.
