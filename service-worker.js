@@ -1,4 +1,4 @@
-const CACHE_VERSION = "guardianes-v4-clean";
+const CACHE_VERSION = "guardianes-v5-modular";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -6,6 +6,8 @@ const APP_SHELL = [
   "./manifest.json",
   "./offline.html",
   "./service-worker.js",
+  "./css/main.css",
+  "./js/main.js",
   "./js/app.js",
   "./js/rubrica.js",
   "./js/pwa.js",
@@ -23,7 +25,8 @@ const APP_SHELL = [
   "./img/causas.png",
   "./img/consecuencias.png",
   "./img/sol.png",
-  "./img/cierre.png"
+  "./img/cierre.png",
+  "./assets/medellin_map.png"
 ];
 
 self.addEventListener("install", event => {
