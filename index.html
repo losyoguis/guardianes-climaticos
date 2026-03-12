@@ -34,16 +34,16 @@
   --borde-comic:3px solid var(--stroke-strong);
 
   /* ✅ IMÁGENES */
-  --img-intro: url("./img/intro.png?v=gcfix7");
-  --img-map: url("./img/map.png?v=gcfix7");
-  --img-briefing: url("./img/briefing.png?v=gcfix7");
-  --img-alert: url("./img/alert.png?v=gcfix7");
-  --img-vision: url("./img/vision.png?v=gcfix7");
-  --img-command-menu: url("./img/command.png?v=gcfix7");
-  --img-causas: url("./img/causas.png?v=gcfix7");
-  --img-consecuencias: url("./img/consecuencias.png?v=gcfix7");
-  --img-sol: url("./img/sol.png?v=gcfix7");
-  --img-cierre: url("./img/cierre.png?v=gcfix7");
+  --img-intro: url("./img/intro.png?v=gcfix9");
+  --img-map: url("./img/map.png?v=gcfix9");
+  --img-briefing: url("./img/briefing.png?v=gcfix9");
+  --img-alert: url("./img/alert.png?v=gcfix9");
+  --img-vision: url("./img/vision.png?v=gcfix9");
+  --img-command-menu: url("./img/command.png?v=gcfix9");
+  --img-causas: url("./img/causas.png?v=gcfix9");
+  --img-consecuencias: url("./img/consecuencias.png?v=gcfix9");
+  --img-sol: url("./img/sol.png?v=gcfix9");
+  --img-cierre: url("./img/cierre.png?v=gcfix9");
 
   /* MOBILE SPACING (APP-LIKE) */
   --app-pad-x: 16px;
@@ -248,7 +248,7 @@ transition:width .5s ease;border-radius:0 3px 3px 0;box-shadow:0 0 10px var(--ve
   position:fixed;
   right:14px;
   bottom:calc(92px + env(safe-area-inset-bottom, 0px));
-  z-index:1300;
+  z-index:5000;
   display:flex;flex-direction:column;gap:10px;
 }
 .util-btn{
@@ -988,9 +988,9 @@ input,textarea,select,button{font:inherit}
 
 <!-- UTILIDADES: Idioma + Día/Noche + ✅ Audio explicativo por sección -->
 <div id="utility-dock" aria-label="Controles rápidos">
-  <button type="button" class="util-btn" id="btn-audio" aria-label="Audio de la sección">🔊</button>
-  <button type="button" class="util-btn" id="btn-lang" aria-label="Cambiar idioma">🌎 ES</button>
-  <button type="button" class="util-btn" id="btn-theme" aria-label="Cambiar modo día/noche">🌙</button>
+  <button type="button" class="util-btn" id="btn-audio" aria-label="Activar o silenciar audio" title="Activar o silenciar audio" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleAudio(event); } }catch(e){} return false;">🔊</button>
+  <button type="button" class="util-btn" id="btn-lang" aria-label="Cambiar idioma" title="Cambiar idioma" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleLang(event); } }catch(e){} return false;">🌎 ES</button>
+  <button type="button" class="util-btn" id="btn-theme" aria-label="Cambiar modo día/noche" title="Cambiar modo día/noche" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleTheme(event); } }catch(e){} return false;">🌙</button>
 </div>
 
 <div id="loading-screen">
@@ -1985,6 +1985,7 @@ const I18N = {
 
 const PREF_LANG_KEY="gcmed_lang_v1";
 const PREF_THEME_KEY="gcmed_theme_v1";
+const PREF_AUDIO_KEY="gcmed_audio_v1";
 
 let currentLang = "es";
 let currentTheme = "light";
@@ -2034,6 +2035,7 @@ function showToast(msg){
 let audioCtx=null;
 let audioUnlocked=false;
 function initAudio(){
+  if(!audioEnabled) return;
   if(audioUnlocked) return;
   try{
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
@@ -2042,7 +2044,7 @@ function initAudio(){
   }catch(e){ audioUnlocked=false; }
 }
 function playPointSound(amount=10){
-  if(!audioUnlocked || !audioCtx) return;
+  if(!audioEnabled || !audioUnlocked || !audioCtx) return;
   const now=audioCtx.currentTime;
   const base=520;
   const boost=Math.min(420, Math.max(0, amount*6));
@@ -2135,6 +2137,10 @@ function pickVoiceFor(langPrefix){
 
 function speakText(text){
   if(!text) return;
+  if(!audioEnabled){
+    showToast((currentLang==="en") ? "Audio is muted 🔇" : "El audio está silenciado 🔇");
+    return;
+  }
   if(!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined"){
     showToast(t("t_tts_not_supported"));
     return;
@@ -3711,22 +3717,38 @@ function completeMission(key){
 function loadPrefs(){
   const sLang = safeGet(localStorage, PREF_LANG_KEY);
   const sTheme = safeGet(localStorage, PREF_THEME_KEY);
+  const sAudio = safeGet(localStorage, PREF_AUDIO_KEY);
   currentLang = (sLang==="en" || sLang==="es") ? sLang : "es";
   currentTheme = (sTheme==="dark" || sTheme==="light") ? sTheme : "light";
+  audioEnabled = (sAudio===null) ? true : !(String(sAudio).toLowerCase()==="off" || String(sAudio).toLowerCase()==="false" || String(sAudio)==="0");
   document.body.classList.toggle("dark", currentTheme==="dark");
 }
 function updateUtilityLabels(){
   const langBtn=document.getElementById("btn-lang");
   const themeBtn=document.getElementById("btn-theme");
   const audioBtn=document.getElementById("btn-audio");
-  if(langBtn) langBtn.textContent = (currentLang==="en") ? "🌎 EN" : "🌎 ES";
+  if(langBtn){
+    langBtn.textContent = (currentLang==="en") ? "🌎 EN" : "🌎 ES";
+    langBtn.setAttribute("aria-label", (currentLang==="en") ? "Change language" : "Cambiar idioma");
+    langBtn.setAttribute("title", (currentLang==="en") ? "Change language" : "Cambiar idioma");
+  }
   if(themeBtn){
     themeBtn.textContent = (currentTheme==="dark")
       ? ((currentLang==="en") ? "☀️ Day" : "☀️ Día")
       : ((currentLang==="en") ? "🌙 Night" : "🌙 Noche");
+    themeBtn.setAttribute("aria-label", (currentLang==="en") ? "Toggle day and night mode" : "Cambiar modo día y noche");
+    themeBtn.setAttribute("title", (currentLang==="en") ? "Toggle day and night mode" : "Cambiar modo día y noche");
+    themeBtn.setAttribute("aria-pressed", currentTheme==="dark" ? "true" : "false");
   }
   if(audioBtn){
-    audioBtn.setAttribute("aria-label", (currentLang==="en") ? "Section audio" : "Audio de la sección");
+    audioBtn.textContent = audioEnabled ? "🔊" : "🔇";
+    audioBtn.setAttribute("aria-label", audioEnabled
+      ? ((currentLang==="en") ? "Mute audio" : "Silenciar audio")
+      : ((currentLang==="en") ? "Enable audio" : "Activar audio"));
+    audioBtn.setAttribute("title", audioEnabled
+      ? ((currentLang==="en") ? "Mute audio" : "Silenciar audio")
+      : ((currentLang==="en") ? "Enable audio" : "Activar audio"));
+    audioBtn.setAttribute("aria-pressed", audioEnabled ? "true" : "false");
   }
 }
 function toggleTheme(){
@@ -3735,6 +3757,10 @@ function toggleTheme(){
   safeSet(localStorage, PREF_THEME_KEY, currentTheme);
   updateUtilityLabels();
   applyAllBgs();
+  showToast((currentLang==="en")
+    ? (currentTheme==="dark" ? "Night mode activated 🌙" : "Day mode activated ☀️")
+    : (currentTheme==="dark" ? "Modo noche activado 🌙" : "Modo día activado ☀️"));
+  return false;
 }
 function toggleLang(){
   stopNarration();
@@ -3743,6 +3769,27 @@ function toggleLang(){
   applyI18n();
   refreshPlanLock();
   applyAllBgs();
+  showToast((currentLang==="en") ? "Language changed to English 🌎" : "Idioma cambiado a Español 🌎");
+  return false;
+}
+
+function toggleAudio(){
+  if(audioEnabled){
+    audioEnabled = false;
+    stopNarration();
+    safeSet(localStorage, PREF_AUDIO_KEY, "off");
+    updateUtilityLabels();
+    showToast((currentLang==="en") ? "Audio muted 🔇" : "Audio silenciado 🔇");
+    return false;
+  }
+  audioEnabled = true;
+  safeSet(localStorage, PREF_AUDIO_KEY, "on");
+  audioUnlocked = false;
+  initAudio();
+  updateUtilityLabels();
+  showToast((currentLang==="en") ? "Audio enabled 🔊" : "Audio activado 🔊");
+  try{ playSectionNarration(nav && nav.current ? nav.current : "home"); }catch(e){}
+  return false;
 }
 
 /* Events */
@@ -3759,11 +3806,7 @@ function wireButtons(){
   document.getElementById("btn-lang").addEventListener("click", ()=>{ initAudio(); toggleLang(); });
 
   document.getElementById("btn-audio").addEventListener("click", ()=>{
-    if(("speechSynthesis" in window) && window.speechSynthesis.speaking){
-      stopNarration();
-      return;
-    }
-    playSectionNarration(nav.current);
+    toggleAudio();
   });
 
   document.getElementById("btn-close-intro").addEventListener("click", ()=>{ initAudio(); closeIntroToHome(); });
@@ -3995,8 +4038,36 @@ window.addEventListener("load", ()=>{
 </script>
 
 <script>
+window.GCQuick = {
+  toggleAudio: function(ev){
+    try{
+      if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+      if(typeof toggleAudio === "function") return toggleAudio();
+    }catch(err){ console.warn("[GC quick] toggleAudio", err); }
+    return false;
+  },
+  toggleLang: function(ev){
+    try{
+      if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+      if(typeof initAudio === "function") initAudio();
+      if(typeof toggleLang === "function") return toggleLang();
+    }catch(err){ console.warn("[GC quick] toggleLang", err); }
+    return false;
+  },
+  toggleTheme: function(ev){
+    try{
+      if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+      if(typeof initAudio === "function") initAudio();
+      if(typeof toggleTheme === "function") return toggleTheme();
+    }catch(err){ console.warn("[GC quick] toggleTheme", err); }
+    return false;
+  }
+};
+</script>
+
+<script>
 (function(){
-  const BUILD = 'gcfix7';
+  const BUILD = 'gcfix9';
   const BG = {
     intro: './img/intro.png?v=' + BUILD,
     briefing: './img/briefing.png?v=' + BUILD,
