@@ -1183,22 +1183,22 @@ input,textarea,select,button{font:inherit}
           <div class="drag-sim" data-drag-veh="bus">
             <div class="drag-instruction" data-i18n="drag_bus_hint">🫳 Arrastra o toca para mover el bus hacia el nivel correcto.</div>
             <div class="drag-guide">
-              <button type="button" class="drag-arrow left" data-drag-step="-1" aria-label="Mover bus a la izquierda" title="Mover bus a la izquierda">⬅️</button>
-              <div class="drag-track" data-drag-track="bus" aria-hidden="false">
+              <button type="button" class="drag-arrow left" data-drag-step="-1" aria-label="Mover bus a la izquierda" title="Mover bus a la izquierda" onclick="return window.GCBusInlineStep(-1,event)">⬅️</button>
+              <div class="drag-track" data-drag-track="bus" aria-hidden="false" onclick="return window.GCBusInlineTrack(event)">
                 <div class="drag-lane-label" data-i18n="drag_bus_lane">↔️ Desliza aquí</div>
                 <div class="drag-hand" aria-hidden="true">🫳</div>
-                <button type="button" class="drag-lane" data-veh="bus" data-level="low">
+                <button type="button" class="drag-lane" data-veh="bus" data-level="low" onclick="return window.GCBusInlineSet('low',event)">
                   <span data-i18n="lvl_low">Baja</span>
                 </button>
-                <button type="button" class="drag-lane" data-veh="bus" data-level="mid">
+                <button type="button" class="drag-lane" data-veh="bus" data-level="mid" onclick="return window.GCBusInlineSet('mid',event)">
                   <span data-i18n="lvl_mid">Media</span>
                 </button>
-                <button type="button" class="drag-lane" data-veh="bus" data-level="high">
+                <button type="button" class="drag-lane" data-veh="bus" data-level="high" onclick="return window.GCBusInlineSet('high',event)">
                   <span data-i18n="lvl_high">Alta</span>
                 </button>
-                <button type="button" class="drag-bus" data-drag-bus="bus" role="slider" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="3" aria-valuenow="0" aria-label="Arrastra el bus hacia Baja, Media o Alta">🚌</button>
+                <button type="button" class="drag-bus" data-drag-bus="bus" role="slider" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="3" aria-valuenow="0" aria-label="Arrastra el bus hacia Baja, Media o Alta" onclick="return window.GCBusInlineStep(1,event)">🚌</button>
               </div>
-              <button type="button" class="drag-arrow right" data-drag-step="1" aria-label="Mover bus a la derecha" title="Mover bus a la derecha">➡️</button>
+              <button type="button" class="drag-arrow right" data-drag-step="1" aria-label="Mover bus a la derecha" title="Mover bus a la derecha" onclick="return window.GCBusInlineStep(1,event)">➡️</button>
             </div>
             <div class="drag-auto-hint" data-auto-hint="bus" aria-live="polite"></div>
           </div>
@@ -3286,6 +3286,7 @@ function initBusDragSimulation(){
   });
 
   bus.addEventListener("click", (e)=>{
+    if(e.defaultPrevented) return;
     if(state.tasks.causas.veh) return;
     setBusGuideVisibility(true);
     shiftBusLevel(1, true);
@@ -3293,6 +3294,7 @@ function initBusDragSimulation(){
   });
 
   track.addEventListener("click", (e)=>{
+    if(e.defaultPrevented) return;
     if(state.tasks.causas.veh) return;
     if(e.target && e.target.closest && e.target.closest('.drag-lane[data-veh="bus"], .drag-bus, .drag-arrow')) return;
     const level=getNearestBusLevel(typeof e.clientX==="number" ? e.clientX : (track.getBoundingClientRect().left + (track.clientWidth/2)));
@@ -3307,6 +3309,7 @@ function initBusDragSimulation(){
     arrow.dataset.busArrowReady="1";
     const dir=Number(arrow.getAttribute('data-drag-step') || '1');
     const move=(e)=>{
+      if(e && e.defaultPrevented) return;
       if(state.tasks.causas.veh) return;
       setBusGuideVisibility(true);
       shiftBusLevel(dir, true);
@@ -3320,7 +3323,8 @@ function initBusDragSimulation(){
   });
 
   track.querySelectorAll('.drag-lane[data-veh="bus"]').forEach(lane=>{
-    lane.addEventListener("click", ()=>{
+    lane.addEventListener("click", (e)=>{
+      if(e.defaultPrevented) return;
       if(state.tasks.causas.veh) return;
       setBusGuideVisibility(true);
       setBusLevel(lane.getAttribute("data-level"), true);
@@ -3372,6 +3376,59 @@ function updateVehSelected(){
   });
   syncBusDragUI();
 }
+window.GCBusInlineSet=function(level,e){
+  try{
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    if(state && state.tasks && state.tasks.causas && state.tasks.causas.veh){
+      showToast((currentLang==="en") ? "Already done ✅" : "Ya está listo ✅");
+      return false;
+    }
+    setBusGuideVisibility(true);
+    setBusLevel(level, true);
+    return false;
+  }catch(err){
+    console.error("[GC bus inline set]", err);
+    try{ vehPick.bus=level; updateVehSelected(); }catch(_e){}
+    return false;
+  }
+};
+window.GCBusInlineStep=function(dir,e){
+  try{
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    if(state && state.tasks && state.tasks.causas && state.tasks.causas.veh){
+      showToast((currentLang==="en") ? "Already done ✅" : "Ya está listo ✅");
+      return false;
+    }
+    setBusGuideVisibility(true);
+    shiftBusLevel(Number(dir)||1, true);
+    return false;
+  }catch(err){
+    console.error("[GC bus inline step]", err);
+    try{ shiftBusLevel(Number(dir)||1, false); }catch(_e){}
+    return false;
+  }
+};
+window.GCBusInlineTrack=function(e){
+  try{
+    if(e && e.target && e.target.closest && e.target.closest('.drag-lane[data-veh="bus"], .drag-bus, .drag-arrow')) return false;
+    if(state && state.tasks && state.tasks.causas && state.tasks.causas.veh){
+      showToast((currentLang==="en") ? "Already done ✅" : "Ya está listo ✅");
+      return false;
+    }
+    const track=getDragTrack("bus");
+    if(!track) return false;
+    const x=(e && typeof e.clientX==="number") ? e.clientX : (track.getBoundingClientRect().left + (track.clientWidth/2));
+    const level=getNearestBusLevel(x) || "mid";
+    setBusGuideVisibility(true);
+    setBusLevel(level, true);
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    return false;
+  }catch(err){
+    console.error("[GC bus inline track]", err);
+    return false;
+  }
+};
+
 function checkVeh(){
   if(state.tasks.causas.veh) { showToast((currentLang==="en") ? "Already done ✅" : "Ya está listo ✅"); return; }
   const ans={car:"high",bus:"mid",metro:"low"};
