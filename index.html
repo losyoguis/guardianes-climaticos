@@ -488,6 +488,9 @@ cursor:pointer;box-shadow:0 12px 0 rgba(0,0,0,.28);backdrop-filter: blur(10px);t
 .drag-instruction{font-size:.92rem;font-weight:800;color:rgba(0,0,0,.7)}
 .drag-guide{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center}
 .drag-arrow{
+  position:relative;
+  z-index:6;
+  pointer-events:auto;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -562,6 +565,9 @@ cursor:pointer;box-shadow:0 12px 0 rgba(0,0,0,.28);backdrop-filter: blur(10px);t
 .drag-sim.guide-hidden .drag-lane-label{opacity:.18}
 .drag-sim.guide-hidden .drag-hand{animation:none}
 .drag-lane{
+  position:relative;
+  z-index:5;
+  pointer-events:auto;
   min-height:56px;
   border:2px solid rgba(0,0,0,.15);
   border-radius:14px;
@@ -577,6 +583,7 @@ cursor:pointer;box-shadow:0 12px 0 rgba(0,0,0,.28);backdrop-filter: blur(10px);t
 .drag-lane.wrong{border-color:rgba(239,83,80,.95); background:rgba(255,235,238,.92)}
 .drag-bus{
   position:absolute;
+  pointer-events:auto;
   top:10px;
   left:8px;
   width:66px;
@@ -3429,6 +3436,115 @@ window.GCBusInlineTrack=function(e){
   }
 };
 
+
+let gcBusActionTs=0;
+function gcBusBlockRepeat(){
+  const now=Date.now();
+  if(now-gcBusActionTs<140) return true;
+  gcBusActionTs=now;
+  return false;
+}
+function gcBusHardStop(e){
+  if(!e) return;
+  try{ if(e.cancelable) e.preventDefault(); }catch(_e){}
+  try{ e.stopPropagation(); }catch(_e){}
+  try{ if(e.stopImmediatePropagation) e.stopImmediatePropagation(); }catch(_e){}
+}
+function gcBusApplyUI(level){
+  try{
+    vehPick.bus=level;
+    document.querySelectorAll('.drag-lane[data-veh="bus"]').forEach(l=>{
+      l.classList.toggle('selected', l.getAttribute('data-level')===level);
+      l.classList.remove('preview');
+    });
+    const track=getDragTrack('bus');
+    const bus=getDragBus('bus');
+    if(track && bus){
+      const lane=track.querySelector(`.drag-lane[data-veh="bus"][data-level="${level}"]`);
+      let left=8;
+      if(lane){
+        left = lane.offsetLeft + Math.max(0,(lane.offsetWidth-bus.offsetWidth)/2);
+      }else{
+        const map={low:.08,mid:.38,high:.70};
+        left=Math.max(8, (track.clientWidth-bus.offsetWidth)*(map[level] ?? .38));
+      }
+      bus.style.left=`${left}px`;
+      bus.classList.remove('dragging');
+      bus.classList.toggle('idle', !level);
+    }
+    try{ syncBusAria(level); }catch(_e){}
+  }catch(err){ console.error('[GC bus apply ui]', err); }
+}
+function gcBusReliableSet(level, announce=true){
+  if(state && state.tasks && state.tasks.causas && state.tasks.causas.veh){
+    showToast((currentLang==='en') ? 'Already done ✅' : 'Ya está listo ✅');
+    return false;
+  }
+  setBusGuideVisibility(true);
+  hideBusAutoHint();
+  gcBusApplyUI(level);
+  if(announce){
+    showToast((currentLang==='en') ? `Bus moved to ${laneText(level)}.` : `Bus movido a ${laneText(level)}.`);
+  }
+  return false;
+}
+function gcBusReliableStep(dir=1, announce=true){
+  const levels=['low','mid','high'];
+  let idx=levels.indexOf(vehPick.bus||'');
+  if(idx<0) idx = dir >= 0 ? -1 : levels.length;
+  idx = Math.max(0, Math.min(levels.length-1, idx + (dir >= 0 ? 1 : -1)));
+  return gcBusReliableSet(levels[idx], announce);
+}
+function gcBusReliableTrack(clientX, announce=true){
+  const track=getDragTrack('bus');
+  if(!track) return false;
+  const rect=track.getBoundingClientRect();
+  const x=(typeof clientX==='number') ? clientX : (rect.left + rect.width/2);
+  const level=getNearestBusLevel(x) || 'mid';
+  return gcBusReliableSet(level, announce);
+}
+window.GCBusInlineSet=function(level,e){ gcBusHardStop(e); return gcBusReliableSet(level,true); };
+window.GCBusInlineStep=function(dir,e){ gcBusHardStop(e); return gcBusReliableStep(Number(dir)||1,true); };
+window.GCBusInlineTrack=function(e){
+  if(e && e.target && e.target.closest && e.target.closest('.drag-lane[data-veh="bus"], .drag-bus, .drag-arrow')) return false;
+  gcBusHardStop(e);
+  return gcBusReliableTrack(e && typeof e.clientX==='number' ? e.clientX : null, true);
+};
+function bindReliableBusControls(){
+  const track=getDragTrack('bus');
+  const bus=getDragBus('bus');
+  if(!track || !bus || track.dataset.gcReliableBound==='1') return;
+  track.dataset.gcReliableBound='1';
+  const left=document.querySelector('.drag-arrow.left[data-drag-step="-1"]');
+  const right=document.querySelector('.drag-arrow.right[data-drag-step="1"]');
+  const bindAction=(el, fn)=>{
+    if(!el) return;
+    el.addEventListener('pointerdown', (e)=>{
+      if(gcBusBlockRepeat()) { gcBusHardStop(e); return; }
+      gcBusHardStop(e);
+      fn(e);
+    }, true);
+    el.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' ' || e.key==='Spacebar'){
+        gcBusHardStop(e);
+        fn(e);
+      }
+    }, true);
+  };
+  bindAction(left, ()=>gcBusReliableStep(-1,true));
+  bindAction(right, ()=>gcBusReliableStep(1,true));
+  track.querySelectorAll('.drag-lane[data-veh="bus"]').forEach(lane=>{
+    bindAction(lane, ()=>gcBusReliableSet(lane.getAttribute('data-level'), true));
+  });
+  bindAction(bus, ()=>gcBusReliableStep(1,true));
+  track.addEventListener('pointerdown', (e)=>{
+    if(e.target && e.target.closest && e.target.closest('.drag-lane[data-veh="bus"], .drag-bus, .drag-arrow')) return;
+    if(gcBusBlockRepeat()) { gcBusHardStop(e); return; }
+    gcBusHardStop(e);
+    gcBusReliableTrack(typeof e.clientX==='number' ? e.clientX : null, true);
+  }, true);
+}
+
 function checkVeh(){
   if(state.tasks.causas.veh) { showToast((currentLang==="en") ? "Already done ✅" : "Ya está listo ✅"); return; }
   const ans={car:"high",bus:"mid",metro:"low"};
@@ -4092,6 +4208,7 @@ window.addEventListener("load", ()=>{
   safeStep("wirePlanInputs", wirePlanInputs);
   safeStep("syncPlanFormFromState", ()=>syncPlanFormFromState(true));
   safeStep("initBusDragSimulation", initBusDragSimulation);
+  safeStep("bindReliableBusControls", bindReliableBusControls);
   safeStep("resizeHook", ()=>window.addEventListener("resize", ()=>{ try{ syncBusDragUI(); }catch(_e){} }));
   safeStep("bindSeqDnD", ()=>bindSeqDnD("cons"));
   safeStep("bindCommitDnD", bindCommitDnD);
