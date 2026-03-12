@@ -1,4 +1,4 @@
-const CACHE_VERSION = "guardianes-v5-stable";
+const CACHE_VERSION = "guardianes-v6-recovery";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -28,7 +28,12 @@ const APP_SHELL = [
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_VERSION).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE_VERSION)
+      .then(cache => cache.addAll(APP_SHELL))
+      .catch(() => Promise.resolve())
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", event => {
@@ -41,52 +46,26 @@ self.addEventListener("fetch", event => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+
   if (url.origin !== self.location.origin) {
     event.respondWith(fetch(req).catch(() => caches.match(req)));
     return;
   }
 
-  if (req.mode === "navigate") {
-    event.respondWith(
-      fetch(req)
-        .then(res => {
-          const copy = res.clone();
-          caches.open(CACHE_VERSION).then(cache => cache.put(req, copy));
-          return res;
-        })
-        .catch(async () => (await caches.match(req)) || (await caches.match("./index.html")) || (await caches.match("./offline.html")))
-    );
-    return;
-  }
-
-  if (["style","script","worker","font"].includes(req.destination)) {
-    event.respondWith(
-      fetch(req)
-        .then(res => {
-          const copy = res.clone();
-          caches.open(CACHE_VERSION).then(cache => cache.put(req, copy));
-          return res;
-        })
-        .catch(async () => (await caches.match(req)))
-    );
-    return;
-  }
-
-  if (req.destination === "image") {
-    event.respondWith(
-      caches.match(req).then(cached => {
-        const networkFetch = fetch(req)
-          .then(res => {
-            const copy = res.clone();
-            caches.open(CACHE_VERSION).then(cache => cache.put(req, copy));
-            return res;
-          })
-          .catch(() => cached);
-        return cached || networkFetch;
-      })
-    );
-    return;
-  }
-
-  event.respondWith(fetch(req).catch(() => caches.match(req)));
+  event.respondWith((async () => {
+    try {
+      const network = await fetch(req);
+      const copy = network.clone();
+      const cache = await caches.open(CACHE_VERSION);
+      cache.put(req, copy).catch(() => {});
+      return network;
+    } catch (err) {
+      const cached = await caches.match(req);
+      if (cached) return cached;
+      if (req.mode === "navigate") {
+        return (await caches.match("./index.html")) || (await caches.match("./offline.html"));
+      }
+      throw err;
+    }
+  })());
 });

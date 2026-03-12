@@ -160,6 +160,15 @@ border:2px solid rgba(0,0,0,.2);font-size:.85rem;box-shadow:0 6px 0 rgba(0,0,0,.
 .scene-body{position:relative;aspect-ratio: 16/9;background:#0b1f14;overflow:hidden}
 .scene-body .img{width:100%;height:100%;background:center/cover no-repeat;transform:scale(1.06);
 animation:kenburns 9s ease-in-out infinite alternate;filter:saturate(1.05) contrast(1.05)}
+/* Fallback visual directo para imágenes críticas aunque falle JS */
+[data-bg="--img-intro"]{background-image:var(--img-intro)}
+[data-bg="--img-briefing"]{background-image:var(--img-briefing)}
+[data-bg="--img-alert"]{background-image:var(--img-alert)}
+[data-bg="--img-vision"]{background-image:var(--img-vision)}
+[data-bg="--img-command-menu"]{background-image:var(--img-command-menu)}
+[data-bg="--img-causas"]{background-image:var(--img-causas)}
+[data-bg="--img-consecuencias"]{background-image:var(--img-consecuencias)}
+[data-bg="--img-sol"]{background-image:var(--img-sol)}
 @keyframes kenburns{0%{transform:scale(1.06) translate3d(-1%, -1%, 0)}100%{transform:scale(1.12) translate3d(1%, 1%, 0)}}
 .scene-scanlines{position:absolute;inset:0;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.05) 0px,rgba(255,255,255,.05) 1px,rgba(0,0,0,0) 3px,rgba(0,0,0,0) 6px);mix-blend-mode:overlay;opacity:.35;pointer-events:none}
 .scene-glow{position:absolute;inset:-40%;background:conic-gradient(from 180deg,rgba(0,230,118,.0),rgba(0,230,118,.22),rgba(255,214,0,.18),rgba(21,101,192,.18),rgba(171,71,188,.18),rgba(0,230,118,.0));filter:blur(28px);animation:spinGlow 8s linear infinite;opacity:.55;pointer-events:none}
@@ -1008,7 +1017,7 @@ input,textarea,select,button{font:inherit}
     </div>
     <div class="scene-footer">
       <p data-i18n-html="intro_text">👋 Soy <b>Guardia</b>. Medellín nos necesita. Toca <b>Continuar</b> para empezar.</p>
-      <button type="button" class="scene-btn" id="btn-close-intro" data-i18n="intro_continue">✨ Continuar</button>
+      <button type="button" class="scene-btn" id="btn-close-intro" data-i18n="intro_continue" onclick="if(window.closeIntroToHome){window.closeIntroToHome();}else if(window.__gcFallbackContinue){window.__gcFallbackContinue();}">✨ Continuar</button>
     </div>
   </div>
 </div>
@@ -2873,6 +2882,7 @@ function closeIntroToHome(){
   intro.setAttribute("aria-hidden","true");
   nav.go("home",{updateHash:true});
 }
+window.closeIntroToHome = closeIntroToHome;
 function showIntro(){
   state.introClosed=false;
   const intro=document.getElementById("intro-scene");
@@ -3905,49 +3915,53 @@ function wireButtons(){
 
 /* INIT */
 window.addEventListener("load", ()=>{
-  loadPrefs();
-  loadState();
+  const bootErrors=[];
+  const safeStep=(name, fn)=>{
+    try{ if(typeof fn === "function") fn(); }
+    catch(err){ console.error("[GC boot]", name, err); bootErrors.push(name); }
+  };
 
-  document.getElementById("score-value").textContent = state.score;
+  safeStep("loadPrefs", loadPrefs);
+  safeStep("loadState", loadState);
+
+  const scoreEl=document.getElementById("score-value");
+  if(scoreEl) scoreEl.textContent = state.score;
   prevPlanUnlocked = isPlanUnlocked();
 
-  createLeaves();
-  wireButtons();
-  applyAllBgs();
-  applyI18n();
-  wirePlanInputs();
-  syncPlanFormFromState(true);
-  initBusDragSimulation();
-  window.addEventListener("resize", ()=>syncBusDragUI());
+  safeStep("createLeaves", createLeaves);
+  safeStep("wireButtons", wireButtons);
+  safeStep("applyAllBgs", applyAllBgs);
+  safeStep("applyI18n", applyI18n);
+  safeStep("wirePlanInputs", wirePlanInputs);
+  safeStep("syncPlanFormFromState", ()=>syncPlanFormFromState(true));
+  safeStep("initBusDragSimulation", initBusDragSimulation);
+  safeStep("resizeHook", ()=>window.addEventListener("resize", ()=>{ try{ syncBusDragUI(); }catch(_e){} }));
+  safeStep("bindSeqDnD", ()=>bindSeqDnD("cons"));
+  safeStep("bindCommitDnD", bindCommitDnD);
+  safeStep("hydrateConsecuencias", ()=>{
+    if(state.tasks.consecuencias.seq){ sortSeqToCorrect("cons"); setSeqDone("cons"); updateSeqProgress("cons"); }
+    else { shuffleSeq("cons"); }
+  });
+  safeStep("hydrateCommitUIFromState", hydrateCommitUIFromState);
+  safeStep("refreshMissionLocks", refreshMissionLocks);
+  safeStep("refreshPlanLock", refreshPlanLock);
+  safeStep("updatePlanVisibility", updatePlanVisibility);
 
-  bindSeqDnD("cons");
-  bindCommitDnD();
-  if(state.tasks.consecuencias.seq){
-    sortSeqToCorrect("cons");
-    setSeqDone("cons");
-    updateSeqProgress("cons");
-  }else{
-    shuffleSeq("cons");
-  }
-  hydrateCommitUIFromState();
-
-  refreshMissionLocks();
-  refreshPlanLock();
-  updatePlanVisibility();
-
-  setTimeout(()=>document.getElementById("loading-screen").classList.add("hidden"),650);
+  setTimeout(()=>{ const loader=document.getElementById("loading-screen"); if(loader) loader.classList.add("hidden"); },450);
 
   if(!state.introClosed){
     state.lastScreen="home";
-    nav.go("home",{updateHash:true});
-    document.getElementById("intro-scene").classList.remove("hidden");
-    document.getElementById("intro-scene").setAttribute("aria-hidden","false");
-    document.getElementById("belt").style.display="none";
+    safeStep("introNavHome", ()=>nav.go("home",{updateHash:true}));
+    const intro=document.getElementById("intro-scene");
+    if(intro){ intro.classList.remove("hidden"); intro.setAttribute("aria-hidden","false"); }
+    const belt=document.getElementById("belt");
+    if(belt) belt.style.display="none";
     document.body.classList.remove("belt-on");
-    updateProgress();
-    refreshCommandMenuBadges();
-    refreshPlanLock();
-    updatePlanVisibility();
+    safeStep("updateProgress", updateProgress);
+    safeStep("refreshCommandMenuBadges", refreshCommandMenuBadges);
+    safeStep("refreshPlanLock2", refreshPlanLock);
+    safeStep("updatePlanVisibility2", updatePlanVisibility);
+    if(bootErrors.length && typeof showToast === "function") setTimeout(()=>showToast("La app se recuperó de un error de carga y seguirá funcionando."),800);
     return;
   }
 
@@ -3956,7 +3970,7 @@ window.addEventListener("load", ()=>{
 
   if(hashScreen==="plan" && !isPlanUnlocked()){
     hashScreen="command";
-    showToast(t("t_plan_locked"));
+    try{ showToast(t("t_plan_locked")); }catch(_e){}
     try{ history.replaceState(null,"",location.pathname+location.search+"#command"); }catch(e){ location.hash="#command"; }
   }
   if(hashScreen==="cierre" && !state.completed.plan){
@@ -3964,39 +3978,48 @@ window.addEventListener("load", ()=>{
     try{ history.replaceState(null,"",location.pathname+location.search+"#command"); }catch(e){ location.hash="#command"; }
   }
 
-  if(hashScreen && document.getElementById(hashScreen)){
-    nav.go(hashScreen,{updateHash:false});
-  }else if(state.lastScreen && document.getElementById(state.lastScreen)){
-    nav.go(state.lastScreen,{updateHash:true});
-  }else{
-    nav.go("home",{updateHash:true});
+  if(hashScreen && document.getElementById(hashScreen)) safeStep("navHash", ()=>nav.go(hashScreen,{updateHash:false}));
+  else if(state.lastScreen && document.getElementById(state.lastScreen)) safeStep("navLast", ()=>nav.go(state.lastScreen,{updateHash:true}));
+  else safeStep("navHome", ()=>nav.go("home",{updateHash:true}));
+
+  const intro=document.getElementById("intro-scene");
+  if(intro){ intro.classList.add("hidden"); intro.setAttribute("aria-hidden","true"); }
+
+  safeStep("setTopUIVisibility", setTopUIVisibility);
+  safeStep("updateProgress2", updateProgress);
+  safeStep("refreshCommandMenuBadges2", refreshCommandMenuBadges);
+  safeStep("refreshPlanLock3", refreshPlanLock);
+  safeStep("updatePlanVisibility3", updatePlanVisibility);
+  safeStep("refreshMissionLocks2", refreshMissionLocks);
+
+  if(bootErrors.length){
+    console.warn("Guardianes boot recovered from:", bootErrors.join(", "));
+    if(typeof showToast === "function") setTimeout(()=>showToast("La app cargó en modo seguro. Revisa la caché si ves algo raro."),800);
   }
-
-  document.getElementById("intro-scene").classList.add("hidden");
-  document.getElementById("intro-scene").setAttribute("aria-hidden","true");
-
-  setTopUIVisibility();
-  updateProgress();
-  refreshCommandMenuBadges();
-  refreshPlanLock();
-  updatePlanVisibility();
-  refreshMissionLocks();
 });
 </script>
 
 <script>
 (function(){
+  function fallbackContinue(){
+    var loader = document.getElementById('loading-screen');
+    if(loader) loader.classList.add('hidden');
+    var intro = document.getElementById('intro-scene');
+    if(intro){ intro.classList.add('hidden'); intro.setAttribute('aria-hidden','true'); }
+    document.querySelectorAll('.screen').forEach(function(s){ if(s.id === 'home') s.classList.add('active'); else s.classList.remove('active'); });
+    var belt = document.getElementById('belt');
+    if(belt) belt.style.display = 'none';
+    try{ history.replaceState(null,'','#home'); }catch(e){ location.hash = '#home'; }
+  }
+  window.__gcFallbackContinue = fallbackContinue;
   function forceShowApp(){
     var loader = document.getElementById('loading-screen');
     if(loader) loader.classList.add('hidden');
-    if(!document.querySelector('.screen.active')){
-      var home = document.getElementById('home');
-      if(home) home.classList.add('active');
-    }
+    if(!document.querySelector('.screen.active')) fallbackContinue();
   }
   window.addEventListener('error', function(){ setTimeout(forceShowApp, 0); });
   window.addEventListener('unhandledrejection', function(){ setTimeout(forceShowApp, 0); });
-  window.setTimeout(forceShowApp, 4500);
+  window.setTimeout(forceShowApp, 3200);
 })();
 </script>
 
