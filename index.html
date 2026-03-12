@@ -41,16 +41,16 @@
   --borde-comic:3px solid var(--stroke-strong);
 
   /* ✅ IMÁGENES */
-  --img-intro: url("img/intro.png");
-  --img-map: url("img/map.png");
-  --img-briefing: url("img/briefing.png");
-  --img-alert: url("img/alert.png");
-  --img-vision: url("img/vision.png");
-  --img-command-menu: url("img/command.png");
-  --img-causas: url("img/causas.png");
-  --img-consecuencias: url("img/consecuencias.png");
-  --img-sol: url("img/sol.png");
-  --img-cierre: url("img/cierre.png");
+  --img-intro: url("./img/intro.png?v=gcfix7");
+  --img-map: url("./img/map.png?v=gcfix7");
+  --img-briefing: url("./img/briefing.png?v=gcfix7");
+  --img-alert: url("./img/alert.png?v=gcfix7");
+  --img-vision: url("./img/vision.png?v=gcfix7");
+  --img-command-menu: url("./img/command.png?v=gcfix7");
+  --img-causas: url("./img/causas.png?v=gcfix7");
+  --img-consecuencias: url("./img/consecuencias.png?v=gcfix7");
+  --img-sol: url("./img/sol.png?v=gcfix7");
+  --img-cierre: url("./img/cierre.png?v=gcfix7");
 
   /* MOBILE SPACING (APP-LIKE) */
   --app-pad-x: 16px;
@@ -1017,7 +1017,7 @@ input,textarea,select,button{font:inherit}
     </div>
     <div class="scene-footer">
       <p data-i18n-html="intro_text">👋 Soy <b>Guardia</b>. Medellín nos necesita. Toca <b>Continuar</b> para empezar.</p>
-      <button type="button" class="scene-btn" id="btn-close-intro" data-i18n="intro_continue" onclick="if(window.closeIntroToHome){window.closeIntroToHome();}else if(window.__gcFallbackContinue){window.__gcFallbackContinue();}">✨ Continuar</button>
+      <button type="button" class="scene-btn" id="btn-close-intro" data-i18n="intro_continue" onclick="try{ if(window.GCRescue&&window.GCRescue.introToHome){ return window.GCRescue.introToHome(event); } if(window.closeIntroToHome){ window.closeIntroToHome(); return false; } }catch(e){ if(window.__gcFallbackContinue){ return window.__gcFallbackContinue(event); } } return false;">✨ Continuar</button>
     </div>
   </div>
 </div>
@@ -1060,7 +1060,7 @@ input,textarea,select,button{font:inherit}
       ¡Hola, explorador! Soy <strong>Guardia</strong>. Nuestra ciudad necesita tu ayuda.
       ¿Aceptas el reto de convertirte en <strong>Guardián Climático</strong>?
     </div>
-    <button type="button" class="btn-start" id="btn-start-mission" data-i18n="home_accept">🚀 ¡ACEPTO LA MISIÓN!</button>
+    <button type="button" class="btn-start" id="btn-start-mission" data-i18n="home_accept" onclick="if(window.GCRescue&&window.GCRescue.startMission){ return window.GCRescue.startMission(event); } return false;">🚀 ¡ACEPTO LA MISIÓN!</button>
   </div>
 </div>
 
@@ -1077,7 +1077,7 @@ input,textarea,select,button{font:inherit}
   <div class="flow-card">
     <p data-i18n-html="briefing_text">🎯 <b>Objetivo:</b> descubrir <b>causas</b>, reconocer <b>consecuencias</b>, proponer <b>soluciones</b> y crear tu <b>Plan Guardián</b>.</p>
     <div class="flow-actions">
-      <button type="button" class="btn btn-primary" id="btn-briefing-next" data-i18n="briefing_next">🚨 Señal climática</button>
+      <button type="button" class="btn btn-primary" id="btn-briefing-next" data-i18n="briefing_next" onclick="if(window.GCRescue){ return window.GCRescue.go('alert'); } return false;">🚨 Señal climática</button>
     </div>
   </div>
 </div>
@@ -1095,7 +1095,7 @@ input,textarea,select,button{font:inherit}
   <div class="flow-card">
     <p data-i18n-html="alert_text">👀 Cuando el planeta se calienta, cambian lluvias, temperaturas y ecosistemas. Ahora pasemos al <b>Mapa de Visión</b>.</p>
     <div class="flow-actions">
-      <button type="button" class="btn btn-primary" id="btn-alert-next" data-i18n="alert_next">👁️ Mapa de Visión</button>
+      <button type="button" class="btn btn-primary" id="btn-alert-next" data-i18n="alert_next" onclick="if(window.GCRescue){ return window.GCRescue.go('vision'); } return false;">👁️ Mapa de Visión</button>
     </div>
   </div>
 </div>
@@ -1113,7 +1113,7 @@ input,textarea,select,button{font:inherit}
   <div class="flow-card">
     <p data-i18n-html="vision_text">🧭 Entender el problema, elegir acciones y convertir tu salón en un equipo de <b>Guardianes Climáticos</b>. Vamos al <b>Cinturón de Guardia</b>.</p>
     <div class="flow-actions">
-      <button type="button" class="btn btn-primary" id="btn-vision-next" data-i18n="vision_next">🧭 Cinturón de Guardia</button>
+      <button type="button" class="btn btn-primary" id="btn-vision-next" data-i18n="vision_next" onclick="if(window.GCRescue){ return window.GCRescue.go('command'); } return false;">🧭 Cinturón de Guardia</button>
     </div>
   </div>
 </div>
@@ -4001,25 +4001,192 @@ window.addEventListener("load", ()=>{
 
 <script>
 (function(){
-  function fallbackContinue(){
+  const BUILD = 'gcfix7';
+  const BG = {
+    intro: './img/intro.png?v=' + BUILD,
+    briefing: './img/briefing.png?v=' + BUILD,
+    alert: './img/alert.png?v=' + BUILD,
+    vision: './img/vision.png?v=' + BUILD,
+    command: './img/command.png?v=' + BUILD,
+    causas: './img/causas.png?v=' + BUILD,
+    consecuencias: './img/consecuencias.png?v=' + BUILD,
+    soluciones: './img/sol.png?v=' + BUILD,
+    cierre: './img/cierre.png?v=' + BUILD
+  };
+
+  function hideLoader(){
     var loader = document.getElementById('loading-screen');
     if(loader) loader.classList.add('hidden');
-    var intro = document.getElementById('intro-scene');
-    if(intro){ intro.classList.add('hidden'); intro.setAttribute('aria-hidden','true'); }
-    document.querySelectorAll('.screen').forEach(function(s){ if(s.id === 'home') s.classList.add('active'); else s.classList.remove('active'); });
+  }
+  function introEl(){ return document.getElementById('intro-scene'); }
+  function softHideIntro(){
+    var intro = introEl();
+    if(!intro) return;
+    intro.classList.add('hidden');
+    intro.setAttribute('aria-hidden','true');
+    intro.style.opacity = '0';
+    intro.style.visibility = 'hidden';
+    intro.style.pointerEvents = 'none';
+  }
+  function softShowIntro(){
+    var intro = introEl();
+    if(!intro) return;
+    intro.classList.remove('hidden');
+    intro.setAttribute('aria-hidden','false');
+    intro.style.opacity = '';
+    intro.style.visibility = '';
+    intro.style.pointerEvents = '';
+  }
+  function activateScreen(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+    var target = document.getElementById(id);
+    if(target) target.classList.add('active');
+  }
+  function setHash(id){
+    var h = '#' + encodeURIComponent(id);
+    try{ history.replaceState(null,'',location.pathname + location.search + h); }
+    catch(e){ location.hash = h; }
+  }
+  function setBg(selector, url){
+    document.querySelectorAll(selector).forEach(function(el){
+      el.style.backgroundImage = 'url("' + url + '")';
+      el.style.backgroundPosition = 'center';
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundRepeat = 'no-repeat';
+    });
+  }
+  function ensureCriticalBgs(){
+    setBg('#intro-scene [data-bg="--img-intro"]', BG.intro);
+    setBg('#briefing .hero-media', BG.briefing);
+    setBg('#alert .hero-media', BG.alert);
+    setBg('#vision .hero-media', BG.vision);
+    setBg('#command .menu-img', BG.command);
+    setBg('#causas .hero-media', BG.causas);
+    setBg('#consecuencias .hero-media', BG.consecuencias);
+    setBg('#soluciones .hero-media', BG.soluciones);
+    var cierre = document.getElementById('cierre');
+    if(cierre){
+      cierre.style.backgroundImage = 'linear-gradient(170deg, rgba(21,101,192,.75) 0%, rgba(66,165,245,.65) 50%, rgba(144,202,249,.55) 100%), url("' + BG.cierre + '")';
+      cierre.style.backgroundPosition = 'center';
+      cierre.style.backgroundSize = 'cover';
+      cierre.style.backgroundRepeat = 'no-repeat';
+    }
+  }
+  function beltOff(){
     var belt = document.getElementById('belt');
     if(belt) belt.style.display = 'none';
-    try{ history.replaceState(null,'','#home'); }catch(e){ location.hash = '#home'; }
+    document.body.classList.remove('belt-on');
   }
-  window.__gcFallbackContinue = fallbackContinue;
-  function forceShowApp(){
-    var loader = document.getElementById('loading-screen');
-    if(loader) loader.classList.add('hidden');
-    if(!document.querySelector('.screen.active')) fallbackContinue();
+  function beltAuto(){
+    try{ if(typeof window.setTopUIVisibility === 'function') window.setTopUIVisibility(); }catch(e){}
   }
-  window.addEventListener('error', function(){ setTimeout(forceShowApp, 0); });
-  window.addEventListener('unhandledrejection', function(){ setTimeout(forceShowApp, 0); });
-  window.setTimeout(forceShowApp, 3200);
+  function rescueGo(id){
+    hideLoader();
+    ensureCriticalBgs();
+    try{
+      if(window.nav && typeof window.nav.go === 'function'){
+        window.nav.go(id, { updateHash: true });
+        if(id === 'home') softHideIntro();
+        beltAuto();
+        ensureCriticalBgs();
+        return true;
+      }
+    }catch(err){ console.warn('[GC rescue] nav.go failed', err); }
+    activateScreen(id);
+    if(id === 'home'){
+      softHideIntro();
+      beltOff();
+    }
+    setHash(id);
+    ensureCriticalBgs();
+    return false;
+  }
+  function rescueIntroToHome(ev){
+    if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+    hideLoader();
+    ensureCriticalBgs();
+    try{
+      if(typeof window.closeIntroToHome === 'function'){
+        window.closeIntroToHome();
+        softHideIntro();
+        beltOff();
+        ensureCriticalBgs();
+        return false;
+      }
+    }catch(err){ console.warn('[GC rescue] closeIntroToHome failed', err); }
+    activateScreen('home');
+    softHideIntro();
+    beltOff();
+    setHash('home');
+    return false;
+  }
+  function rescueStartMission(ev){
+    if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+    hideLoader();
+    ensureCriticalBgs();
+    try{
+      if(typeof window.startMission === 'function'){
+        window.startMission();
+        ensureCriticalBgs();
+        return false;
+      }
+    }catch(err){ console.warn('[GC rescue] startMission failed', err); }
+    rescueGo('briefing');
+    return false;
+  }
+  function bindClick(id, fn){
+    var el = document.getElementById(id);
+    if(!el) return;
+    el.onclick = fn;
+    el.addEventListener('click', fn, true);
+  }
+  function bindAll(){
+    bindClick('btn-close-intro', rescueIntroToHome);
+    bindClick('btn-start-mission', rescueStartMission);
+    bindClick('btn-briefing-next', function(e){ e.preventDefault(); e.stopPropagation(); rescueGo('alert'); return false; });
+    bindClick('btn-alert-next', function(e){ e.preventDefault(); e.stopPropagation(); rescueGo('vision'); return false; });
+    bindClick('btn-vision-next', function(e){ e.preventDefault(); e.stopPropagation(); rescueGo('command'); return false; });
+  }
+
+  window.__gcFallbackContinue = rescueIntroToHome;
+  window.GCRescue = {
+    introToHome: rescueIntroToHome,
+    startMission: rescueStartMission,
+    go: rescueGo,
+    ensureCriticalBgs: ensureCriticalBgs,
+    bindAll: bindAll
+  };
+
+  if(typeof window.showIntro === 'function'){
+    var originalShowIntro = window.showIntro;
+    window.showIntro = function(){
+      softShowIntro();
+      ensureCriticalBgs();
+      return originalShowIntro.apply(this, arguments);
+    };
+  }
+
+  window.addEventListener('DOMContentLoaded', function(){
+    bindAll();
+    ensureCriticalBgs();
+    setTimeout(ensureCriticalBgs, 250);
+    setTimeout(ensureCriticalBgs, 1200);
+    setTimeout(hideLoader, 1800);
+  });
+  window.addEventListener('load', function(){
+    bindAll();
+    ensureCriticalBgs();
+    setTimeout(ensureCriticalBgs, 350);
+    setTimeout(hideLoader, 100);
+  });
+  window.addEventListener('pageshow', function(){
+    bindAll();
+    ensureCriticalBgs();
+    hideLoader();
+  });
+  window.addEventListener('hashchange', function(){
+    ensureCriticalBgs();
+  });
 })();
 </script>
 
