@@ -1,28 +1,19 @@
-# Guardianes Climáticos de Medellín
+# Guardianes Climáticos de Medellín — Web App
 
-Versión depurada del proyecto PWA educativa.
+Versión ajustada para funcionar solo como **web app**, sin PWA.
 
-## Archivo principal
-- `index.html` → experiencia principal completa
-
-## Archivos activos
+## Qué se retiró
 - `manifest.json`
 - `service-worker.js`
 - `offline.html`
 - `js/pwa.js`
+- referencias de instalación tipo app en los HTML
+
+## Qué se dejó
+- `index.html` como app principal
+- imágenes y assets originales
 - `js/rubrica.js`
-- `js/app.js` (compatibilidad para rutas heredadas)
-- `img/`
-- `icons/`
+- páginas de compatibilidad/redirección
 
-## Ajustes realizados
-- Limpieza de archivos residuales y duplicados innecesarios.
-- Conversión de rutas antiguas en redirecciones seguras hacia `index.html`.
-- Actualización del Service Worker para una caché más limpia.
-- Conservación de compatibilidad con enlaces heredados.
-
-
-## Versión estable restaurada
-- Se conservó la arquitectura original de `index.html` para evitar daños visuales o de rutas.
-- Se agregó un fallback mínimo para que la pantalla de carga no quede bloqueada si ocurre un error.
-- Se actualizó la versión de caché del Service Worker para evitar que el navegador sirva recursos viejos.
+## Recomendación al publicar
+Después de subir esta versión a GitHub Pages, haz una recarga forzada (`Cmd + Shift + R`) para limpiar recursos viejos del navegador.
