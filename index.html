@@ -988,9 +988,9 @@ input,textarea,select,button{font:inherit}
 
 <!-- UTILIDADES: Idioma + Día/Noche + ✅ Audio explicativo por sección -->
 <div id="utility-dock" aria-label="Controles rápidos">
-  <button type="button" class="util-btn" id="btn-audio" aria-label="Activar o silenciar audio" title="Activar o silenciar audio" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleAudio(event); } }catch(e){} return false;">🔊</button>
-  <button type="button" class="util-btn" id="btn-lang" aria-label="Cambiar idioma" title="Cambiar idioma" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleLang(event); } }catch(e){} return false;">🌎 ES</button>
-  <button type="button" class="util-btn" id="btn-theme" aria-label="Cambiar modo día/noche" title="Cambiar modo día/noche" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleTheme(event); } }catch(e){} return false;">🌙</button>
+  <button type="button" class="util-btn" id="btn-audio" aria-label="Activar o silenciar audio" title="Activar o silenciar audio" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleAudio(); } }catch(e){} return false;">🔊</button>
+  <button type="button" class="util-btn" id="btn-lang" aria-label="Cambiar idioma" title="Cambiar idioma" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleLang(); } }catch(e){} return false;">🌎 ES</button>
+  <button type="button" class="util-btn" id="btn-theme" aria-label="Cambiar modo día/noche" title="Cambiar modo día/noche" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleTheme(); } }catch(e){} return false;">🌙</button>
 </div>
 
 <div id="loading-screen">
@@ -4291,5 +4291,27 @@ window.GCQuick = {
 <!-- ✅ Botón siempre visible: Guía + Rúbrica -->
 <script src="js/rubrica.js"></script>
 
+
+<style id="gc-utility-fix-style">
+#utility-dock{z-index:2147483000!important;pointer-events:auto!important}#utility-dock .util-btn{position:relative;z-index:2147483001!important;pointer-events:auto!important;touch-action:manipulation!important;-webkit-user-select:none;user-select:none}
+</style>
+<script id="gc-utility-fix-script">
+(function(){
+  function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch(_e){} }
+  function safeToast(msg){ try{ if(typeof showToast==='function'){ showToast(msg); return; } }catch(_e){} try{ var t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.add('show'); clearTimeout(window.__gcToastTimer2); window.__gcToastTimer2=setTimeout(function(){ t.classList.remove('show'); },2200); }catch(_e){} }
+  function getLang(){ try{ return currentLang==='en' ? 'en' : 'es'; }catch(_e){ return window.currentLang==='en' ? 'en' : 'es'; } }
+  function getTheme(){ try{ return currentTheme==='dark' ? 'dark' : 'light'; }catch(_e){ return window.currentTheme==='dark' ? 'dark' : 'light'; } }
+  function getAudio(){ try{ return (typeof audioEnabled==='undefined') ? true : !!audioEnabled; }catch(_e){ return !!window.audioEnabled; } }
+  function updateUtilityButtonsHard(){ var langBtn=document.getElementById('btn-lang'), themeBtn=document.getElementById('btn-theme'), audioBtn=document.getElementById('btn-audio'); var lang=getLang(), theme=getTheme(), audio=getAudio(); if(langBtn){ langBtn.textContent=(lang==='en')?'🌎 EN':'🌎 ES'; langBtn.setAttribute('title', lang==='en'?'Change language':'Cambiar idioma'); langBtn.setAttribute('aria-label', lang==='en'?'Change language':'Cambiar idioma'); } if(themeBtn){ themeBtn.textContent=(theme==='dark') ? (lang==='en'?'☀️ Day':'☀️ Día') : (lang==='en'?'🌙 Night':'🌙 Noche'); themeBtn.setAttribute('title', lang==='en'?'Toggle day and night mode':'Cambiar modo día y noche'); themeBtn.setAttribute('aria-label', lang==='en'?'Toggle day and night mode':'Cambiar modo día y noche'); } if(audioBtn){ audioBtn.textContent=audio?'🔊':'🔇'; audioBtn.setAttribute('title', audio ? (lang==='en'?'Mute audio':'Silenciar audio') : (lang==='en'?'Enable audio':'Activar audio')); audioBtn.setAttribute('aria-label', audio ? (lang==='en'?'Mute audio':'Silenciar audio') : (lang==='en'?'Enable audio':'Activar audio')); } }
+  function hardToggleLang(){ try{ currentLang=(getLang()==='en')?'es':'en'; safeSet((typeof PREF_LANG_KEY!=='undefined'?PREF_LANG_KEY:'gcmed_lang_v1'), currentLang); }catch(_e){ window.currentLang=(getLang()==='en')?'es':'en'; safeSet('gcmed_lang_v1', window.currentLang); } try{ if(typeof applyI18n==='function') applyI18n(); }catch(err){ console.warn('[GC util hard] applyI18n failed', err); } try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} try{ if(typeof refreshPlanLock==='function') refreshPlanLock(); }catch(_e){} try{ if(typeof applyAllBgs==='function') applyAllBgs(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? 'Language changed to English 🌎' : 'Idioma cambiado a Español 🌎'); return false; }
+  function hardToggleTheme(){ try{ currentTheme=(getTheme()==='dark')?'light':'dark'; document.body.classList.toggle('dark', currentTheme==='dark'); safeSet((typeof PREF_THEME_KEY!=='undefined'?PREF_THEME_KEY:'gcmed_theme_v1'), currentTheme); }catch(_e){ var isDark=document.body.classList.toggle('dark'); window.currentTheme=isDark?'dark':'light'; safeSet('gcmed_theme_v1', window.currentTheme); } try{ if(typeof applyAllBgs==='function') applyAllBgs(); }catch(_e){} try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? (getTheme()==='dark' ? 'Night mode activated 🌙' : 'Day mode activated ☀️') : (getTheme()==='dark' ? 'Modo noche activado 🌙' : 'Modo día activado ☀️')); return false; }
+  function hardToggleAudio(){ try{ if(typeof audioEnabled==='undefined') audioEnabled=true; audioEnabled=!audioEnabled; safeSet((typeof PREF_AUDIO_KEY!=='undefined'?PREF_AUDIO_KEY:'gcmed_audio_v1'), audioEnabled?'on':'off'); if(!audioEnabled){ try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(_e){} } else { try{ if(typeof initAudio==='function') initAudio(); }catch(_e){} } }catch(_e){ window.audioEnabled=!window.audioEnabled; safeSet('gcmed_audio_v1', window.audioEnabled?'on':'off'); } try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? (getAudio() ? 'Audio enabled 🔊' : 'Audio muted 🔇') : (getAudio() ? 'Audio activado 🔊' : 'Audio silenciado 🔇')); return false; }
+  function wrap(handler){ return function(e){ try{ if(e){ if(typeof e.preventDefault==='function') e.preventDefault(); if(typeof e.stopPropagation==='function') e.stopPropagation(); if(typeof e.stopImmediatePropagation==='function') e.stopImmediatePropagation(); } }catch(_e){} return handler(); }; }
+  function bind(id, handler){ var el=document.getElementById(id); if(!el || el.dataset.gcFixBound==='1') return; el.dataset.gcFixBound='1'; var fn=wrap(handler); el.onclick=fn; ['pointerup','click','touchend','mouseup'].forEach(function(type){ try{ el.addEventListener(type, fn, {capture:true, passive:false}); }catch(_e){ try{ el.addEventListener(type, fn, true); }catch(_e2){} } }); el.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ fn(e); } }, true); }
+  window.GCQuick={ toggleLang:hardToggleLang, toggleTheme:hardToggleTheme, toggleAudio:hardToggleAudio, refresh:updateUtilityButtonsHard };
+  function bindAll(){ updateUtilityButtonsHard(); bind('btn-lang', hardToggleLang); bind('btn-theme', hardToggleTheme); bind('btn-audio', hardToggleAudio); }
+  window.addEventListener('DOMContentLoaded', bindAll); window.addEventListener('load', bindAll); setTimeout(bindAll,1200);
+})();
+</script>
 </body>
 </html>
