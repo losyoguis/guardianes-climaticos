@@ -499,7 +499,10 @@ cursor:pointer;box-shadow:0 12px 0 rgba(0,0,0,.28);backdrop-filter: blur(10px);t
   font-size:1.25rem;
   box-shadow:0 4px 0 rgba(0,0,0,.08);
   user-select:none;
+  cursor:pointer;
+  touch-action:manipulation;
 }
+.drag-arrow:focus-visible{outline:3px solid rgba(255,214,0,.95);outline-offset:2px}
 .drag-arrow.left{animation:dragArrowLeft 1.4s ease-in-out infinite}
 .drag-arrow.right{animation:dragArrowRight 1.4s ease-in-out infinite}
 .drag-track{
@@ -988,7 +991,7 @@ input,textarea,select,button{font:inherit}
 
 <!-- UTILIDADES: Idioma + Día/Noche + ✅ Audio explicativo por sección -->
 <div id="utility-dock" aria-label="Controles rápidos">
-  <button type="button" class="util-btn" id="btn-audio" aria-label="Activar o silenciar audio" title="Activar o silenciar audio" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleAudio(); } }catch(e){} return false;">🔊</button>
+  <button type="button" class="util-btn" id="btn-audio" aria-label="Reproducir audio de la sección" title="Reproducir audio de la sección" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleAudio(); } }catch(e){} return false;">🔊</button>
   <button type="button" class="util-btn" id="btn-lang" aria-label="Cambiar idioma" title="Cambiar idioma" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleLang(); } }catch(e){} return false;">🌎 ES</button>
   <button type="button" class="util-btn" id="btn-theme" aria-label="Cambiar modo día/noche" title="Cambiar modo día/noche" onclick="try{ if(window.GCQuick){ return window.GCQuick.toggleTheme(); } }catch(e){} return false;">🌙</button>
 </div>
@@ -1180,7 +1183,7 @@ input,textarea,select,button{font:inherit}
           <div class="drag-sim" data-drag-veh="bus">
             <div class="drag-instruction" data-i18n="drag_bus_hint">🫳 Arrastra o toca para mover el bus hacia el nivel correcto.</div>
             <div class="drag-guide">
-              <div class="drag-arrow left" aria-hidden="true">⬅️</div>
+              <button type="button" class="drag-arrow left" data-drag-step="-1" aria-label="Mover bus a la izquierda" title="Mover bus a la izquierda">⬅️</button>
               <div class="drag-track" data-drag-track="bus" aria-hidden="false">
                 <div class="drag-lane-label" data-i18n="drag_bus_lane">↔️ Desliza aquí</div>
                 <div class="drag-hand" aria-hidden="true">🫳</div>
@@ -1195,7 +1198,7 @@ input,textarea,select,button{font:inherit}
                 </button>
                 <button type="button" class="drag-bus" data-drag-bus="bus" role="slider" aria-orientation="horizontal" aria-valuemin="1" aria-valuemax="3" aria-valuenow="0" aria-label="Arrastra el bus hacia Baja, Media o Alta">🚌</button>
               </div>
-              <div class="drag-arrow right" aria-hidden="true">➡️</div>
+              <button type="button" class="drag-arrow right" data-drag-step="1" aria-label="Mover bus a la derecha" title="Mover bus a la derecha">➡️</button>
             </div>
             <div class="drag-auto-hint" data-auto-hint="bus" aria-live="polite"></div>
           </div>
@@ -1989,6 +1992,8 @@ const PREF_AUDIO_KEY="gcmed_audio_v1";
 
 let currentLang = "es";
 let currentTheme = "light";
+let audioEnabled = true;
+let sectionNarrationTimer = null;
 
 function t(key){
   const pack = I18N[currentLang] || I18N.es;
@@ -2067,6 +2072,35 @@ function playPointSound(amount=10){
   g2.gain.exponentialRampToValueAtTime(0.0001, now+0.22);
   o2.connect(g2).connect(audioCtx.destination);
   o2.start(now+0.06); o2.stop(now+0.24);
+}
+
+function scheduleSectionNarration(sectionId, delay=240){
+  if(sectionNarrationTimer){
+    clearTimeout(sectionNarrationTimer);
+    sectionNarrationTimer = null;
+  }
+  if(!audioEnabled) return;
+  sectionNarrationTimer = setTimeout(()=>{
+    try{ playSectionNarration(sectionId || (nav && nav.current) || "home"); }catch(e){}
+  }, Math.max(0, delay || 0));
+}
+function handleAudioButton(){
+  if(narrationActive){
+    stopNarration();
+    showToast((currentLang==="en") ? "Audio stopped ⏹️" : "Audio detenido ⏹️");
+    return false;
+  }
+  if(!audioEnabled){
+    audioEnabled = true;
+    safeSet(localStorage, PREF_AUDIO_KEY, "on");
+  }
+  audioUnlocked = false;
+  initAudio();
+  updateUtilityLabels();
+  try{ playPointSound(4); }catch(e){}
+  scheduleSectionNarration((nav && nav.current) ? nav.current : "home", 90);
+  showToast((currentLang==="en") ? "Playing section audio 🔊" : "Reproduciendo audio de la sección 🔊");
+  return false;
 }
 
 /* ✅ Audio explicativo por sección (ES/EN) usando Speech Synthesis */
@@ -2801,6 +2835,7 @@ const nav={
     applyAllBgs();
     if(screenId==="causas") scheduleBusAutoHint(2800);
     else hideBusAutoHint();
+    if(audioEnabled && screenId!=="home") scheduleSectionNarration(screenId, 260);
   }
 };
 window.nav=nav;
@@ -3162,6 +3197,16 @@ function getNearestBusLevel(clientX){
   });
   return best;
 }
+
+function shiftBusLevel(direction=1, announce=true){
+  const levels=["low","mid","high"];
+  const currentIdx=levels.indexOf(vehPick.bus || "");
+  let idx=currentIdx;
+  if(idx<0) idx = direction > 0 ? -1 : levels.length;
+  idx = Math.max(0, Math.min(levels.length-1, idx + (direction >= 0 ? 1 : -1)));
+  setBusGuideVisibility(true);
+  setBusLevel(levels[idx], announce);
+}
 function finishBusDrag(clientX){
   if(!dragVehState.active || dragVehState.veh!=="bus") return;
   const bus=getDragBus("bus");
@@ -3233,9 +3278,45 @@ function initBusDragSimulation(){
       if(!vehPick.bus){
         setBusGuideVisibility(true);
         setBusLevel("mid", true);
+      }else{
+        shiftBusLevel(1, true);
       }
       e.preventDefault();
     }
+  });
+
+  bus.addEventListener("click", (e)=>{
+    if(state.tasks.causas.veh) return;
+    setBusGuideVisibility(true);
+    shiftBusLevel(1, true);
+    e.preventDefault();
+  });
+
+  track.addEventListener("click", (e)=>{
+    if(state.tasks.causas.veh) return;
+    if(e.target && e.target.closest && e.target.closest('.drag-lane[data-veh="bus"], .drag-bus, .drag-arrow')) return;
+    const level=getNearestBusLevel(typeof e.clientX==="number" ? e.clientX : (track.getBoundingClientRect().left + (track.clientWidth/2)));
+    if(level){
+      setBusGuideVisibility(true);
+      setBusLevel(level, true);
+    }
+  });
+
+  document.querySelectorAll('.drag-arrow[data-drag-step]').forEach((arrow)=>{
+    if(arrow.dataset.busArrowReady==="1") return;
+    arrow.dataset.busArrowReady="1";
+    const dir=Number(arrow.getAttribute('data-drag-step') || '1');
+    const move=(e)=>{
+      if(state.tasks.causas.veh) return;
+      setBusGuideVisibility(true);
+      shiftBusLevel(dir, true);
+      if(e){ e.preventDefault(); e.stopPropagation(); }
+    };
+    arrow.addEventListener('click', move);
+    arrow.addEventListener('pointerup', move);
+    arrow.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' '){ move(e); }
+    });
   });
 
   track.querySelectorAll('.drag-lane[data-veh="bus"]').forEach(lane=>{
@@ -3742,12 +3823,8 @@ function updateUtilityLabels(){
   }
   if(audioBtn){
     audioBtn.textContent = audioEnabled ? "🔊" : "🔇";
-    audioBtn.setAttribute("aria-label", audioEnabled
-      ? ((currentLang==="en") ? "Mute audio" : "Silenciar audio")
-      : ((currentLang==="en") ? "Enable audio" : "Activar audio"));
-    audioBtn.setAttribute("title", audioEnabled
-      ? ((currentLang==="en") ? "Mute audio" : "Silenciar audio")
-      : ((currentLang==="en") ? "Enable audio" : "Activar audio"));
+    audioBtn.setAttribute("aria-label", (currentLang==="en") ? "Play section audio" : "Reproducir audio de la sección");
+    audioBtn.setAttribute("title", (currentLang==="en") ? "Play section audio" : "Reproducir audio de la sección");
     audioBtn.setAttribute("aria-pressed", audioEnabled ? "true" : "false");
   }
 }
@@ -3774,22 +3851,7 @@ function toggleLang(){
 }
 
 function toggleAudio(){
-  if(audioEnabled){
-    audioEnabled = false;
-    stopNarration();
-    safeSet(localStorage, PREF_AUDIO_KEY, "off");
-    updateUtilityLabels();
-    showToast((currentLang==="en") ? "Audio muted 🔇" : "Audio silenciado 🔇");
-    return false;
-  }
-  audioEnabled = true;
-  safeSet(localStorage, PREF_AUDIO_KEY, "on");
-  audioUnlocked = false;
-  initAudio();
-  updateUtilityLabels();
-  showToast((currentLang==="en") ? "Audio enabled 🔊" : "Audio activado 🔊");
-  try{ playSectionNarration(nav && nav.current ? nav.current : "home"); }catch(e){}
-  return false;
+  return handleAudioButton();
 }
 
 /* Events */
@@ -4302,10 +4364,10 @@ window.GCQuick = {
   function getLang(){ try{ return currentLang==='en' ? 'en' : 'es'; }catch(_e){ return window.currentLang==='en' ? 'en' : 'es'; } }
   function getTheme(){ try{ return currentTheme==='dark' ? 'dark' : 'light'; }catch(_e){ return window.currentTheme==='dark' ? 'dark' : 'light'; } }
   function getAudio(){ try{ return (typeof audioEnabled==='undefined') ? true : !!audioEnabled; }catch(_e){ return !!window.audioEnabled; } }
-  function updateUtilityButtonsHard(){ var langBtn=document.getElementById('btn-lang'), themeBtn=document.getElementById('btn-theme'), audioBtn=document.getElementById('btn-audio'); var lang=getLang(), theme=getTheme(), audio=getAudio(); if(langBtn){ langBtn.textContent=(lang==='en')?'🌎 EN':'🌎 ES'; langBtn.setAttribute('title', lang==='en'?'Change language':'Cambiar idioma'); langBtn.setAttribute('aria-label', lang==='en'?'Change language':'Cambiar idioma'); } if(themeBtn){ themeBtn.textContent=(theme==='dark') ? (lang==='en'?'☀️ Day':'☀️ Día') : (lang==='en'?'🌙 Night':'🌙 Noche'); themeBtn.setAttribute('title', lang==='en'?'Toggle day and night mode':'Cambiar modo día y noche'); themeBtn.setAttribute('aria-label', lang==='en'?'Toggle day and night mode':'Cambiar modo día y noche'); } if(audioBtn){ audioBtn.textContent=audio?'🔊':'🔇'; audioBtn.setAttribute('title', audio ? (lang==='en'?'Mute audio':'Silenciar audio') : (lang==='en'?'Enable audio':'Activar audio')); audioBtn.setAttribute('aria-label', audio ? (lang==='en'?'Mute audio':'Silenciar audio') : (lang==='en'?'Enable audio':'Activar audio')); } }
+  function updateUtilityButtonsHard(){ var langBtn=document.getElementById('btn-lang'), themeBtn=document.getElementById('btn-theme'), audioBtn=document.getElementById('btn-audio'); var lang=getLang(), theme=getTheme(), audio=getAudio(); if(langBtn){ langBtn.textContent=(lang==='en')?'🌎 EN':'🌎 ES'; langBtn.setAttribute('title', lang==='en'?'Change language':'Cambiar idioma'); langBtn.setAttribute('aria-label', lang==='en'?'Change language':'Cambiar idioma'); } if(themeBtn){ themeBtn.textContent=(theme==='dark') ? (lang==='en'?'☀️ Day':'☀️ Día') : (lang==='en'?'🌙 Night':'🌙 Noche'); themeBtn.setAttribute('title', lang==='en'?'Toggle day and night mode':'Cambiar modo día y noche'); themeBtn.setAttribute('aria-label', lang==='en'?'Toggle day and night mode':'Cambiar modo día y noche'); } if(audioBtn){ audioBtn.textContent=audio?'🔊':'🔇'; audioBtn.setAttribute('title', lang==='en'?'Play section audio':'Reproducir audio de la sección'); audioBtn.setAttribute('aria-label', lang==='en'?'Play section audio':'Reproducir audio de la sección'); } }
   function hardToggleLang(){ try{ currentLang=(getLang()==='en')?'es':'en'; safeSet((typeof PREF_LANG_KEY!=='undefined'?PREF_LANG_KEY:'gcmed_lang_v1'), currentLang); }catch(_e){ window.currentLang=(getLang()==='en')?'es':'en'; safeSet('gcmed_lang_v1', window.currentLang); } try{ if(typeof applyI18n==='function') applyI18n(); }catch(err){ console.warn('[GC util hard] applyI18n failed', err); } try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} try{ if(typeof refreshPlanLock==='function') refreshPlanLock(); }catch(_e){} try{ if(typeof applyAllBgs==='function') applyAllBgs(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? 'Language changed to English 🌎' : 'Idioma cambiado a Español 🌎'); return false; }
   function hardToggleTheme(){ try{ currentTheme=(getTheme()==='dark')?'light':'dark'; document.body.classList.toggle('dark', currentTheme==='dark'); safeSet((typeof PREF_THEME_KEY!=='undefined'?PREF_THEME_KEY:'gcmed_theme_v1'), currentTheme); }catch(_e){ var isDark=document.body.classList.toggle('dark'); window.currentTheme=isDark?'dark':'light'; safeSet('gcmed_theme_v1', window.currentTheme); } try{ if(typeof applyAllBgs==='function') applyAllBgs(); }catch(_e){} try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? (getTheme()==='dark' ? 'Night mode activated 🌙' : 'Day mode activated ☀️') : (getTheme()==='dark' ? 'Modo noche activado 🌙' : 'Modo día activado ☀️')); return false; }
-  function hardToggleAudio(){ try{ if(typeof audioEnabled==='undefined') audioEnabled=true; audioEnabled=!audioEnabled; safeSet((typeof PREF_AUDIO_KEY!=='undefined'?PREF_AUDIO_KEY:'gcmed_audio_v1'), audioEnabled?'on':'off'); if(!audioEnabled){ try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(_e){} } else { try{ if(typeof initAudio==='function') initAudio(); }catch(_e){} } }catch(_e){ window.audioEnabled=!window.audioEnabled; safeSet('gcmed_audio_v1', window.audioEnabled?'on':'off'); } try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? (getAudio() ? 'Audio enabled 🔊' : 'Audio muted 🔇') : (getAudio() ? 'Audio activado 🔊' : 'Audio silenciado 🔇')); return false; }
+  function hardToggleAudio(){ try{ if(typeof handleAudioButton==='function') return handleAudioButton(); }catch(_e){} try{ if(typeof audioEnabled==='undefined') audioEnabled=true; audioEnabled=true; safeSet((typeof PREF_AUDIO_KEY!=='undefined'?PREF_AUDIO_KEY:'gcmed_audio_v1'),'on'); if(typeof initAudio==='function') initAudio(); if(typeof playPointSound==='function') playPointSound(4); if(typeof playSectionNarration==='function') setTimeout(function(){ try{ playSectionNarration((window.nav&&nav.current)?nav.current:'home'); }catch(__e){} },90); }catch(_e){ window.audioEnabled=true; safeSet('gcmed_audio_v1','on'); } try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? 'Playing section audio 🔊' : 'Reproduciendo audio de la sección 🔊'); return false; }
   function wrap(handler){ return function(e){ try{ if(e){ if(typeof e.preventDefault==='function') e.preventDefault(); if(typeof e.stopPropagation==='function') e.stopPropagation(); if(typeof e.stopImmediatePropagation==='function') e.stopImmediatePropagation(); } }catch(_e){} return handler(); }; }
   function bind(id, handler){ var el=document.getElementById(id); if(!el || el.dataset.gcFixBound==='1') return; el.dataset.gcFixBound='1'; var fn=wrap(handler); el.onclick=fn; ['pointerup','click','touchend','mouseup'].forEach(function(type){ try{ el.addEventListener(type, fn, {capture:true, passive:false}); }catch(_e){ try{ el.addEventListener(type, fn, true); }catch(_e2){} } }); el.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ fn(e); } }, true); }
   window.GCQuick={ toggleLang:hardToggleLang, toggleTheme:hardToggleTheme, toggleAudio:hardToggleAudio, refresh:updateUtilityButtonsHard };
