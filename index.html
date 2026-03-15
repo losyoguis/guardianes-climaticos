@@ -2536,71 +2536,147 @@ function buildGuardianCertificateDocument(){
 </body>
 </html>`;
 }
+function downloadHtmlDocument(html, filename, okEs, okEn){
+  try{
+    const blob = new Blob([html], { type:'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    showToast((currentLang==='en') ? okEn : okEs);
+  }catch(err){
+    console.error('downloadHtmlDocument error', err);
+    showToast((currentLang==='en') ? 'The file could not be downloaded.' : 'No se pudo descargar el archivo.');
+  }
+}
+function printHtmlDocument(html, title){
+  try{
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('title', title || 'print-frame');
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '1px';
+    iframe.style.height = '1px';
+    iframe.style.opacity = '0.01';
+    iframe.style.pointerEvents = 'none';
+    iframe.style.border = '0';
+    iframe.style.zIndex = '-1';
+    document.body.appendChild(iframe);
+
+    const cleanup = ()=>{
+      try{ iframe.onload = null; }catch(err){}
+      try{ if(iframe.parentNode) iframe.parentNode.removeChild(iframe); }catch(err){}
+    };
+
+    const startPrint = ()=>{
+      const win = iframe.contentWindow;
+      if(!win){
+        cleanup();
+        showToast((currentLang==='en') ? 'The print view could not be opened.' : 'No se pudo abrir la vista de impresión.');
+        return;
+      }
+      const safePrint = ()=>{
+        try{
+          win.focus();
+          win.print();
+        }catch(err){
+          console.error('printHtmlDocument print error', err);
+          showToast((currentLang==='en') ? 'Printing is not available on this device.' : 'La impresión no está disponible en este dispositivo.');
+        }
+        setTimeout(cleanup, 1200);
+      };
+      try{
+        const doc = win.document;
+        const images = Array.from(doc.images || []);
+        let pending = images.length;
+        if(!pending){
+          setTimeout(safePrint, 180);
+          return;
+        }
+        let resolved = false;
+        const done = ()=>{
+          if(resolved) return;
+          resolved = true;
+          setTimeout(safePrint, 180);
+        };
+        const tick = ()=>{ pending -= 1; if(pending <= 0) done(); };
+        images.forEach(img=>{
+          if(img.complete) tick();
+          else {
+            img.addEventListener('load', tick, { once:true });
+            img.addEventListener('error', tick, { once:true });
+          }
+        });
+        setTimeout(done, 1400);
+      }catch(err){
+        console.error('printHtmlDocument wait error', err);
+        setTimeout(safePrint, 220);
+      }
+    };
+
+    iframe.onload = ()=>setTimeout(startPrint, 120);
+
+    const doc = iframe.contentWindow && iframe.contentWindow.document;
+    if(!doc){
+      cleanup();
+      showToast((currentLang==='en') ? 'The print view could not be opened.' : 'No se pudo abrir la vista de impresión.');
+      return;
+    }
+    doc.open();
+    doc.write(html);
+    doc.close();
+  }catch(err){
+    console.error('printHtmlDocument error', err);
+    showToast((currentLang==='en') ? 'Printing could not be started.' : 'No se pudo iniciar la impresión.');
+  }
+}
 function printPlanEvidence(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const win = window.open('', '_blank', 'noopener,noreferrer');
-  if(!win){
-    showToast((currentLang==='en') ? 'Allow pop-up windows to print your plan.' : 'Permite las ventanas emergentes para imprimir tu plan.');
-    return;
-  }
-  win.document.open();
-  win.document.write(buildPlanEvidenceDocument());
-  win.document.close();
-  setTimeout(()=>{ try{ win.focus(); win.print(); }catch(err){} }, 350);
+  printHtmlDocument(buildPlanEvidenceDocument(), (currentLang==='en') ? 'Guardian Plan' : 'Plan Guardián');
 }
 function downloadPlanEvidence(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const blob = new Blob([buildPlanEvidenceDocument()], { type:'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
   const stamp = new Date().toISOString().slice(0,10);
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
-  a.href = url;
-  a.download = `${currentLang==='en' ? 'guardian_plan' : 'plan_guardian'}_${namePart}_${stamp}.html`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 1600);
-  showToast((currentLang==='en') ? 'Plan downloaded.' : 'Plan descargado.');
+  downloadHtmlDocument(
+    buildPlanEvidenceDocument(),
+    `${currentLang==='en' ? 'guardian_plan' : 'plan_guardian'}_${namePart}_${stamp}.html`,
+    'Plan descargado.',
+    'Plan downloaded.'
+  );
 }
 function printGuardianCertificate(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const win = window.open('', '_blank', 'noopener,noreferrer');
-  if(!win){
-    showToast((currentLang==='en') ? 'Allow pop-up windows to print your certificate.' : 'Permite las ventanas emergentes para imprimir tu diploma.');
-    return;
-  }
-  win.document.open();
-  win.document.write(buildGuardianCertificateDocument());
-  win.document.close();
-  setTimeout(()=>{ try{ win.focus(); win.print(); }catch(err){} }, 350);
+  printHtmlDocument(buildGuardianCertificateDocument(), (currentLang==='en') ? 'Climate Guardian Certificate' : 'Diploma Guardián Climático');
 }
 function downloadGuardianCertificate(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const blob = new Blob([buildGuardianCertificateDocument()], { type:'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
   const stamp = new Date().toISOString().slice(0,10);
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
-  a.href = url;
-  a.download = `${currentLang==='en' ? 'guardian_certificate' : 'diploma_guardian'}_${namePart}_${stamp}.html`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 1600);
-  showToast((currentLang==='en') ? 'Certificate downloaded.' : 'Diploma descargado.');
+  downloadHtmlDocument(
+    buildGuardianCertificateDocument(),
+    `${currentLang==='en' ? 'guardian_certificate' : 'diploma_guardian'}_${namePart}_${stamp}.html`,
+    'Diploma descargado.',
+    'Certificate downloaded.'
+  );
 }
 function downscaleImageFile(file){
   return new Promise((resolve, reject)=>{
