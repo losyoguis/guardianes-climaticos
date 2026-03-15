@@ -1227,8 +1227,8 @@ input,textarea,select,button{font:inherit}
       <div class="mission-footer">
         <div class="mission-meter"><span data-i18n="points_tip">⭐ Tip:</span> <span data-i18n="c_r1_tip">El Metro suele contaminar menos por persona.</span></div>
         <div class="small-actions">
-          <button type="button" class="btn btn-primary" id="btn-check-veh" data-action="check-veh" data-i18n="btn_check">✅ Verificar</button>
-          <button type="button" class="btn btn-ghost" id="btn-reset-veh" data-action="reset-veh" data-i18n="btn_reset">↩️ Reiniciar</button>
+          <button type="button" class="btn btn-primary" data-action="check-veh" data-i18n="btn_check">✅ Verificar</button>
+          <button type="button" class="btn btn-ghost" data-action="reset-veh" data-i18n="btn_reset">↩️ Reiniciar</button>
         </div>
       </div>
     </div>
@@ -2217,6 +2217,23 @@ function playSectionNarration(sectionId){
 const STORAGE_KEY="gcmed_state_v27";
 const SESSION_KEY="gcmed_state_session_v27";
 
+const PLAN_FORM_VERSION = 3;
+function defaultPlanData(){
+  return {
+    version: PLAN_FORM_VERSION,
+    studentName: "",
+    problem: "",
+    context: "",
+    actions: [
+      { what:"", who:"", when:"" },
+      { what:"", who:"", when:"" },
+      { what:"", who:"", when:"" }
+    ],
+    photoData: "",
+    photoName: ""
+  };
+}
+
 const defaultState=()=>({
   missionStarted:false,
   score:0,
@@ -2237,23 +2254,6 @@ function safeSet(store,key,val){ try{store.setItem(key,val);}catch(e){} }
 function safeGet(store,key){ try{return store.getItem(key);}catch(e){return null;} }
 function safeRemove(store,key){ try{store.removeItem(key);}catch(e){} }
 
-
-const PLAN_FORM_VERSION = 3;
-function defaultPlanData(){
-  return {
-    version: PLAN_FORM_VERSION,
-    studentName: "",
-    problem: "",
-    context: "",
-    actions: [
-      { what:"", who:"", when:"" },
-      { what:"", who:"", when:"" },
-      { what:"", who:"", when:"" }
-    ],
-    photoData: "",
-    photoName: ""
-  };
-}
 function normalizePlanData(data){
   const base = defaultPlanData();
   if(!data || typeof data !== "object") return base;
@@ -4526,7 +4526,6 @@ window.GCQuick = {
 
 <!-- ✅ Botón siempre visible: Guía + Rúbrica -->
 <script src="js/rubrica.js"></script>
-<script src="js/causas-mission-fix-v3.js?v=3"></script>
 
 
 <style id="gc-utility-fix-style">
