@@ -1176,9 +1176,9 @@ input,textarea,select,button{font:inherit}
             <div class="vehicle-name" data-i18n="veh_car">Carro</div>
           </div>
           <div class="level-choices">
-            <button type="button" class="tiny-choice" data-veh="car" data-level="low" data-i18n="lvl_low">Baja</button>
-            <button type="button" class="tiny-choice" data-veh="car" data-level="mid" data-i18n="lvl_mid">Media</button>
-            <button type="button" class="tiny-choice" data-veh="car" data-level="high" data-i18n="lvl_high">Alta</button>
+            <button class="tiny-choice" data-veh="car" data-level="low" data-i18n="lvl_low">Baja</button>
+            <button class="tiny-choice" data-veh="car" data-level="mid" data-i18n="lvl_mid">Media</button>
+            <button class="tiny-choice" data-veh="car" data-level="high" data-i18n="lvl_high">Alta</button>
           </div>
         </div>
 
@@ -1217,9 +1217,9 @@ input,textarea,select,button{font:inherit}
             <div class="vehicle-name" data-i18n="veh_metro">Metro</div>
           </div>
           <div class="level-choices">
-            <button type="button" class="tiny-choice" data-veh="metro" data-level="low" data-i18n="lvl_low">Baja</button>
-            <button type="button" class="tiny-choice" data-veh="metro" data-level="mid" data-i18n="lvl_mid">Media</button>
-            <button type="button" class="tiny-choice" data-veh="metro" data-level="high" data-i18n="lvl_high">Alta</button>
+            <button class="tiny-choice" data-veh="metro" data-level="low" data-i18n="lvl_low">Baja</button>
+            <button class="tiny-choice" data-veh="metro" data-level="mid" data-i18n="lvl_mid">Media</button>
+            <button class="tiny-choice" data-veh="metro" data-level="high" data-i18n="lvl_high">Alta</button>
           </div>
         </div>
       </div>
@@ -1227,8 +1227,8 @@ input,textarea,select,button{font:inherit}
       <div class="mission-footer">
         <div class="mission-meter"><span data-i18n="points_tip">⭐ Tip:</span> <span data-i18n="c_r1_tip">El Metro suele contaminar menos por persona.</span></div>
         <div class="small-actions">
-          <button type="button" class="btn btn-primary" data-action="check-veh" id="btn-check-veh" data-i18n="btn_check">✅ Verificar</button>
-          <button type="button" class="btn btn-ghost" data-action="reset-veh" id="btn-reset-veh" data-i18n="btn_reset">↩️ Reiniciar</button>
+          <button type="button" class="btn btn-primary" id="btn-check-veh" data-action="check-veh" data-i18n="btn_check">✅ Verificar</button>
+          <button type="button" class="btn btn-ghost" id="btn-reset-veh" data-action="reset-veh" data-i18n="btn_reset">↩️ Reiniciar</button>
         </div>
       </div>
     </div>
@@ -1241,13 +1241,13 @@ input,textarea,select,button{font:inherit}
       <div class="step-note" data-i18n="c_r2_note">Pregunta: ¿Qué hace el CO₂ en la atmósfera? Elige 1 respuesta. (+5)</div>
 
       <div class="choice-grid" data-quiz="causas-q">
-        <button type="button" class="choice" data-quiz-id="causas-q" data-correct="1">
+        <button class="choice" data-quiz-id="causas-q" data-correct="1">
           <span class="emoji">🧥</span><span data-i18n="c_q_correct">Atrapa el calor como una manta</span>
         </button>
-        <button type="button" class="choice" data-quiz-id="causas-q">
+        <button class="choice" data-quiz-id="causas-q">
           <span class="emoji">🧊</span><span data-i18n="c_q_w1">Congela la ciudad de inmediato</span>
         </button>
-        <button type="button" class="choice" data-quiz-id="causas-q">
+        <button class="choice" data-quiz-id="causas-q">
           <span class="emoji">🌧️</span><span data-i18n="c_q_w2">Hace que llueva siempre todos los días</span>
         </button>
       </div>
@@ -1262,7 +1262,7 @@ input,textarea,select,button{font:inherit}
       <div class="mission-footer">
         <div class="mission-meter" id="causas-progress">Retos: 0/2</div>
         <div class="small-actions">
-          <button type="button" class="btn btn-primary" data-complete="causas" id="btn-complete-causas" disabled data-i18n="btn_complete_mission_20">🏁 Completar misión (+20)</button>
+          <button class="btn btn-primary" data-complete="causas" id="btn-complete-causas" disabled data-i18n="btn_complete_mission_20">🏁 Completar misión (+20)</button>
         </div>
       </div>
     </div>
@@ -2496,6 +2496,7 @@ function buildPlanEvidenceDocument(){
 
     <div class="footer">${escapeHtml(t('plan_export_footer'))}</div>
   </main>
+<script src="js/causas-mission-fix-v2.js?v=2"></script>
 </body>
 </html>`;
 }
@@ -4549,7 +4550,5 @@ window.GCQuick = {
   window.addEventListener('DOMContentLoaded', bindAll); window.addEventListener('load', bindAll); setTimeout(bindAll,1200);
 })();
 </script>
-
-<script src="js/causas-mission-fix.js?v=1"></script>
 </body>
 </html>
