@@ -1,4 +1,4 @@
-const CACHE_VERSION = "guardianes-v6-recovery";
+const CACHE_VERSION = "guardianes-v7-propuesta-ambiental";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -24,6 +24,7 @@ const APP_SHELL = [
   "./img/consecuencias.png",
   "./img/sol.png",
   "./img/cierre.png",
+  "./img/propuesta-ambiental.png",
   "./assets/medellin_map.png"
 ];
 

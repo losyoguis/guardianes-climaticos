@@ -307,6 +307,37 @@ font-size:1rem;color:rgba(0,0,0,.82);box-shadow:var(--sombra);line-height:1.5}
 }
 .btn-start:hover{top:-3px;box-shadow:0 9px 0 #BF360C,var(--sombra-fuerte)}
 .btn-start:active{top:4px;box-shadow:0 2px 0 #BF360C}
+.home-actions{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap}
+.btn-propuesta{
+  appearance:none;border:3px solid rgba(0,0,0,.62);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:15px 32px;border-radius:50px;
+  font-family:'Bangers',cursive;font-size:1.22rem;letter-spacing:1.4px;
+  color:#0d331a;background:linear-gradient(135deg,#FFD600,#FFF176);
+  box-shadow:0 6px 0 #b79500,var(--sombra);position:relative;top:0;
+  transition:all .25s;min-height:52px;text-shadow:0 1px 0 rgba(255,255,255,.65)
+}
+.btn-propuesta:hover{top:-3px;box-shadow:0 9px 0 #b79500,var(--sombra-fuerte)}
+.btn-propuesta:active{top:4px;box-shadow:0 2px 0 #b79500}
+.propuesta-modal{position:fixed;inset:0;z-index:2147483500;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,10,7,.72);backdrop-filter:blur(8px)}
+.propuesta-modal.is-open{display:flex}
+.propuesta-modal-card{width:min(1120px,96vw);max-height:92dvh;overflow:auto;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(232,245,233,.98));border:4px solid #263238;border-radius:24px;box-shadow:0 24px 90px rgba(0,0,0,.45);position:relative}
+.propuesta-modal-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:linear-gradient(90deg,#1a5e2a,#43A047);border-bottom:3px solid #263238;color:#fff}
+.propuesta-modal-title{font-family:'Bangers',cursive;font-size:clamp(1.35rem,4vw,2.2rem);letter-spacing:1.2px;text-shadow:2px 2px 0 rgba(0,0,0,.25)}
+.propuesta-close{appearance:none;border:3px solid rgba(0,0,0,.5);cursor:pointer;width:46px;height:46px;border-radius:50%;background:#fff;color:#1a5e2a;font-size:1.35rem;font-weight:900;box-shadow:0 5px 0 rgba(0,0,0,.22);line-height:1}
+.propuesta-close:hover{transform:translateY(-2px)}
+.propuesta-close:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.22)}
+.propuesta-modal-body{padding:16px}
+.propuesta-media-block{border:3px solid rgba(0,0,0,.28);border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 0 rgba(0,0,0,.10),0 18px 38px rgba(0,0,0,.12);margin-bottom:18px}
+.propuesta-img{display:block;width:100%;height:auto}
+.propuesta-video-wrap{position:relative;width:100%;aspect-ratio:16/9;border:3px solid rgba(0,0,0,.28);border-radius:18px;overflow:hidden;background:#0b1f14;box-shadow:0 10px 0 rgba(0,0,0,.10),0 18px 38px rgba(0,0,0,.12)}
+.propuesta-video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.propuesta-video-note{margin:10px 2px 0;text-align:center;font-weight:800;color:#255d2e}
+.propuesta-video-note a{color:#1565C0;text-decoration:underline;text-underline-offset:3px}
+body.dark .propuesta-modal-card{background:linear-gradient(180deg,rgba(17,24,32,.98),rgba(9,25,17,.98));color:var(--texto-base);border-color:rgba(255,255,255,.28)}
+body.dark .propuesta-modal-head{border-bottom-color:rgba(255,255,255,.28)}
+body.dark .propuesta-media-block,body.dark .propuesta-video-wrap{border-color:rgba(255,255,255,.20);background:rgba(255,255,255,.06)}
+body.dark .propuesta-video-note{color:rgba(233,242,251,.88)}
 
 /* Cards */
 .hero{max-width:1100px;margin:0 auto 18px;border-radius:22px;overflow:hidden;border:var(--borde-comic);box-shadow:0 10px 0 rgba(0,0,0,.12), var(--sombra-fuerte);position:relative;background:#0b1f14}
@@ -789,7 +820,11 @@ body.dark .mission-meter{background:rgba(255,255,255,.06); border-color:rgba(255
   #home{padding:18px}
   .guardia-avatar{width:120px;height:120px;font-size:60px;margin-bottom:14px}
   .speech-bubble{padding:16px 18px;font-size:1rem;border-radius:18px}
-  .btn-start{width:100%;max-width:520px;padding:16px 18px;font-size:1.25rem}
+  .home-actions{width:100%;flex-direction:column;gap:12px}
+  .btn-start,.btn-propuesta{width:100%;max-width:520px;padding:16px 18px;font-size:1.25rem}
+  .propuesta-modal{padding:10px}
+  .propuesta-modal-card{max-height:94dvh;border-radius:18px}
+  .propuesta-modal-body{padding:12px}
 
   /* Intro scene card full width */
   .scene-card{border-radius:18px}
@@ -918,7 +953,7 @@ input,textarea,select,button{font:inherit}
   .scene-title{font-size:1.05rem;line-height:1.15}
   .scene-chip{align-self:flex-start;font-size:.76rem;padding:6px 10px}
   .scene-footer p{max-width:none}
-  .scene-btn,.btn,.btn-start,.end-btn{width:100%;justify-content:center}
+  .scene-btn,.btn,.btn-start,.btn-propuesta,.end-btn{width:100%;justify-content:center}
   .hero .hero-caption{position:static;margin:10px;border-radius:14px;box-shadow:none}
   .flow-title{font-size:2rem}
   .flow-sub,.content-header p,.step-note,.plan-help,.drag-instruction{font-size:.95rem}
@@ -977,7 +1012,7 @@ input,textarea,select,button{font:inherit}
   .flow-sub,.content-header p,.step-note,.plan-help,.drag-instruction{font-size:.92rem}
   .scene-body{aspect-ratio:4/5}
   .hero .hero-media{aspect-ratio:4/3}
-  .scene-btn,.btn-start,.btn,.end-btn{padding:14px 16px;border-radius:18px}
+  .scene-btn,.btn-start,.btn-propuesta,.btn,.end-btn{padding:14px 16px;border-radius:18px}
   .vehicle-row,.mission-step,.flow-card,.card-box,.plan-problem-box,.plan-photo-panel,.plan-ready-box,.plan-action-card{padding:12px}
   .drag-track{padding-top:54px;min-height:110px}
   .drag-bus{font-size:1.6rem}
@@ -1065,7 +1100,29 @@ input,textarea,select,button{font:inherit}
       ¡Hola, explorador! Soy <strong>Guardia</strong>. Nuestra ciudad necesita tu ayuda.
       ¿Aceptas el reto de convertirte en <strong>Guardián Climático</strong>?
     </div>
-    <button type="button" class="btn-start" id="btn-start-mission" data-i18n="home_accept" onclick="if(window.GCRescue&&window.GCRescue.startMission){ return window.GCRescue.startMission(event); } return false;">🚀 ¡ACEPTO LA MISIÓN!</button>
+    <div class="home-actions">
+      <button type="button" class="btn-start" id="btn-start-mission" data-i18n="home_accept" onclick="if(window.GCRescue&&window.GCRescue.startMission){ return window.GCRescue.startMission(event); } return false;">🚀 ¡ACEPTO LA MISIÓN!</button>
+      <button type="button" class="btn-propuesta" id="btn-propuesta-ambiental" data-i18n="home_propuesta">🌎 Propuesta Ambiental</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROPUESTA AMBIENTAL -->
+<div class="propuesta-modal" id="propuesta-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="propuesta-modal-title">
+  <div class="propuesta-modal-card" role="document">
+    <div class="propuesta-modal-head">
+      <h2 class="propuesta-modal-title" id="propuesta-modal-title" data-i18n="propuesta_title">🌎 Propuesta Ambiental</h2>
+      <button type="button" class="propuesta-close" id="propuesta-close" aria-label="Cerrar propuesta ambiental">×</button>
+    </div>
+    <div class="propuesta-modal-body">
+      <div class="propuesta-media-block">
+        <img class="propuesta-img" src="img/propuesta-ambiental.png" alt="Guardianes Climáticos de Medellín: de espectadores a protagonistas" loading="lazy">
+      </div>
+      <div class="propuesta-video-wrap" aria-label="Video de la propuesta ambiental">
+        <iframe id="propuesta-video" title="Video Propuesta Ambiental Guardianes Climáticos" loading="lazy" allowfullscreen allow="fullscreen; autoplay; clipboard-write; encrypted-media" data-src="https://www.canva.com/design/DAHHcO2T_ow/watch?embed"></iframe>
+      </div>
+      <p class="propuesta-video-note" data-i18n-html="propuesta_video_note">Si el video no carga, <a href="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?utm_content=DAHHcO2T_ow&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbcec9ce882" target="_blank" rel="noopener">ábrelo en Canva</a>.</p>
+    </div>
   </div>
 </div>
 
@@ -1567,6 +1624,9 @@ const I18N = {
     home_subtitle:"Una misión para el futuro de nuestra ciudad",
     home_bubble:'¡Hola, explorador! Soy <strong>Guardia</strong>. Nuestra ciudad necesita tu ayuda. ¿Aceptas el reto de convertirte en <strong>Guardián Climático</strong>?',
     home_accept:"🚀 ¡ACEPTO LA MISIÓN!",
+    home_propuesta:"🌎 Propuesta Ambiental",
+    propuesta_title:"🌎 Propuesta Ambiental",
+    propuesta_video_note:'Si el video no carga, <a href="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?utm_content=DAHHcO2T_ow&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbcec9ce882" target="_blank" rel="noopener">ábrelo en Canva</a>.',
 
     briefing_title:"✅ MISIÓN ACEPTADA",
     briefing_sub:"Genial... ahora vamos a entender el problema y convertirlo en acción.",
@@ -1785,6 +1845,9 @@ const I18N = {
     home_subtitle:"A mission for our city’s future",
     home_bubble:'Hi, explorer! I’m <strong>Guardia</strong>. Our city needs your help. Will you accept the challenge to become a <strong>Climate Guardian</strong>?',
     home_accept:"🚀 I ACCEPT THE MISSION!",
+    home_propuesta:"🌎 Environmental Proposal",
+    propuesta_title:"🌎 Environmental Proposal",
+    propuesta_video_note:'If the video does not load, <a href="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?utm_content=DAHHcO2T_ow&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbcec9ce882" target="_blank" rel="noopener">open it in Canva</a>.',
 
     briefing_title:"✅ MISSION ACCEPTED",
     briefing_sub:"Awesome… now we’ll understand the problem and turn it into action.",
@@ -4578,6 +4641,57 @@ window.GCQuick = {
 })();
 </script>
 
+
+<!-- ✅ Modal Propuesta Ambiental -->
+<script>
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function openPropuesta(){
+    var modal=byId('propuesta-modal');
+    var iframe=byId('propuesta-video');
+    var closeBtn=byId('propuesta-close');
+    if(!modal) return false;
+    if(iframe && !iframe.getAttribute('src')){ iframe.setAttribute('src', iframe.getAttribute('data-src') || 'https://www.canva.com/design/DAHHcO2T_ow/watch?embed'); }
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+    setTimeout(function(){ try{ closeBtn && closeBtn.focus(); }catch(_e){} },40);
+    return false;
+  }
+  function closePropuesta(){
+    var modal=byId('propuesta-modal');
+    if(!modal) return false;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden','true');
+    document.body.style.overflow='';
+    return false;
+  }
+  function bindPropuesta(){
+    var btn=byId('btn-propuesta-ambiental');
+    var closeBtn=byId('propuesta-close');
+    var modal=byId('propuesta-modal');
+    if(btn && btn.dataset.propuestaBound!=='1'){
+      btn.dataset.propuestaBound='1';
+      btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); openPropuesta(); });
+    }
+    if(closeBtn && closeBtn.dataset.propuestaBound!=='1'){
+      closeBtn.dataset.propuestaBound='1';
+      closeBtn.addEventListener('click', function(e){ e.preventDefault(); closePropuesta(); });
+    }
+    if(modal && modal.dataset.propuestaBound!=='1'){
+      modal.dataset.propuestaBound='1';
+      modal.addEventListener('click', function(e){ if(e.target===modal) closePropuesta(); });
+    }
+  }
+  window.openPropuestaAmbiental=openPropuesta;
+  window.closePropuestaAmbiental=closePropuesta;
+  window.addEventListener('DOMContentLoaded', bindPropuesta);
+  window.addEventListener('load', bindPropuesta);
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){ closePropuesta(); }
+  });
+})();
+</script>
 
 <!-- ✅ Botón siempre visible: Guía + Rúbrica -->
 <script>
