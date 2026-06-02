@@ -1,4 +1,4 @@
-const CACHE_VERSION = "guardianes-v7-propuesta-ambiental";
+const CACHE_VERSION = "guardianes-v8-propuesta-ambiental-embeds";
 const APP_SHELL = [
   "./",
   "./index.html",

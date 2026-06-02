@@ -328,6 +328,8 @@ font-size:1rem;color:rgba(0,0,0,.82);box-shadow:var(--sombra);line-height:1.5}
 .propuesta-close:hover{transform:translateY(-2px)}
 .propuesta-close:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.22)}
 .propuesta-modal-body{padding:16px}
+.propuesta-section-title{margin:18px 4px 10px;font-family:'Bangers',cursive;font-size:clamp(1.15rem,3.3vw,1.75rem);letter-spacing:.8px;color:#1B5E20;text-shadow:1px 1px 0 rgba(255,255,255,.7)}
+.propuesta-section-title:first-child{margin-top:0}
 .propuesta-media-block{border:3px solid rgba(0,0,0,.28);border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 10px 0 rgba(0,0,0,.10),0 18px 38px rgba(0,0,0,.12);margin-bottom:18px}
 .propuesta-img{display:block;width:100%;height:auto}
 .propuesta-video-wrap{position:relative;width:100%;aspect-ratio:16/9;border:3px solid rgba(0,0,0,.28);border-radius:18px;overflow:hidden;background:#0b1f14;box-shadow:0 10px 0 rgba(0,0,0,.10),0 18px 38px rgba(0,0,0,.12)}
@@ -338,6 +340,7 @@ body.dark .propuesta-modal-card{background:linear-gradient(180deg,rgba(17,24,32,
 body.dark .propuesta-modal-head{border-bottom-color:rgba(255,255,255,.28)}
 body.dark .propuesta-media-block,body.dark .propuesta-video-wrap{border-color:rgba(255,255,255,.20);background:rgba(255,255,255,.06)}
 body.dark .propuesta-video-note{color:rgba(233,242,251,.88)}
+body.dark .propuesta-section-title{color:#b9f6ca;text-shadow:1px 1px 0 rgba(0,0,0,.45)}
 
 /* Cards */
 .hero{max-width:1100px;margin:0 auto 18px;border-radius:22px;overflow:hidden;border:var(--borde-comic);box-shadow:0 10px 0 rgba(0,0,0,.12), var(--sombra-fuerte);position:relative;background:#0b1f14}
@@ -1115,13 +1118,34 @@ input,textarea,select,button{font:inherit}
       <button type="button" class="propuesta-close" id="propuesta-close" aria-label="Cerrar propuesta ambiental">×</button>
     </div>
     <div class="propuesta-modal-body">
+      <div class="propuesta-section-title" data-i18n="propuesta_img_title">🖼️ Infografía de la propuesta</div>
       <div class="propuesta-media-block">
         <img class="propuesta-img" src="img/propuesta-ambiental.png" alt="Guardianes Climáticos de Medellín: de espectadores a protagonistas" loading="lazy">
       </div>
+
+      <div class="propuesta-section-title" data-i18n="propuesta_video_title">🎬 Video principal</div>
       <div class="propuesta-video-wrap" aria-label="Video de la propuesta ambiental">
-        <iframe id="propuesta-video" title="Video Propuesta Ambiental Guardianes Climáticos" loading="lazy" allowfullscreen allow="fullscreen; autoplay; clipboard-write; encrypted-media" data-src="https://www.canva.com/design/DAHHcO2T_ow/watch?embed"></iframe>
+        <iframe class="propuesta-embed" id="propuesta-video" title="Video Propuesta Ambiental Guardianes Climáticos" loading="lazy" allowfullscreen allow="fullscreen; autoplay; clipboard-write; encrypted-media" data-src="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?embed"></iframe>
       </div>
       <p class="propuesta-video-note" data-i18n-html="propuesta_video_note">Si el video no carga, <a href="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?utm_content=DAHHcO2T_ow&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbcec9ce882" target="_blank" rel="noopener">ábrelo en Canva</a>.</p>
+
+      <div class="propuesta-section-title" data-i18n="propuesta_genially_title">🧩 Genially interactivo</div>
+      <div class="propuesta-video-wrap" aria-label="Genially interactivo de Guardianes Climáticos">
+        <iframe class="propuesta-embed" title="Genially Guardianes Climáticos" loading="lazy" allowfullscreen allow="fullscreen" data-src="https://view.genially.com/69e986ad77114efe83df5cc9"></iframe>
+      </div>
+      <p class="propuesta-video-note" data-i18n-html="propuesta_genially_note">Si el Genially no carga, <a href="https://view.genially.com/69e986ad77114efe83df5cc9" target="_blank" rel="noopener">ábrelo en Genially</a>.</p>
+
+      <div class="propuesta-section-title" data-i18n="propuesta_practicas_title">🧪 Prácticas</div>
+      <div class="propuesta-video-wrap" aria-label="Presentación Prácticas en Canva">
+        <iframe class="propuesta-embed" title="Prácticas - Juan Carlos Blandón Vargas" loading="lazy" allowfullscreen allow="fullscreen" data-src="https://www.canva.com/design/DAHJICm2ZzM/5TdLdE3WcfC3JzoIaLxGsA/watch?embed"></iframe>
+      </div>
+      <p class="propuesta-video-note" data-i18n-html="propuesta_practicas_note">Si la presentación no carga, <a href="https://www.canva.com/design/DAHJICm2ZzM/5TdLdE3WcfC3JzoIaLxGsA/watch?utm_content=DAHJICm2ZzM&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">abre Prácticas en Canva</a>.</p>
+
+      <div class="propuesta-section-title" data-i18n="propuesta_reflexion_title">🎓 Reflexión Académica</div>
+      <div class="propuesta-video-wrap" aria-label="Presentación Reflexión Académica en Canva">
+        <iframe class="propuesta-embed" title="Reflexión Académica - Juan Carlos Blandón Vargas" loading="lazy" allowfullscreen allow="fullscreen" data-src="https://www.canva.com/design/DAHKmgNR0bo/KUvp9UYAtikZlJ-oD7haMw/watch?embed"></iframe>
+      </div>
+      <p class="propuesta-video-note" data-i18n-html="propuesta_reflexion_note">Si la presentación no carga, <a href="https://www.canva.com/design/DAHKmgNR0bo/KUvp9UYAtikZlJ-oD7haMw/watch?utm_content=DAHKmgNR0bo&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">abre Reflexión Académica en Canva</a>.</p>
     </div>
   </div>
 </div>
@@ -1626,7 +1650,15 @@ const I18N = {
     home_accept:"🚀 ¡ACEPTO LA MISIÓN!",
     home_propuesta:"🌎 Propuesta Ambiental",
     propuesta_title:"🌎 Propuesta Ambiental",
+    propuesta_img_title:"🖼️ Infografía de la propuesta",
+    propuesta_video_title:"🎬 Video principal",
     propuesta_video_note:'Si el video no carga, <a href="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?utm_content=DAHHcO2T_ow&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbcec9ce882" target="_blank" rel="noopener">ábrelo en Canva</a>.',
+    propuesta_genially_title:"🧩 Genially interactivo",
+    propuesta_genially_note:'Si el Genially no carga, <a href="https://view.genially.com/69e986ad77114efe83df5cc9" target="_blank" rel="noopener">ábrelo en Genially</a>.',
+    propuesta_practicas_title:"🧪 Prácticas",
+    propuesta_practicas_note:'Si la presentación no carga, <a href="https://www.canva.com/design/DAHJICm2ZzM/5TdLdE3WcfC3JzoIaLxGsA/watch?utm_content=DAHJICm2ZzM&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">abre Prácticas en Canva</a>.',
+    propuesta_reflexion_title:"🎓 Reflexión Académica",
+    propuesta_reflexion_note:'Si la presentación no carga, <a href="https://www.canva.com/design/DAHKmgNR0bo/KUvp9UYAtikZlJ-oD7haMw/watch?utm_content=DAHKmgNR0bo&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">abre Reflexión Académica en Canva</a>.',
 
     briefing_title:"✅ MISIÓN ACEPTADA",
     briefing_sub:"Genial... ahora vamos a entender el problema y convertirlo en acción.",
@@ -1847,7 +1879,15 @@ const I18N = {
     home_accept:"🚀 I ACCEPT THE MISSION!",
     home_propuesta:"🌎 Environmental Proposal",
     propuesta_title:"🌎 Environmental Proposal",
+    propuesta_img_title:"🖼️ Proposal infographic",
+    propuesta_video_title:"🎬 Main video",
     propuesta_video_note:'If the video does not load, <a href="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?utm_content=DAHHcO2T_ow&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbcec9ce882" target="_blank" rel="noopener">open it in Canva</a>.',
+    propuesta_genially_title:"🧩 Interactive Genially",
+    propuesta_genially_note:'If the Genially does not load, <a href="https://view.genially.com/69e986ad77114efe83df5cc9" target="_blank" rel="noopener">open it in Genially</a>.',
+    propuesta_practicas_title:"🧪 Practices",
+    propuesta_practicas_note:'If the presentation does not load, <a href="https://www.canva.com/design/DAHJICm2ZzM/5TdLdE3WcfC3JzoIaLxGsA/watch?utm_content=DAHJICm2ZzM&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">open Practices in Canva</a>.',
+    propuesta_reflexion_title:"🎓 Academic Reflection",
+    propuesta_reflexion_note:'If the presentation does not load, <a href="https://www.canva.com/design/DAHKmgNR0bo/KUvp9UYAtikZlJ-oD7haMw/watch?utm_content=DAHKmgNR0bo&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">open Academic Reflection in Canva</a>.',
 
     briefing_title:"✅ MISSION ACCEPTED",
     briefing_sub:"Awesome… now we’ll understand the problem and turn it into action.",
@@ -4648,10 +4688,11 @@ window.GCQuick = {
   function byId(id){ return document.getElementById(id); }
   function openPropuesta(){
     var modal=byId('propuesta-modal');
-    var iframe=byId('propuesta-video');
     var closeBtn=byId('propuesta-close');
     if(!modal) return false;
-    if(iframe && !iframe.getAttribute('src')){ iframe.setAttribute('src', iframe.getAttribute('data-src') || 'https://www.canva.com/design/DAHHcO2T_ow/watch?embed'); }
+    modal.querySelectorAll('iframe[data-src]').forEach(function(frame){
+      if(!frame.getAttribute('src')) frame.setAttribute('src', frame.getAttribute('data-src'));
+    });
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden','false');
     document.body.style.overflow='hidden';
