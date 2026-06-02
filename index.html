@@ -288,7 +288,7 @@ min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-
 .floating-leaves{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .leaf{position:absolute;font-size:1.5rem;animation:fallLeaf linear infinite;opacity:.4}
 @keyframes fallLeaf{0%{transform:translateY(-50px) rotate(0deg);opacity:0}10%{opacity:.4}90%{opacity:.4}100%{transform:translateY(100dvh) rotate(360deg);opacity:0}}
-.home-content{position:relative;z-index:2;max-width:740px}
+.home-content{position:relative;z-index:2;width:min(100%,740px);max-width:740px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
 .guardia-avatar{width:140px;height:140px;background:linear-gradient(135deg,var(--verde-neon),#69F0AE);border-radius:50%;margin:0 auto 18px;display:flex;
 align-items:center;justify-content:center;font-size:72px;border:5px solid var(--amarillo);box-shadow:0 0 50px rgba(0,230,118,.3);animation:float 3s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
@@ -303,11 +303,13 @@ font-size:1rem;color:rgba(0,0,0,.82);box-shadow:var(--sombra);line-height:1.5}
   padding:16px 40px;font-size:1.35rem;font-family:'Bangers',cursive;letter-spacing:2px;
   border-radius:50px;cursor:pointer;
   transition:all .25s;box-shadow:0 6px 0 #BF360C,var(--sombra);position:relative;top:0;
-  min-height:52px;
+  min-height:52px;width:100%;max-width:520px;display:inline-flex;align-items:center;justify-content:center;text-align:center;
 }
 .btn-start:hover{top:-3px;box-shadow:0 9px 0 #BF360C,var(--sombra-fuerte)}
 .btn-start:active{top:4px;box-shadow:0 2px 0 #BF360C}
-.home-actions{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap}
+.home-actions{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:16px;flex-wrap:nowrap;width:min(100%,520px);margin:0 auto}
+.home-actions .btn-propuesta{order:1}
+.home-actions .btn-start{order:2}
 .btn-propuesta{
   appearance:none;border:3px solid rgba(0,0,0,.62);cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;gap:10px;
@@ -315,7 +317,7 @@ font-size:1rem;color:rgba(0,0,0,.82);box-shadow:var(--sombra);line-height:1.5}
   font-family:'Bangers',cursive;font-size:1.22rem;letter-spacing:1.4px;
   color:#0d331a;background:linear-gradient(135deg,#FFD600,#FFF176);
   box-shadow:0 6px 0 #b79500,var(--sombra);position:relative;top:0;
-  transition:all .25s;min-height:52px;text-shadow:0 1px 0 rgba(255,255,255,.65)
+  transition:all .25s;min-height:52px;width:100%;max-width:520px;text-align:center;text-shadow:0 1px 0 rgba(255,255,255,.65)
 }
 .btn-propuesta:hover{top:-3px;box-shadow:0 9px 0 #b79500,var(--sombra-fuerte)}
 .btn-propuesta:active{top:4px;box-shadow:0 2px 0 #b79500}
@@ -1027,6 +1029,187 @@ input,textarea,select,button{font:inherit}
   .cierre-sub{font-size:1rem}
 }
 
+
+/* === GC v5: desplazamiento normal + responsive refinado ===
+   Permite que las pantallas posteriores a “Misión aceptada” se muevan con
+   scroll nativo de página, sin depender de contenedores con barra interna. */
+html,
+body{
+  height:auto !important;
+  min-height:100%;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:auto;
+}
+body.modal-open{
+  overflow:hidden !important;
+}
+body.mission-scroll{
+  overflow-y:auto !important;
+  height:auto !important;
+  min-height:100%;
+  touch-action:pan-y;
+}
+body.mission-scroll .screen.active:not(#home){
+  display:block !important;
+  height:auto !important;
+  min-height:100svh;
+  overflow:visible !important;
+  touch-action:pan-y;
+}
+body.mission-scroll .flow-screen,
+body.mission-scroll .content-screen{
+  overflow:visible !important;
+  scroll-margin-top:90px;
+}
+body.mission-scroll #cierre{
+  overflow:visible !important;
+  align-items:flex-start;
+}
+body.mission-scroll .flow-card,
+body.mission-scroll .card-box,
+body.mission-scroll .mission-wrap,
+body.mission-scroll .plan-form-grid,
+body.mission-scroll .cierre-wrap{
+  max-width:min(1100px, 100%);
+}
+
+/* Cinturón sin scroll horizontal interno: se acomoda en filas responsivas. */
+body.belt-on #belt{
+  max-height:none;
+  overflow:visible;
+}
+body.belt-on .belt-left,
+body.belt-on .belt-right{
+  overflow:visible !important;
+  -webkit-overflow-scrolling:auto;
+  scrollbar-width:none;
+}
+
+@media (max-width: 820px){
+  :root{--belt-h:176px;}
+  body.mission-scroll .flow-screen,
+  body.mission-scroll .content-screen{
+    padding-top:calc(72px + env(safe-area-inset-top, 0px));
+    padding-bottom:calc(34px + env(safe-area-inset-bottom, 0px) + var(--belt-h));
+  }
+  body.belt-on #belt{
+    flex-direction:column;
+    align-items:stretch;
+    justify-content:center;
+    gap:8px;
+    padding:8px;
+    border-radius:18px;
+  }
+  body.belt-on .belt-left,
+  body.belt-on .belt-right{
+    width:100%;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+  }
+  body.belt-on .belt-btn{
+    flex:1 1 calc(50% - 8px);
+    min-width:0;
+    white-space:normal;
+    text-align:center;
+    justify-content:center;
+    line-height:1.1;
+    padding:10px 10px;
+    min-height:42px;
+  }
+  body.belt-on .belt-brand{
+    flex-basis:100%;
+  }
+  body.belt-on .belt-score{
+    flex:1 1 auto;
+    justify-content:center;
+    min-height:42px;
+  }
+  body.belt-on .belt-icon{
+    flex:0 0 42px;
+    width:42px;
+    height:42px;
+  }
+  #utility-dock{
+    max-width:calc(100vw - 24px);
+  }
+}
+
+@media (max-width: 640px){
+  :root{--belt-h:190px;}
+  #home{
+    min-height:100svh;
+    padding:calc(18px + env(safe-area-inset-top, 0px)) 14px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+  .home-content{
+    width:min(100%, 560px);
+  }
+  .home-title{
+    font-size:clamp(2.1rem, 11vw, 3.15rem);
+  }
+  .home-subtitle{
+    font-size:clamp(1rem, 5vw, 1.35rem);
+  }
+  .speech-bubble{
+    max-width:100%;
+  }
+  body.mission-scroll .hero .hero-media{
+    aspect-ratio:4/3;
+  }
+  body.mission-scroll .flow-card,
+  body.mission-scroll .card-box,
+  body.mission-scroll .mission-step{
+    width:100%;
+  }
+  body.belt-on #belt{
+    left:8px;
+    right:8px;
+    bottom:calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 480px){
+  :root{--belt-h:206px;}
+  body.belt-on .belt-left{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+  }
+  body.belt-on .belt-brand{
+    grid-column:1 / -1;
+  }
+  body.belt-on .belt-btn{
+    font-size:.82rem;
+    min-height:38px;
+    padding:8px 8px;
+    border-radius:13px;
+  }
+  body.belt-on .belt-right{
+    display:flex;
+    justify-content:center;
+  }
+  body.belt-on .belt-score{
+    font-size:.82rem;
+    padding:8px 10px;
+    min-height:38px;
+    border-radius:13px;
+  }
+  body.belt-on .belt-icon{
+    flex:0 0 38px;
+    width:38px;
+    height:38px;
+    min-height:38px;
+    border-radius:13px;
+  }
+  body.mission-scroll .flow-screen,
+  body.mission-scroll .content-screen{
+    padding-top:calc(66px + env(safe-area-inset-top, 0px));
+    padding-bottom:calc(28px + env(safe-area-inset-bottom, 0px) + var(--belt-h));
+  }
+}
+
 </style>
 </head>
 
@@ -1097,15 +1280,15 @@ input,textarea,select,button{font:inherit}
 
   <div class="home-content">
     <div class="guardia-avatar">🌿</div>
-    <h1 class="home-title" data-i18n-html="home_title">GUARDIANES CLIMÁTICOS<br>DE MEDEDELLÍN</h1>
+    <h1 class="home-title" data-i18n-html="home_title">GUARDIANES CLIMÁTICOS<br>DE MEDELLÍN</h1>
     <p class="home-subtitle" data-i18n="home_subtitle">Una misión para el futuro de nuestra ciudad</p>
     <div class="speech-bubble" data-i18n-html="home_bubble">
       ¡Hola, explorador! Soy <strong>Guardia</strong>. Nuestra ciudad necesita tu ayuda.
       ¿Aceptas el reto de convertirte en <strong>Guardián Climático</strong>?
     </div>
-    <div class="home-actions">
-      <button type="button" class="btn-start" id="btn-start-mission" data-i18n="home_accept" onclick="if(window.GCRescue&&window.GCRescue.startMission){ return window.GCRescue.startMission(event); } return false;">🚀 ¡ACEPTO LA MISIÓN!</button>
+    <div class="home-actions" aria-label="Acciones principales">
       <button type="button" class="btn-propuesta" id="btn-propuesta-ambiental" data-i18n="home_propuesta">🌎 Propuesta Ambiental</button>
+      <button type="button" class="btn-start" id="btn-start-mission" data-i18n="home_accept" onclick="if(window.GCRescue&&window.GCRescue.startMission){ return window.GCRescue.startMission(event); } return false;">🚀 ¡ACEPTO LA MISIÓN!</button>
     </div>
   </div>
 </div>
@@ -1125,9 +1308,9 @@ input,textarea,select,button{font:inherit}
 
       <div class="propuesta-section-title" data-i18n="propuesta_video_title">🎬 Video principal</div>
       <div class="propuesta-video-wrap" aria-label="Video de la propuesta ambiental">
-        <iframe class="propuesta-embed" id="propuesta-video" title="Video Propuesta Ambiental Guardianes Climáticos" loading="lazy" allowfullscreen allow="fullscreen; autoplay; clipboard-write; encrypted-media" data-src="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?embed"></iframe>
+        <iframe class="propuesta-embed" id="propuesta-video" title="Video Propuesta Ambiental Guardianes Climáticos" loading="lazy" allowfullscreen allow="fullscreen; autoplay; clipboard-write; encrypted-media" data-src="https://www.canva.com/design/DAHHcO2T_ow/wx9_O9bKfneTvI-1kLsvFQ/watch?embed"></iframe>
       </div>
-      <p class="propuesta-video-note" data-i18n-html="propuesta_video_note">Si el video no carga, <a href="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?utm_content=DAHHcO2T_ow&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbcec9ce882" target="_blank" rel="noopener">ábrelo en Canva</a>.</p>
+      <p class="propuesta-video-note" data-i18n-html="propuesta_video_note">Si el video no carga, <a href="https://www.canva.com/design/DAHHcO2T_ow/wx9_O9bKfneTvI-1kLsvFQ/watch?utm_content=DAHHcO2T_ow&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Guardianes Climaticos ok</a> de Academia IA.</p>
 
       <div class="propuesta-section-title" data-i18n="propuesta_genially_title">🧩 Genially interactivo</div>
       <div class="propuesta-video-wrap" aria-label="Genially interactivo de Guardianes Climáticos">
@@ -1652,7 +1835,7 @@ const I18N = {
     propuesta_title:"🌎 Propuesta Ambiental",
     propuesta_img_title:"🖼️ Infografía de la propuesta",
     propuesta_video_title:"🎬 Video principal",
-    propuesta_video_note:'Si el video no carga, <a href="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?utm_content=DAHHcO2T_ow&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbcec9ce882" target="_blank" rel="noopener">ábrelo en Canva</a>.',
+    propuesta_video_note:'Si el video no carga, <a href="https://www.canva.com/design/DAHHcO2T_ow/wx9_O9bKfneTvI-1kLsvFQ/watch?utm_content=DAHHcO2T_ow&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Guardianes Climaticos ok</a> de Academia IA.',
     propuesta_genially_title:"🧩 Genially interactivo",
     propuesta_genially_note:'Si el Genially no carga, <a href="https://view.genially.com/69e986ad77114efe83df5cc9" target="_blank" rel="noopener">ábrelo en Genially</a>.',
     propuesta_practicas_title:"🧪 Prácticas",
@@ -1881,7 +2064,7 @@ const I18N = {
     propuesta_title:"🌎 Environmental Proposal",
     propuesta_img_title:"🖼️ Proposal infographic",
     propuesta_video_title:"🎬 Main video",
-    propuesta_video_note:'If the video does not load, <a href="https://www.canva.com/design/DAHHcO2T_ow/uxpmy-gQTvpEL37vYX-Zhg/watch?utm_content=DAHHcO2T_ow&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hbcec9ce882" target="_blank" rel="noopener">open it in Canva</a>.',
+    propuesta_video_note:'If the video does not load, <a href="https://www.canva.com/design/DAHHcO2T_ow/wx9_O9bKfneTvI-1kLsvFQ/watch?utm_content=DAHHcO2T_ow&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Guardianes Climaticos ok</a> by Academia IA.',
     propuesta_genially_title:"🧩 Interactive Genially",
     propuesta_genially_note:'If the Genially does not load, <a href="https://view.genially.com/69e986ad77114efe83df5cc9" target="_blank" rel="noopener">open it in Genially</a>.',
     propuesta_practicas_title:"🧪 Practices",
@@ -4682,6 +4865,82 @@ window.GCQuick = {
 </script>
 
 
+
+<!-- ✅ GC v5: Scroll normal después de aceptar la misión -->
+<script>
+(function(){
+  function activeId(){
+    var active = document.querySelector('.screen.active');
+    return active ? active.id : 'home';
+  }
+  function isMissionLike(id){
+    return id && id !== 'home';
+  }
+  function applyScrollFix(id){
+    id = id || activeId();
+    var modal = document.getElementById('propuesta-modal');
+    var modalOpen = !!(modal && modal.classList.contains('is-open'));
+
+    document.documentElement.style.overflowX = 'hidden';
+    document.body.style.overflowX = 'hidden';
+    document.documentElement.style.overflowY = 'auto';
+
+    if(modalOpen){
+      document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+      return;
+    }
+
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.overflowY = 'auto';
+    document.body.classList.toggle('mission-scroll', isMissionLike(id));
+  }
+  function topAfterNav(){
+    applyScrollFix();
+    try{ window.scrollTo({top:0, left:0, behavior:'auto'}); }catch(_e){ window.scrollTo(0,0); }
+  }
+  function patchNav(){
+    if(window.nav && typeof window.nav.go === 'function' && !window.nav.__gcScrollPatched){
+      var originalGo = window.nav.go.bind(window.nav);
+      window.nav.go = function(screenId, opts){
+        var result = originalGo(screenId, opts || {});
+        setTimeout(function(){ applyScrollFix(screenId); }, 0);
+        setTimeout(function(){ applyScrollFix(screenId); }, 120);
+        return result;
+      };
+      window.nav.__gcScrollPatched = true;
+    }
+    if(window.GCRescue && !window.GCRescue.__gcScrollPatched){
+      if(typeof window.GCRescue.go === 'function'){
+        var rescueGo = window.GCRescue.go;
+        window.GCRescue.go = function(id){
+          var result = rescueGo.apply(this, arguments);
+          setTimeout(function(){ applyScrollFix(id); }, 0);
+          setTimeout(function(){ applyScrollFix(id); }, 120);
+          return result;
+        };
+      }
+      if(typeof window.GCRescue.startMission === 'function'){
+        var rescueStart = window.GCRescue.startMission;
+        window.GCRescue.startMission = function(ev){
+          var result = rescueStart.apply(this, arguments);
+          setTimeout(function(){ applyScrollFix('briefing'); }, 0);
+          setTimeout(function(){ applyScrollFix(activeId()); }, 150);
+          return result;
+        };
+      }
+      window.GCRescue.__gcScrollPatched = true;
+    }
+  }
+  window.GCScrollFix = { apply: applyScrollFix, patch: patchNav, topAfterNav: topAfterNav };
+  document.addEventListener('DOMContentLoaded', function(){ patchNav(); applyScrollFix(); setTimeout(patchNav, 400); setTimeout(applyScrollFix, 500); });
+  window.addEventListener('load', function(){ patchNav(); applyScrollFix(); });
+  window.addEventListener('hashchange', function(){ setTimeout(function(){ applyScrollFix(); }, 40); });
+  window.addEventListener('pageshow', function(){ patchNav(); applyScrollFix(); });
+})();
+</script>
+
 <!-- ✅ Modal Propuesta Ambiental -->
 <script>
 (function(){
@@ -4695,6 +4954,7 @@ window.GCQuick = {
     });
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open');
     document.body.style.overflow='hidden';
     setTimeout(function(){ try{ closeBtn && closeBtn.focus(); }catch(_e){} },40);
     return false;
@@ -4704,7 +4964,9 @@ window.GCQuick = {
     if(!modal) return false;
     modal.classList.remove('is-open');
     modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('modal-open');
     document.body.style.overflow='';
+    if(window.GCScrollFix && window.GCScrollFix.apply){ window.GCScrollFix.apply(); }
     return false;
   }
   function bindPropuesta(){

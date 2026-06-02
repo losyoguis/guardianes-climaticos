@@ -1,4 +1,4 @@
-const CACHE_VERSION = "guardianes-v8-propuesta-ambiental-embeds";
+const CACHE_VERSION = "guardianes-v11-scroll-responsive";
 const APP_SHELL = [
   "./",
   "./index.html",
