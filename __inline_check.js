@@ -14,6 +14,15 @@ const I18N = {
     home_subtitle:"Una misión para el futuro de nuestra ciudad",
     home_bubble:'¡Hola, explorador! Soy <strong>Guardia</strong>. Nuestra ciudad necesita tu ayuda. ¿Aceptas el reto de convertirte en <strong>Guardián Climático</strong>?',
     home_accept:"🚀 ¡ACEPTO LA MISIÓN!",
+    home_propuesta:"🌎 Propuesta Ambiental",
+    propuesta_title:"🌎 Propuesta Ambiental",
+    propuesta_img_title:"🖼️ Infografía de la propuesta",
+    propuesta_video_title:"🎬 Video principal",
+    propuesta_video_note:'Si el video no carga, <a href="https://www.canva.com/design/DAHHcO2T_ow/wx9_O9bKfneTvI-1kLsvFQ/watch?utm_content=DAHHcO2T_ow&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Guardianes Climaticos ok</a> de Academia IA.',
+    propuesta_genially_title:"🧩 Genially interactivo",
+    propuesta_genially_note:'Si el Genially no carga, <a href="https://view.genially.com/69e986ad77114efe83df5cc9" target="_blank" rel="noopener">ábrelo en Genially</a>.',
+    propuesta_reflexion_title:"🎓 Reflexión Académica",
+    propuesta_reflexion_note:'Si la presentación no carga, <a href="https://www.canva.com/design/DAHKmgNR0bo/KUvp9UYAtikZlJ-oD7haMw/watch?utm_content=DAHKmgNR0bo&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">abre Reflexión Académica en Canva</a>.',
 
     briefing_title:"✅ MISIÓN ACEPTADA",
     briefing_sub:"Genial... ahora vamos a entender el problema y convertirlo en acción.",
@@ -232,6 +241,15 @@ const I18N = {
     home_subtitle:"A mission for our city’s future",
     home_bubble:'Hi, explorer! I’m <strong>Guardia</strong>. Our city needs your help. Will you accept the challenge to become a <strong>Climate Guardian</strong>?',
     home_accept:"🚀 I ACCEPT THE MISSION!",
+    home_propuesta:"🌎 Environmental Proposal",
+    propuesta_title:"🌎 Environmental Proposal",
+    propuesta_img_title:"🖼️ Proposal infographic",
+    propuesta_video_title:"🎬 Main video",
+    propuesta_video_note:'If the video does not load, <a href="https://www.canva.com/design/DAHHcO2T_ow/wx9_O9bKfneTvI-1kLsvFQ/watch?utm_content=DAHHcO2T_ow&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">Guardianes Climaticos ok</a> by Academia IA.',
+    propuesta_genially_title:"🧩 Interactive Genially",
+    propuesta_genially_note:'If the Genially does not load, <a href="https://view.genially.com/69e986ad77114efe83df5cc9" target="_blank" rel="noopener">open it in Genially</a>.',
+    propuesta_reflexion_title:"🎓 Academic Reflection",
+    propuesta_reflexion_note:'If the presentation does not load, <a href="https://www.canva.com/design/DAHKmgNR0bo/KUvp9UYAtikZlJ-oD7haMw/watch?utm_content=DAHKmgNR0bo&amp;utm_campaign=designshare&amp;utm_medium=embeds&amp;utm_source=link" target="_blank" rel="noopener">open Academic Reflection in Canva</a>.',
 
     briefing_title:"✅ MISSION ACCEPTED",
     briefing_sub:"Awesome… now we’ll understand the problem and turn it into action.",
@@ -664,6 +682,23 @@ function playSectionNarration(sectionId){
 const STORAGE_KEY="gcmed_state_v27";
 const SESSION_KEY="gcmed_state_session_v27";
 
+const PLAN_FORM_VERSION = 3;
+function defaultPlanData(){
+  return {
+    version: PLAN_FORM_VERSION,
+    studentName: "",
+    problem: "",
+    context: "",
+    actions: [
+      { what:"", who:"", when:"" },
+      { what:"", who:"", when:"" },
+      { what:"", who:"", when:"" }
+    ],
+    photoData: "",
+    photoName: ""
+  };
+}
+
 const defaultState=()=>({
   missionStarted:false,
   score:0,
@@ -684,23 +719,6 @@ function safeSet(store,key,val){ try{store.setItem(key,val);}catch(e){} }
 function safeGet(store,key){ try{return store.getItem(key);}catch(e){return null;} }
 function safeRemove(store,key){ try{store.removeItem(key);}catch(e){} }
 
-
-const PLAN_FORM_VERSION = 3;
-function defaultPlanData(){
-  return {
-    version: PLAN_FORM_VERSION,
-    studentName: "",
-    problem: "",
-    context: "",
-    actions: [
-      { what:"", who:"", when:"" },
-      { what:"", who:"", when:"" },
-      { what:"", who:"", when:"" }
-    ],
-    photoData: "",
-    photoName: ""
-  };
-}
 function normalizePlanData(data){
   const base = defaultPlanData();
   if(!data || typeof data !== "object") return base;
@@ -983,71 +1001,147 @@ function buildGuardianCertificateDocument(){
 </body>
 </html>`;
 }
+function downloadHtmlDocument(html, filename, okEs, okEn){
+  try{
+    const blob = new Blob([html], { type:'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 2000);
+    showToast((currentLang==='en') ? okEn : okEs);
+  }catch(err){
+    console.error('downloadHtmlDocument error', err);
+    showToast((currentLang==='en') ? 'The file could not be downloaded.' : 'No se pudo descargar el archivo.');
+  }
+}
+function printHtmlDocument(html, title){
+  try{
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('title', title || 'print-frame');
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '1px';
+    iframe.style.height = '1px';
+    iframe.style.opacity = '0.01';
+    iframe.style.pointerEvents = 'none';
+    iframe.style.border = '0';
+    iframe.style.zIndex = '-1';
+    document.body.appendChild(iframe);
+
+    const cleanup = ()=>{
+      try{ iframe.onload = null; }catch(err){}
+      try{ if(iframe.parentNode) iframe.parentNode.removeChild(iframe); }catch(err){}
+    };
+
+    const startPrint = ()=>{
+      const win = iframe.contentWindow;
+      if(!win){
+        cleanup();
+        showToast((currentLang==='en') ? 'The print view could not be opened.' : 'No se pudo abrir la vista de impresión.');
+        return;
+      }
+      const safePrint = ()=>{
+        try{
+          win.focus();
+          win.print();
+        }catch(err){
+          console.error('printHtmlDocument print error', err);
+          showToast((currentLang==='en') ? 'Printing is not available on this device.' : 'La impresión no está disponible en este dispositivo.');
+        }
+        setTimeout(cleanup, 1200);
+      };
+      try{
+        const doc = win.document;
+        const images = Array.from(doc.images || []);
+        let pending = images.length;
+        if(!pending){
+          setTimeout(safePrint, 180);
+          return;
+        }
+        let resolved = false;
+        const done = ()=>{
+          if(resolved) return;
+          resolved = true;
+          setTimeout(safePrint, 180);
+        };
+        const tick = ()=>{ pending -= 1; if(pending <= 0) done(); };
+        images.forEach(img=>{
+          if(img.complete) tick();
+          else {
+            img.addEventListener('load', tick, { once:true });
+            img.addEventListener('error', tick, { once:true });
+          }
+        });
+        setTimeout(done, 1400);
+      }catch(err){
+        console.error('printHtmlDocument wait error', err);
+        setTimeout(safePrint, 220);
+      }
+    };
+
+    iframe.onload = ()=>setTimeout(startPrint, 120);
+
+    const doc = iframe.contentWindow && iframe.contentWindow.document;
+    if(!doc){
+      cleanup();
+      showToast((currentLang==='en') ? 'The print view could not be opened.' : 'No se pudo abrir la vista de impresión.');
+      return;
+    }
+    doc.open();
+    doc.write(html);
+    doc.close();
+  }catch(err){
+    console.error('printHtmlDocument error', err);
+    showToast((currentLang==='en') ? 'Printing could not be started.' : 'No se pudo iniciar la impresión.');
+  }
+}
 function printPlanEvidence(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const win = window.open('', '_blank', 'noopener,noreferrer');
-  if(!win){
-    showToast((currentLang==='en') ? 'Allow pop-up windows to print your plan.' : 'Permite las ventanas emergentes para imprimir tu plan.');
-    return;
-  }
-  win.document.open();
-  win.document.write(buildPlanEvidenceDocument());
-  win.document.close();
-  setTimeout(()=>{ try{ win.focus(); win.print(); }catch(err){} }, 350);
+  printHtmlDocument(buildPlanEvidenceDocument(), (currentLang==='en') ? 'Guardian Plan' : 'Plan Guardián');
 }
 function downloadPlanEvidence(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const blob = new Blob([buildPlanEvidenceDocument()], { type:'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
   const stamp = new Date().toISOString().slice(0,10);
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
-  a.href = url;
-  a.download = `${currentLang==='en' ? 'guardian_plan' : 'plan_guardian'}_${namePart}_${stamp}.html`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 1600);
-  showToast((currentLang==='en') ? 'Plan downloaded.' : 'Plan descargado.');
+  downloadHtmlDocument(
+    buildPlanEvidenceDocument(),
+    `${currentLang==='en' ? 'guardian_plan' : 'plan_guardian'}_${namePart}_${stamp}.html`,
+    'Plan descargado.',
+    'Plan downloaded.'
+  );
 }
 function printGuardianCertificate(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const win = window.open('', '_blank', 'noopener,noreferrer');
-  if(!win){
-    showToast((currentLang==='en') ? 'Allow pop-up windows to print your certificate.' : 'Permite las ventanas emergentes para imprimir tu diploma.');
-    return;
-  }
-  win.document.open();
-  win.document.write(buildGuardianCertificateDocument());
-  win.document.close();
-  setTimeout(()=>{ try{ win.focus(); win.print(); }catch(err){} }, 350);
+  printHtmlDocument(buildGuardianCertificateDocument(), (currentLang==='en') ? 'Climate Guardian Certificate' : 'Diploma Guardián Climático');
 }
 function downloadGuardianCertificate(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const blob = new Blob([buildGuardianCertificateDocument()], { type:'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
   const stamp = new Date().toISOString().slice(0,10);
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
-  a.href = url;
-  a.download = `${currentLang==='en' ? 'guardian_certificate' : 'diploma_guardian'}_${namePart}_${stamp}.html`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 1600);
-  showToast((currentLang==='en') ? 'Certificate downloaded.' : 'Diploma descargado.');
+  downloadHtmlDocument(
+    buildGuardianCertificateDocument(),
+    `${currentLang==='en' ? 'guardian_certificate' : 'diploma_guardian'}_${namePart}_${stamp}.html`,
+    'Diploma descargado.',
+    'Certificate downloaded.'
+  );
 }
 function downscaleImageFile(file){
   return new Promise((resolve, reject)=>{
@@ -1883,6 +1977,115 @@ window.GCBusInlineTrack=function(e){
   }
 };
 
+
+let gcBusActionTs=0;
+function gcBusBlockRepeat(){
+  const now=Date.now();
+  if(now-gcBusActionTs<140) return true;
+  gcBusActionTs=now;
+  return false;
+}
+function gcBusHardStop(e){
+  if(!e) return;
+  try{ if(e.cancelable) e.preventDefault(); }catch(_e){}
+  try{ e.stopPropagation(); }catch(_e){}
+  try{ if(e.stopImmediatePropagation) e.stopImmediatePropagation(); }catch(_e){}
+}
+function gcBusApplyUI(level){
+  try{
+    vehPick.bus=level;
+    document.querySelectorAll('.drag-lane[data-veh="bus"]').forEach(l=>{
+      l.classList.toggle('selected', l.getAttribute('data-level')===level);
+      l.classList.remove('preview');
+    });
+    const track=getDragTrack('bus');
+    const bus=getDragBus('bus');
+    if(track && bus){
+      const lane=track.querySelector(`.drag-lane[data-veh="bus"][data-level="${level}"]`);
+      let left=8;
+      if(lane){
+        left = lane.offsetLeft + Math.max(0,(lane.offsetWidth-bus.offsetWidth)/2);
+      }else{
+        const map={low:.08,mid:.38,high:.70};
+        left=Math.max(8, (track.clientWidth-bus.offsetWidth)*(map[level] ?? .38));
+      }
+      bus.style.left=`${left}px`;
+      bus.classList.remove('dragging');
+      bus.classList.toggle('idle', !level);
+    }
+    try{ syncBusAria(level); }catch(_e){}
+  }catch(err){ console.error('[GC bus apply ui]', err); }
+}
+function gcBusReliableSet(level, announce=true){
+  if(state && state.tasks && state.tasks.causas && state.tasks.causas.veh){
+    showToast((currentLang==='en') ? 'Already done ✅' : 'Ya está listo ✅');
+    return false;
+  }
+  setBusGuideVisibility(true);
+  hideBusAutoHint();
+  gcBusApplyUI(level);
+  if(announce){
+    showToast((currentLang==='en') ? `Bus moved to ${laneText(level)}.` : `Bus movido a ${laneText(level)}.`);
+  }
+  return false;
+}
+function gcBusReliableStep(dir=1, announce=true){
+  const levels=['low','mid','high'];
+  let idx=levels.indexOf(vehPick.bus||'');
+  if(idx<0) idx = dir >= 0 ? -1 : levels.length;
+  idx = Math.max(0, Math.min(levels.length-1, idx + (dir >= 0 ? 1 : -1)));
+  return gcBusReliableSet(levels[idx], announce);
+}
+function gcBusReliableTrack(clientX, announce=true){
+  const track=getDragTrack('bus');
+  if(!track) return false;
+  const rect=track.getBoundingClientRect();
+  const x=(typeof clientX==='number') ? clientX : (rect.left + rect.width/2);
+  const level=getNearestBusLevel(x) || 'mid';
+  return gcBusReliableSet(level, announce);
+}
+window.GCBusInlineSet=function(level,e){ gcBusHardStop(e); return gcBusReliableSet(level,true); };
+window.GCBusInlineStep=function(dir,e){ gcBusHardStop(e); return gcBusReliableStep(Number(dir)||1,true); };
+window.GCBusInlineTrack=function(e){
+  if(e && e.target && e.target.closest && e.target.closest('.drag-lane[data-veh="bus"], .drag-bus, .drag-arrow')) return false;
+  gcBusHardStop(e);
+  return gcBusReliableTrack(e && typeof e.clientX==='number' ? e.clientX : null, true);
+};
+function bindReliableBusControls(){
+  const track=getDragTrack('bus');
+  const bus=getDragBus('bus');
+  if(!track || !bus || track.dataset.gcReliableBound==='1') return;
+  track.dataset.gcReliableBound='1';
+  const left=document.querySelector('.drag-arrow.left[data-drag-step="-1"]');
+  const right=document.querySelector('.drag-arrow.right[data-drag-step="1"]');
+  const bindAction=(el, fn)=>{
+    if(!el) return;
+    el.addEventListener('pointerdown', (e)=>{
+      if(gcBusBlockRepeat()) { gcBusHardStop(e); return; }
+      gcBusHardStop(e);
+      fn(e);
+    }, true);
+    el.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' || e.key===' ' || e.key==='Spacebar'){
+        gcBusHardStop(e);
+        fn(e);
+      }
+    }, true);
+  };
+  bindAction(left, ()=>gcBusReliableStep(-1,true));
+  bindAction(right, ()=>gcBusReliableStep(1,true));
+  track.querySelectorAll('.drag-lane[data-veh="bus"]').forEach(lane=>{
+    bindAction(lane, ()=>gcBusReliableSet(lane.getAttribute('data-level'), true));
+  });
+  bindAction(bus, ()=>gcBusReliableStep(1,true));
+  track.addEventListener('pointerdown', (e)=>{
+    if(e.target && e.target.closest && e.target.closest('.drag-lane[data-veh="bus"], .drag-bus, .drag-arrow')) return;
+    if(gcBusBlockRepeat()) { gcBusHardStop(e); return; }
+    gcBusHardStop(e);
+    gcBusReliableTrack(typeof e.clientX==='number' ? e.clientX : null, true);
+  }, true);
+}
+
 function checkVeh(){
   if(state.tasks.causas.veh) { showToast((currentLang==="en") ? "Already done ✅" : "Ya está listo ✅"); return; }
   const ans={car:"high",bus:"mid",metro:"low"};
@@ -2546,6 +2749,7 @@ window.addEventListener("load", ()=>{
   safeStep("wirePlanInputs", wirePlanInputs);
   safeStep("syncPlanFormFromState", ()=>syncPlanFormFromState(true));
   safeStep("initBusDragSimulation", initBusDragSimulation);
+  safeStep("bindReliableBusControls", bindReliableBusControls);
   safeStep("resizeHook", ()=>window.addEventListener("resize", ()=>{ try{ syncBusDragUI(); }catch(_e){} }));
   safeStep("bindSeqDnD", ()=>bindSeqDnD("cons"));
   safeStep("bindCommitDnD", bindCommitDnD);
@@ -2609,7 +2813,7 @@ window.addEventListener("load", ()=>{
   }
 });
 
-
+;
 
 window.GCQuick = {
   toggleAudio: function(ev){
@@ -2637,7 +2841,7 @@ window.GCQuick = {
   }
 };
 
-
+;
 
 (function(){
   const BUILD = 'gcfix9';
@@ -2838,7 +3042,135 @@ window.GCQuick = {
   });
 })();
 
+;
 
+(function(){
+  function activeId(){
+    var active = document.querySelector('.screen.active');
+    return active ? active.id : 'home';
+  }
+  function isMissionLike(id){
+    return id && id !== 'home';
+  }
+  function applyScrollFix(id){
+    id = id || activeId();
+    var modal = document.getElementById('propuesta-modal');
+    var modalOpen = !!(modal && modal.classList.contains('is-open'));
+
+    document.documentElement.style.overflowX = 'hidden';
+    document.body.style.overflowX = 'hidden';
+    document.documentElement.style.overflowY = 'auto';
+
+    if(modalOpen){
+      document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+      return;
+    }
+
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.overflowY = 'auto';
+    document.body.classList.toggle('mission-scroll', isMissionLike(id));
+  }
+  function topAfterNav(){
+    applyScrollFix();
+    try{ window.scrollTo({top:0, left:0, behavior:'auto'}); }catch(_e){ window.scrollTo(0,0); }
+  }
+  function patchNav(){
+    if(window.nav && typeof window.nav.go === 'function' && !window.nav.__gcScrollPatched){
+      var originalGo = window.nav.go.bind(window.nav);
+      window.nav.go = function(screenId, opts){
+        var result = originalGo(screenId, opts || {});
+        setTimeout(function(){ applyScrollFix(screenId); }, 0);
+        setTimeout(function(){ applyScrollFix(screenId); }, 120);
+        return result;
+      };
+      window.nav.__gcScrollPatched = true;
+    }
+    if(window.GCRescue && !window.GCRescue.__gcScrollPatched){
+      if(typeof window.GCRescue.go === 'function'){
+        var rescueGo = window.GCRescue.go;
+        window.GCRescue.go = function(id){
+          var result = rescueGo.apply(this, arguments);
+          setTimeout(function(){ applyScrollFix(id); }, 0);
+          setTimeout(function(){ applyScrollFix(id); }, 120);
+          return result;
+        };
+      }
+      if(typeof window.GCRescue.startMission === 'function'){
+        var rescueStart = window.GCRescue.startMission;
+        window.GCRescue.startMission = function(ev){
+          var result = rescueStart.apply(this, arguments);
+          setTimeout(function(){ applyScrollFix('briefing'); }, 0);
+          setTimeout(function(){ applyScrollFix(activeId()); }, 150);
+          return result;
+        };
+      }
+      window.GCRescue.__gcScrollPatched = true;
+    }
+  }
+  window.GCScrollFix = { apply: applyScrollFix, patch: patchNav, topAfterNav: topAfterNav };
+  document.addEventListener('DOMContentLoaded', function(){ patchNav(); applyScrollFix(); setTimeout(patchNav, 400); setTimeout(applyScrollFix, 500); });
+  window.addEventListener('load', function(){ patchNav(); applyScrollFix(); });
+  window.addEventListener('hashchange', function(){ setTimeout(function(){ applyScrollFix(); }, 40); });
+  window.addEventListener('pageshow', function(){ patchNav(); applyScrollFix(); });
+})();
+
+;
+
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function openPropuesta(){
+    var modal=byId('propuesta-modal');
+    var closeBtn=byId('propuesta-close');
+    if(!modal) return false;
+    modal.querySelectorAll('iframe[data-src]').forEach(function(frame){
+      if(!frame.getAttribute('src')) frame.setAttribute('src', frame.getAttribute('data-src'));
+    });
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('modal-open');
+    document.body.style.overflow='hidden';
+    setTimeout(function(){ try{ closeBtn && closeBtn.focus(); }catch(_e){} },40);
+    return false;
+  }
+  function closePropuesta(){
+    var modal=byId('propuesta-modal');
+    if(!modal) return false;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow='';
+    if(window.GCScrollFix && window.GCScrollFix.apply){ window.GCScrollFix.apply(); }
+    return false;
+  }
+  function bindPropuesta(){
+    var btn=byId('btn-propuesta-ambiental');
+    var closeBtn=byId('propuesta-close');
+    var modal=byId('propuesta-modal');
+    if(btn && btn.dataset.propuestaBound!=='1'){
+      btn.dataset.propuestaBound='1';
+      btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); openPropuesta(); });
+    }
+    if(closeBtn && closeBtn.dataset.propuestaBound!=='1'){
+      closeBtn.dataset.propuestaBound='1';
+      closeBtn.addEventListener('click', function(e){ e.preventDefault(); closePropuesta(); });
+    }
+    if(modal && modal.dataset.propuestaBound!=='1'){
+      modal.dataset.propuestaBound='1';
+      modal.addEventListener('click', function(e){ if(e.target===modal) closePropuesta(); });
+    }
+  }
+  window.openPropuestaAmbiental=openPropuesta;
+  window.closePropuestaAmbiental=closePropuesta;
+  window.addEventListener('DOMContentLoaded', bindPropuesta);
+  window.addEventListener('load', bindPropuesta);
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){ closePropuesta(); }
+  });
+})();
+
+;
 
 (function(){
   async function cleanupWebAppOnly(){
@@ -2856,4 +3188,23 @@ window.GCQuick = {
     }
   }
   window.addEventListener('load', cleanupWebAppOnly, { once:true });
+})();
+
+;
+
+(function(){
+  function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch(_e){} }
+  function safeToast(msg){ try{ if(typeof showToast==='function'){ showToast(msg); return; } }catch(_e){} try{ var t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.add('show'); clearTimeout(window.__gcToastTimer2); window.__gcToastTimer2=setTimeout(function(){ t.classList.remove('show'); },2200); }catch(_e){} }
+  function getLang(){ try{ return currentLang==='en' ? 'en' : 'es'; }catch(_e){ return window.currentLang==='en' ? 'en' : 'es'; } }
+  function getTheme(){ try{ return currentTheme==='dark' ? 'dark' : 'light'; }catch(_e){ return window.currentTheme==='dark' ? 'dark' : 'light'; } }
+  function getAudio(){ try{ return (typeof audioEnabled==='undefined') ? true : !!audioEnabled; }catch(_e){ return !!window.audioEnabled; } }
+  function updateUtilityButtonsHard(){ var langBtn=document.getElementById('btn-lang'), themeBtn=document.getElementById('btn-theme'), audioBtn=document.getElementById('btn-audio'); var lang=getLang(), theme=getTheme(), audio=getAudio(); if(langBtn){ langBtn.textContent=(lang==='en')?'🌎 EN':'🌎 ES'; langBtn.setAttribute('title', lang==='en'?'Change language':'Cambiar idioma'); langBtn.setAttribute('aria-label', lang==='en'?'Change language':'Cambiar idioma'); } if(themeBtn){ themeBtn.textContent=(theme==='dark') ? (lang==='en'?'☀️ Day':'☀️ Día') : (lang==='en'?'🌙 Night':'🌙 Noche'); themeBtn.setAttribute('title', lang==='en'?'Toggle day and night mode':'Cambiar modo día y noche'); themeBtn.setAttribute('aria-label', lang==='en'?'Toggle day and night mode':'Cambiar modo día y noche'); } if(audioBtn){ audioBtn.textContent=audio?'🔊':'🔇'; audioBtn.setAttribute('title', lang==='en'?'Play section audio':'Reproducir audio de la sección'); audioBtn.setAttribute('aria-label', lang==='en'?'Play section audio':'Reproducir audio de la sección'); } }
+  function hardToggleLang(){ try{ currentLang=(getLang()==='en')?'es':'en'; safeSet((typeof PREF_LANG_KEY!=='undefined'?PREF_LANG_KEY:'gcmed_lang_v1'), currentLang); }catch(_e){ window.currentLang=(getLang()==='en')?'es':'en'; safeSet('gcmed_lang_v1', window.currentLang); } try{ if(typeof applyI18n==='function') applyI18n(); }catch(err){ console.warn('[GC util hard] applyI18n failed', err); } try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} try{ if(typeof refreshPlanLock==='function') refreshPlanLock(); }catch(_e){} try{ if(typeof applyAllBgs==='function') applyAllBgs(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? 'Language changed to English 🌎' : 'Idioma cambiado a Español 🌎'); return false; }
+  function hardToggleTheme(){ try{ currentTheme=(getTheme()==='dark')?'light':'dark'; document.body.classList.toggle('dark', currentTheme==='dark'); safeSet((typeof PREF_THEME_KEY!=='undefined'?PREF_THEME_KEY:'gcmed_theme_v1'), currentTheme); }catch(_e){ var isDark=document.body.classList.toggle('dark'); window.currentTheme=isDark?'dark':'light'; safeSet('gcmed_theme_v1', window.currentTheme); } try{ if(typeof applyAllBgs==='function') applyAllBgs(); }catch(_e){} try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? (getTheme()==='dark' ? 'Night mode activated 🌙' : 'Day mode activated ☀️') : (getTheme()==='dark' ? 'Modo noche activado 🌙' : 'Modo día activado ☀️')); return false; }
+  function hardToggleAudio(){ try{ if(typeof handleAudioButton==='function') return handleAudioButton(); }catch(_e){} try{ if(typeof audioEnabled==='undefined') audioEnabled=true; audioEnabled=true; safeSet((typeof PREF_AUDIO_KEY!=='undefined'?PREF_AUDIO_KEY:'gcmed_audio_v1'),'on'); if(typeof initAudio==='function') initAudio(); if(typeof playPointSound==='function') playPointSound(4); if(typeof playSectionNarration==='function') setTimeout(function(){ try{ playSectionNarration((window.nav&&nav.current)?nav.current:'home'); }catch(__e){} },90); }catch(_e){ window.audioEnabled=true; safeSet('gcmed_audio_v1','on'); } try{ if(typeof updateUtilityLabels==='function') updateUtilityLabels(); }catch(_e){} updateUtilityButtonsHard(); safeToast(getLang()==='en' ? 'Playing section audio 🔊' : 'Reproduciendo audio de la sección 🔊'); return false; }
+  function wrap(handler){ return function(e){ try{ if(e){ if(typeof e.preventDefault==='function') e.preventDefault(); if(typeof e.stopPropagation==='function') e.stopPropagation(); if(typeof e.stopImmediatePropagation==='function') e.stopImmediatePropagation(); } }catch(_e){} return handler(); }; }
+  function bind(id, handler){ var el=document.getElementById(id); if(!el || el.dataset.gcFixBound==='1') return; el.dataset.gcFixBound='1'; var fn=wrap(handler); el.onclick=fn; ['pointerup','click','touchend','mouseup'].forEach(function(type){ try{ el.addEventListener(type, fn, {capture:true, passive:false}); }catch(_e){ try{ el.addEventListener(type, fn, true); }catch(_e2){} } }); el.addEventListener('keydown', function(e){ if(e.key==='Enter' || e.key===' '){ fn(e); } }, true); }
+  window.GCQuick={ toggleLang:hardToggleLang, toggleTheme:hardToggleTheme, toggleAudio:hardToggleAudio, refresh:updateUtilityButtonsHard };
+  function bindAll(){ updateUtilityButtonsHard(); bind('btn-lang', hardToggleLang); bind('btn-theme', hardToggleTheme); bind('btn-audio', hardToggleAudio); }
+  window.addEventListener('DOMContentLoaded', bindAll); window.addEventListener('load', bindAll); setTimeout(bindAll,1200);
 })();
