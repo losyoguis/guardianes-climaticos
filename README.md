@@ -23,3 +23,12 @@ Actualización v8: reforzados los vínculos del Cinturón de Guardia con handler
 
 
 - v11: flechas del reto del bus activas, clic completo en pista/carriles y audio por botón/por sección reforzado.
+
+## PDF reales y envío automático por correo
+
+El Plan Guardián y el Diploma ahora se descargan como archivos `.pdf` reales. En el mismo proceso, la aplicación intenta enviar automáticamente una copia adjunta a `cd@iemanueljbetancur.edu.co`.
+
+Para activar el envío, sigue una sola vez las instrucciones de `CONFIGURAR_ENVIO_EMAIL.md`. El backend listo para desplegar se encuentra en `apps-script/Code.gs` y la URL se registra en `js/email-config.js`.
+
+La descarga local sigue funcionando aunque el servicio de correo no esté disponible.
+

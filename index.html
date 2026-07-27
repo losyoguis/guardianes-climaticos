@@ -919,6 +919,7 @@ body.dark .plan-summary-list li{background:rgba(15,23,42,.7)}
 .plan-summary-empty{opacity:.8;font-weight:700}
 .final-plan-card{margin-top:16px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:22px;padding:14px 16px;text-align:left;backdrop-filter:blur(8px)}
 .final-plan-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-start;margin-top:14px}
+.pdf-email-note{margin-top:10px;padding:9px 12px;border-radius:14px;background:rgba(38,198,218,.12);border:1px solid rgba(38,198,218,.28);font-size:.9rem;font-weight:800;line-height:1.35}
 .final-plan-photo-wrap{margin-top:12px}
 .final-plan-photo{display:block;max-width:min(100%,340px);max-height:260px;border-radius:18px;border:2px solid rgba(255,255,255,.28);box-shadow:0 12px 28px rgba(0,0,0,.18);object-fit:cover;background:rgba(255,255,255,.08)}
 .final-plan-title{font-weight:900;margin-bottom:8px}
@@ -1790,6 +1791,7 @@ body.belt-on .belt-right{
         <button type="button" class="btn btn-primary" id="btn-print-plan" data-i18n="plan_print_btn">🖨️ Imprimir plan</button>
         <button type="button" class="btn btn-ghost" id="btn-download-plan" data-i18n="plan_download_btn">⬇️ Descargar plan</button>
       </div>
+      <div class="pdf-email-note" data-i18n="pdf_email_note">📧 Al descargar el PDF, también se enviará automáticamente una copia a cd@iemanueljbetancur.edu.co.</div>
     </div>
 
     <div class="final-cert-card" id="final-cert-card" style="display:none">
@@ -1799,6 +1801,7 @@ body.belt-on .belt-right{
         <button type="button" class="btn btn-primary" id="btn-print-cert" data-i18n="cert_print_btn">🖨️ Imprimir diploma</button>
         <button type="button" class="btn btn-ghost" id="btn-download-cert" data-i18n="cert_download_btn">⬇️ Descargar diploma</button>
       </div>
+      <div class="pdf-email-note" data-i18n="pdf_email_note">📧 Al descargar el PDF, también se enviará automáticamente una copia a cd@iemanueljbetancur.edu.co.</div>
     </div>
 
     <div class="end-actions">
@@ -1809,6 +1812,8 @@ body.belt-on .belt-right{
   </div>
 </div>
 
+<script src="js/email-config.js"></script>
+<script src="js/pdf-email.js"></script>
 <script>
 /* =========================
    I18N (ES/EN) – kids-friendly
@@ -1918,6 +1923,7 @@ const I18N = {
     end_plan_title:'📌 Tu Plan Guardián',
     plan_print_btn:'🖨️ Imprimir plan',
     plan_download_btn:'⬇️ Descargar plan',
+    pdf_email_note:'📧 Al descargar el PDF, también se enviará automáticamente una copia a cd@iemanueljbetancur.edu.co.',
     plan_export_title:'Plan Guardián del Clima',
     plan_export_intro:'Ahora eres un Guardián del Clima. Este es tu plan final con acciones concretas para transformar una problemática de tu contexto.',
     plan_export_generated:'Fecha de generación',
@@ -2145,6 +2151,7 @@ const I18N = {
     end_plan_title:'📌 Your Guardian Plan',
     plan_print_btn:'🖨️ Print plan',
     plan_download_btn:'⬇️ Download plan',
+    pdf_email_note:'📧 When the PDF is downloaded, a copy will also be sent automatically to cd@iemanueljbetancur.edu.co.',
     plan_export_title:'Climate Guardian Plan',
     plan_export_intro:'You are now a Climate Guardian. This is your final plan with concrete actions to improve a problem in your context.',
     plan_export_generated:'Date generated',
@@ -2919,19 +2926,109 @@ function printPlanEvidence(){
   }
   printHtmlDocument(buildPlanEvidenceDocument(), (currentLang==='en') ? 'Guardian Plan' : 'Plan Guardián');
 }
-function downloadPlanEvidence(){
+function buildPlanPdfData(){
+  const pd = state.planData || defaultPlanData();
+  const generatedOn = new Intl.DateTimeFormat(currentLang==='en' ? 'en-US' : 'es-CO', { year:'numeric', month:'long', day:'numeric' }).format(new Date());
+  return {
+    title:t('plan_export_title'),
+    intro:t('plan_export_intro'),
+    generatedLabel:t('plan_export_generated'),
+    generatedOn,
+    scoreLabel:t('plan_export_score'),
+    score:Number(state.score || 0),
+    studentLabel:t('plan_export_student'),
+    studentName:(pd.studentName || '').trim() || t('cert_name_missing'),
+    problemLabel:t('plan_export_problem'),
+    problem:(pd.problem || '').trim(),
+    problemMissing:(currentLang==='en') ? 'No problem written yet.' : 'Todavía no hay una problemática escrita.',
+    contextLabel:t('plan_export_context'),
+    context:(pd.context || '').trim(),
+    actionsLabel:t('plan_export_actions'),
+    actionWord:(currentLang==='en') ? 'Action' : 'Acción',
+    actionMissing:(currentLang==='en') ? 'No action written.' : 'No se escribió la acción.',
+    ownerLabel:t('plan_owner_label').replace(/^\S+\s*/,''),
+    dateLabel:t('plan_date_label').replace(/^\S+\s*/,''),
+    actions:(pd.actions || []).map((item,index)=>({
+      title:`${(currentLang==='en') ? 'Action' : 'Acción'} ${index+1}`,
+      what:(item.what || '').trim(),
+      who:(item.who || '').trim(),
+      when:(item.when || '').trim()
+    })),
+    evidenceLabel:t('plan_export_evidence'),
+    noPhotoLabel:t('plan_export_no_photo'),
+    photoData:pd.photoData || '',
+    footer:t('plan_export_footer')
+  };
+}
+function buildDiplomaPdfData(){
+  const pd = state.planData || defaultPlanData();
+  const generatedOn = new Intl.DateTimeFormat(currentLang==='en' ? 'en-US' : 'es-CO', { year:'numeric', month:'long', day:'numeric' }).format(new Date());
+  return {
+    chip:t('cert_preview_chip'),
+    title:t('cert_export_title'),
+    subtitle:t('cert_export_subtitle'),
+    awardedTo:t('cert_awarded_to'),
+    studentName:(pd.studentName || '').trim() || t('cert_name_missing'),
+    forText:t('cert_for_text'),
+    problemLabel:t('cert_problem_label'),
+    problem:(pd.problem || '').trim(),
+    problemMissing:(currentLang==='en') ? 'No problem written yet.' : 'Todavía no hay una problemática escrita.',
+    dateLabel:t('cert_date_label'),
+    generatedOn,
+    scoreLabel:t('cert_score_label'),
+    score:Number(state.score || 0),
+    footer:t('cert_export_footer')
+  };
+}
+async function deliverPdfDocument(options){
+  const button = document.getElementById(options.buttonId);
+  const oldText = button ? button.textContent : '';
+  if(button){ button.disabled = true; button.textContent = (currentLang==='en') ? '⏳ Creating PDF...' : '⏳ Creando PDF...'; }
+  try{
+    if(!window.GCPdfEmail) throw new Error('pdf-module-unavailable');
+    const blob = await options.createPdf();
+    window.GCPdfEmail.downloadBlob(blob, options.filename);
+    showToast((currentLang==='en') ? 'PDF downloaded. Sending the email copy...' : 'PDF descargado. Enviando la copia por correo...');
+    try{
+      const sent = await window.GCPdfEmail.sendPdf(blob, {
+        filename:options.filename,
+        documentType:options.documentType,
+        studentName:options.studentName,
+        generatedAt:new Date().toISOString()
+      });
+      if(sent.ok){
+        showToast((currentLang==='en') ? 'PDF downloaded and sent automatically by email.' : 'PDF descargado y enviado automáticamente por correo.');
+      }else if(!sent.configured){
+        showToast((currentLang==='en') ? 'PDF downloaded. The email service still needs its deployment URL.' : 'PDF descargado. Falta registrar la URL del servicio de correo.');
+      }else if(sent.reason==='too-large'){
+        showToast((currentLang==='en') ? 'PDF downloaded, but it is too large to email.' : 'PDF descargado, pero es demasiado grande para enviarlo por correo.');
+      }
+    }catch(emailError){
+      console.error('Automatic PDF email failed', emailError);
+      showToast((currentLang==='en') ? 'PDF downloaded, but the automatic email could not be sent.' : 'PDF descargado, pero no se pudo completar el envío automático.');
+    }
+  }catch(err){
+    console.error('PDF generation error', err);
+    showToast((currentLang==='en') ? 'The PDF could not be created.' : 'No se pudo crear el PDF.');
+  }finally{
+    if(button){ button.disabled = false; button.textContent = oldText; }
+  }
+}
+async function downloadPlanEvidence(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
   const stamp = new Date().toISOString().slice(0,10);
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
-  downloadHtmlDocument(
-    buildPlanEvidenceDocument(),
-    `${currentLang==='en' ? 'guardian_plan' : 'plan_guardian'}_${namePart}_${stamp}.html`,
-    'Plan descargado.',
-    'Plan downloaded.'
-  );
+  const data = buildPlanPdfData();
+  await deliverPdfDocument({
+    buttonId:'btn-download-plan',
+    filename:`${currentLang==='en' ? 'guardian_plan' : 'plan_guardian'}_${namePart}_${stamp}.pdf`,
+    documentType:(currentLang==='en') ? 'Climate Guardian Plan' : 'Plan Guardián del Clima',
+    studentName:data.studentName,
+    createPdf:()=>window.GCPdfEmail.createPlanPdf(data)
+  });
 }
 function printGuardianCertificate(){
   if(!state.completed.plan){
@@ -2940,19 +3037,21 @@ function printGuardianCertificate(){
   }
   printHtmlDocument(buildGuardianCertificateDocument(), (currentLang==='en') ? 'Climate Guardian Certificate' : 'Diploma Guardián Climático');
 }
-function downloadGuardianCertificate(){
+async function downloadGuardianCertificate(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
   const stamp = new Date().toISOString().slice(0,10);
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
-  downloadHtmlDocument(
-    buildGuardianCertificateDocument(),
-    `${currentLang==='en' ? 'guardian_certificate' : 'diploma_guardian'}_${namePart}_${stamp}.html`,
-    'Diploma descargado.',
-    'Certificate downloaded.'
-  );
+  const data = buildDiplomaPdfData();
+  await deliverPdfDocument({
+    buttonId:'btn-download-cert',
+    filename:`${currentLang==='en' ? 'guardian_certificate' : 'diploma_guardian'}_${namePart}_${stamp}.pdf`,
+    documentType:(currentLang==='en') ? 'Climate Guardian Certificate' : 'Diploma Guardián Climático',
+    studentName:data.studentName,
+    createPdf:()=>window.GCPdfEmail.createDiplomaPdf(data)
+  });
 }
 function downscaleImageFile(file){
   return new Promise((resolve, reject)=>{
