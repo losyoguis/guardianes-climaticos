@@ -9,13 +9,6 @@
     return window.GC_EMAIL_CONFIG || {};
   }
 
-  function isEmailConfigured(){
-    const cfg = config();
-    return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test(String(cfg.webAppUrl || '').trim())
-      && String(cfg.appToken || '').trim()
-      && !/^CAMBIAR_/i.test(String(cfg.appToken || '').trim());
-  }
-
   function makeCanvas(size){
     const canvas = document.createElement('canvas');
     canvas.width = size.pixelWidth;
@@ -324,16 +317,107 @@
     return buildPdfFromJpegPages([drawDiplomaPage(data)]);
   }
 
-  function downloadBlob(blob, filename){
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  let activePdfUrl = '';
+
+  function getWebAppUrl(){
+    const cfg = config();
+    const direct = String(cfg.webAppUrl || '').trim();
+    if(direct) return direct;
+    try{
+      return String(localStorage.getItem('gc_email_webapp_url') || '').trim();
+    }catch(_e){
+      return '';
+    }
+  }
+
+  function isEmailConfigured(){
+    const cfg = config();
+    return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test(getWebAppUrl())
+      && String(cfg.appToken || '').trim()
+      && !/^CAMBIAR_/i.test(String(cfg.appToken || '').trim());
+  }
+
+  function ensurePdfDialogStyles(){
+    if(document.getElementById('gc-pdf-dialog-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'gc-pdf-dialog-styles';
+    style.textContent = `
+      .gc-pdf-overlay{position:fixed;inset:0;z-index:2147483600;background:rgba(8,24,42,.78);display:flex;align-items:center;justify-content:center;padding:16px}
+      .gc-pdf-panel{width:min(760px,100%);max-height:92vh;overflow:auto;background:#fff;color:#15304b;border-radius:24px;padding:22px;box-shadow:0 24px 80px rgba(0,0,0,.38);text-align:center}
+      .gc-pdf-panel h2{margin:0 0 8px;font-size:25px}.gc-pdf-panel p{margin:7px 0;line-height:1.45}
+      .gc-pdf-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+      .gc-pdf-actions a,.gc-pdf-actions button{appearance:none;border:0;border-radius:999px;padding:12px 18px;font:800 16px Arial,sans-serif;cursor:pointer;text-decoration:none}
+      .gc-pdf-download{background:#1565c0;color:#fff}.gc-pdf-open{background:#00a86b;color:#fff}.gc-pdf-close{background:#e8eef5;color:#15304b}
+      .gc-pdf-email-state{margin-top:14px;padding:12px;border-radius:14px;background:#f1f7ff;font-weight:700}
+      @media(max-width:520px){.gc-pdf-panel{padding:18px 14px;border-radius:18px}.gc-pdf-actions{flex-direction:column}.gc-pdf-actions a,.gc-pdf-actions button{width:100%}}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function closePdfDialog(){
+    const old = document.getElementById('gc-pdf-overlay');
+    if(old) old.remove();
+  }
+
+  function showPdfReadyDialog(blob, filename, options){
+    ensurePdfDialogStyles();
+    closePdfDialog();
+    if(activePdfUrl){
+      try{ URL.revokeObjectURL(activePdfUrl); }catch(_e){}
+    }
+    activePdfUrl = URL.createObjectURL(blob);
+    const opts = options || {};
+    const overlay = document.createElement('div');
+    overlay.id = 'gc-pdf-overlay';
+    overlay.className = 'gc-pdf-overlay';
+    overlay.setAttribute('role','dialog');
+    overlay.setAttribute('aria-modal','true');
+    overlay.innerHTML = `
+      <div class="gc-pdf-panel">
+        <h2>${opts.title || 'PDF listo'}</h2>
+        <p>${opts.message || 'El documento está listo. Si la descarga automática fue bloqueada, usa el botón azul.'}</p>
+        <div class="gc-pdf-actions">
+          <a class="gc-pdf-download" download="${String(filename).replace(/"/g,'')}" href="${activePdfUrl}">⬇️ Descargar PDF ahora</a>
+          <button type="button" class="gc-pdf-open">🖨️ Abrir / imprimir</button>
+          <button type="button" class="gc-pdf-close">Cerrar</button>
+        </div>
+        <div class="gc-pdf-email-state" aria-live="polite">${opts.emailState || '📧 Preparando el envío por correo…'}</div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const openBtn = overlay.querySelector('.gc-pdf-open');
+    const closeBtn = overlay.querySelector('.gc-pdf-close');
+    openBtn.addEventListener('click', ()=>{
+      const opened = window.open(activePdfUrl, '_blank', 'noopener');
+      if(!opened){
+        const link = overlay.querySelector('.gc-pdf-download');
+        link.focus();
+      }
+    });
+    closeBtn.addEventListener('click', closePdfDialog);
+    overlay.addEventListener('click', (event)=>{ if(event.target === overlay) closePdfDialog(); });
+    const auto = document.createElement('a');
+    auto.href = activePdfUrl;
+    auto.download = filename;
+    auto.style.display = 'none';
+    document.body.appendChild(auto);
+    try{ auto.click(); }catch(_e){}
+    auto.remove();
+    return overlay;
+  }
+
+  function setPdfDialogEmailState(message, kind){
+    const box = document.querySelector('#gc-pdf-overlay .gc-pdf-email-state');
+    if(!box) return;
+    box.textContent = message;
+    box.dataset.kind = kind || '';
+    if(kind === 'ok') box.style.background = '#e8f7ef';
+    else if(kind === 'error') box.style.background = '#fff0f0';
+    else if(kind === 'warning') box.style.background = '#fff8df';
+    else box.style.background = '#f1f7ff';
+  }
+
+  function downloadBlob(blob, filename, options){
+    return showPdfReadyDialog(blob, filename, options);
   }
 
   function blobToBase64(blob){
@@ -345,29 +429,139 @@
     });
   }
 
+  function makeRequestId(){
+    if(window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
+    return `gc-${Date.now()}-${Math.random().toString(36).slice(2,12)}`;
+  }
+
+  function submitPdfForm(endpoint, payload, requestId){
+    return new Promise((resolve, reject)=>{
+      const iframeName = `gc_email_frame_${requestId.replace(/[^a-zA-Z0-9_]/g,'_')}`;
+      const iframe = document.createElement('iframe');
+      iframe.name = iframeName;
+      iframe.style.display = 'none';
+      iframe.setAttribute('aria-hidden','true');
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = endpoint;
+      form.target = iframeName;
+      form.enctype = 'application/x-www-form-urlencoded';
+      form.acceptCharset = 'UTF-8';
+      form.style.display = 'none';
+      const input = document.createElement('textarea');
+      input.name = 'payload';
+      input.value = JSON.stringify(payload);
+      form.appendChild(input);
+      document.body.appendChild(iframe);
+      document.body.appendChild(form);
+      let settled = false;
+      const cleanup = ()=>{
+        setTimeout(()=>{
+          try{ form.remove(); }catch(_e){}
+          try{ iframe.remove(); }catch(_e){}
+        }, 1500);
+      };
+      iframe.addEventListener('load', ()=>{
+        if(settled) return;
+        settled = true;
+        cleanup();
+        resolve(true);
+      }, { once:true });
+      try{
+        form.submit();
+        setTimeout(()=>{
+          if(settled) return;
+          settled = true;
+          cleanup();
+          resolve(true);
+        }, 1200);
+      }catch(error){
+        settled = true;
+        cleanup();
+        reject(error);
+      }
+    });
+  }
+
+  async function submitPdfRequest(endpoint, payload, requestId){
+    try{
+      await fetch(endpoint, {
+        method:'POST',
+        mode:'no-cors',
+        cache:'no-store',
+        credentials:'omit',
+        redirect:'follow',
+        headers:{ 'Content-Type':'text/plain;charset=UTF-8' },
+        body:JSON.stringify(payload)
+      });
+      return true;
+    }catch(fetchError){
+      console.warn('Direct PDF POST failed; trying form fallback.', fetchError);
+      return submitPdfForm(endpoint, payload, requestId);
+    }
+  }
+
+  function jsonpStatus(endpoint, requestId){
+    return new Promise((resolve, reject)=>{
+      const callbackName = `__gcEmailStatus_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+      const script = document.createElement('script');
+      let finished = false;
+      const cleanup = ()=>{
+        if(finished) return;
+        finished = true;
+        clearTimeout(timer);
+        try{ delete window[callbackName]; }catch(_e){ window[callbackName] = undefined; }
+        try{ script.remove(); }catch(_e){}
+      };
+      window[callbackName] = (data)=>{ cleanup(); resolve(data || {}); };
+      const separator = endpoint.includes('?') ? '&' : '?';
+      script.src = `${endpoint}${separator}action=status&requestId=${encodeURIComponent(requestId)}&callback=${encodeURIComponent(callbackName)}&_=${Date.now()}`;
+      script.async = true;
+      script.onerror = ()=>{ cleanup(); reject(new Error('No se pudo consultar la confirmación del correo.')); };
+      const timer = setTimeout(()=>{ cleanup(); reject(new Error('Tiempo de confirmación agotado.')); }, 7000);
+      document.head.appendChild(script);
+    });
+  }
+
+  async function waitForEmailStatus(endpoint, requestId){
+    const deadline = Date.now() + 30000;
+    let lastError = null;
+    while(Date.now() < deadline){
+      try{
+        const result = await jsonpStatus(endpoint, requestId);
+        if(result && result.pending === false) return result;
+        if(result && result.ok === true) return result;
+        if(result && result.error && !result.pending) return result;
+      }catch(error){
+        lastError = error;
+      }
+      await new Promise(resolve=>setTimeout(resolve, 1100));
+    }
+    return { ok:false, pending:true, error:lastError ? lastError.message : 'No fue posible confirmar el envío.' };
+  }
+
   async function sendPdf(blob, metadata){
     const cfg = config();
+    const endpoint = getWebAppUrl();
     if(!isEmailConfigured()) return { ok:false, configured:false, reason:'not-configured' };
     const maxBytes = Number(cfg.maxPdfBytes || 8 * 1024 * 1024);
     if(blob.size > maxBytes) return { ok:false, configured:true, reason:'too-large' };
     const pdfBase64 = await blobToBase64(blob);
+    const requestId = makeRequestId();
     const payload = {
       token: String(cfg.appToken || ''),
+      requestId,
       filename: metadata.filename,
       documentType: metadata.documentType,
       studentName: metadata.studentName,
       generatedAt: metadata.generatedAt,
-      pdfBase64: pdfBase64
+      pdfBase64
     };
-    await fetch(String(cfg.webAppUrl).trim(), {
-      method:'POST',
-      mode:'no-cors',
-      cache:'no-store',
-      credentials:'omit',
-      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body:JSON.stringify(payload)
-    });
-    return { ok:true, configured:true, opaque:true };
+    await submitPdfRequest(endpoint, payload, requestId);
+    const status = await waitForEmailStatus(endpoint, requestId);
+    if(status && status.ok) return { ok:true, configured:true, requestId, confirmed:true };
+    if(status && status.pending) return { ok:false, configured:true, requestId, pending:true, reason:'confirmation-timeout' };
+    return { ok:false, configured:true, requestId, reason:'server-error', error:String(status && status.error || 'El servidor no confirmó el envío.') };
   }
 
   window.GCPdfEmail = Object.freeze({
@@ -375,6 +569,9 @@
     createPlanPdf,
     createDiplomaPdf,
     downloadBlob,
+    showPdfReadyDialog,
+    setPdfDialogEmailState,
+    closePdfDialog,
     sendPdf
   });
 })();

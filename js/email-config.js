@@ -1,8 +1,9 @@
 /*
  * CONFIGURACIÓN DEL ENVÍO AUTOMÁTICO DE PDF
- * 1. Despliega el archivo apps-script/Code.gs como aplicación web.
- * 2. Copia la URL terminada en /exec en webAppUrl.
- * 3. Usa el mismo token configurado en Code.gs.
+ *
+ * La URL webAppUrl la genera Google al desplegar apps-script/Code.gs.
+ * Debe terminar en /exec. También puede configurarse y probarse desde
+ * configurar-correo.html.
  */
 window.GC_EMAIL_CONFIG = Object.freeze({
   recipient: 'cd@iemanueljbetancur.edu.co',
