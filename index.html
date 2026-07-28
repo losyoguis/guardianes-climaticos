@@ -918,6 +918,7 @@ body.dark .gc-camera-close{background:#243342;color:#fff}
 .gc-camera-status{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 12px;border-radius:14px;background:rgba(0,0,0,.68);color:#fff;font-weight:850;text-align:center;line-height:1.35}
 .gc-camera-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
 .gc-camera-actions .btn{min-width:170px}
+.gc-camera-actions a.btn{text-decoration:none}
 .gc-camera-help{margin:12px 2px 0;color:#42627d;font-weight:750;line-height:1.4;text-align:center}
 body.dark .gc-camera-help{color:#bed4e4}
 @media(max-width:640px){.gc-camera-overlay{padding:8px}.gc-camera-panel{padding:12px;border-radius:18px;max-height:calc(100vh - 16px)}.gc-camera-stage{min-height:220px}.gc-camera-actions{display:grid;grid-template-columns:1fr}.gc-camera-actions .btn{width:100%;min-width:0}}
@@ -1764,7 +1765,7 @@ body.belt-on .belt-right{
         <div class="plan-photo-panel">
           <div class="plan-photo-head">
             <div class="plan-photo-title" data-i18n="plan_photo_title">📸 Evidencia del trabajo</div>
-            <div class="plan-help" data-i18n="plan_photo_help">Toma una foto con la cámara del celular o del computador, o sube una imagen existente.</div>
+            <div class="plan-help" data-i18n="plan_photo_help">Abre la cámara en una ventana segura para usar la cámara interna o externa del computador, incluso cuando la actividad esté incrustada en Google Sites. También puedes subir una imagen existente.</div>
           </div>
           <div class="plan-photo-preview" id="plan-photo-preview">
             <div class="plan-photo-placeholder">
@@ -1774,7 +1775,7 @@ body.belt-on .belt-right{
           </div>
           <input type="file" id="plan-photo-input" accept="image/*" hidden />
           <div class="small-actions">
-            <button type="button" class="btn btn-primary" id="btn-plan-camera" data-i18n="plan_camera_btn">📷 Abrir cámara</button>
+            <button type="button" class="btn btn-primary" id="btn-plan-camera" data-i18n="plan_camera_btn">📷 Abrir cámara del equipo</button>
             <button type="button" class="btn btn-ghost" id="btn-plan-photo" data-i18n="plan_photo_btn">🖼️ Subir imagen</button>
             <button type="button" class="btn btn-ghost" id="btn-plan-photo-remove" data-i18n="plan_photo_remove">🗑️ Quitar foto</button>
           </div>
@@ -1919,9 +1920,9 @@ const I18N = {
     plan_owner_ph_3:'Ejemplo: docente y dos estudiantes',
     plan_date_label:'📅 Fecha de realización',
     plan_photo_title:'📸 Evidencia del trabajo',
-    plan_photo_help:'Toma una foto con la cámara del celular o del computador, o sube una imagen existente.',
+    plan_photo_help:'Abre la cámara en una ventana segura para usar la cámara interna o externa del computador, incluso cuando la actividad esté incrustada en Google Sites. También puedes subir una imagen existente.',
     plan_photo_empty:'Aún no hay foto cargada.',
-    plan_camera_btn:'📷 Abrir cámara',
+    plan_camera_btn:'📷 Abrir cámara del equipo',
     plan_photo_btn:'🖼️ Subir imagen',
     plan_photo_remove:'🗑️ Quitar foto',
     plan_photo_meta_empty:'Sin evidencia cargada todavía.',
@@ -2148,9 +2149,9 @@ const I18N = {
     plan_owner_ph_3:'Example: teacher and two students',
     plan_date_label:'📅 Date',
     plan_photo_title:'📸 Evidence photo',
-    plan_photo_help:'Take a photo with the phone or computer camera, or upload an existing image.',
+    plan_photo_help:'Open the camera in a secure window to use the computer built-in or external camera, even when the activity is embedded in Google Sites. You can also upload an existing image.',
     plan_photo_empty:'No photo uploaded yet.',
-    plan_camera_btn:'📷 Open camera',
+    plan_camera_btn:'📷 Open device camera',
     plan_photo_btn:'🖼️ Upload image',
     plan_photo_remove:'🗑️ Remove photo',
     plan_photo_meta_empty:'No evidence uploaded yet.',
@@ -3108,101 +3109,11 @@ function downscaleImageFile(file){
     reader.readAsDataURL(file);
   });
 }
-let planCameraStream = null;
-let planCameraFacingMode = 'environment';
-let planCameraOverlay = null;
-let planCameraSessionToken = 0;
-
-function stopPlanCameraStream(){
-  if(planCameraStream){
-    try{ planCameraStream.getTracks().forEach(track=>track.stop()); }catch(_err){}
-    planCameraStream = null;
-  }
-}
-
-function closePlanCamera(){
-  planCameraSessionToken++;
-  stopPlanCameraStream();
-  if(planCameraOverlay){
-    try{ planCameraOverlay.remove(); }catch(_err){}
-    planCameraOverlay = null;
-  }
-  document.removeEventListener('keydown', handlePlanCameraEscape);
-}
-
-function handlePlanCameraEscape(event){
-  if(event.key === 'Escape') closePlanCamera();
-}
-
-function planCameraErrorMessage(error){
-  const isEn = currentLang === 'en';
-  if(!window.isSecureContext){
-    return isEn
-      ? 'The computer camera requires HTTPS. Open the published GitHub Pages site.'
-      : 'La cámara del computador requiere HTTPS. Abre la aplicación publicada en GitHub Pages.';
-  }
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    return isEn
-      ? 'This browser does not support direct camera access. Use “Upload image”.'
-      : 'Este navegador no permite activar la cámara directamente. Usa “Subir imagen”.';
-  }
-  const name = error && error.name ? error.name : '';
-  if(name === 'NotAllowedError' || name === 'SecurityError'){
-    return isEn
-      ? 'Camera permission was denied. Allow camera access in the browser and try again.'
-      : 'Se negó el permiso de la cámara. Permite el acceso en el navegador y vuelve a intentarlo.';
-  }
-  if(name === 'NotFoundError' || name === 'DevicesNotFoundError'){
-    return isEn
-      ? 'No camera was detected on this device.'
-      : 'No se detectó ninguna cámara en este equipo.';
-  }
-  if(name === 'NotReadableError' || name === 'TrackStartError'){
-    return isEn
-      ? 'The camera is busy in another application. Close it there and try again.'
-      : 'La cámara está siendo utilizada por otra aplicación. Ciérrala allí y vuelve a intentarlo.';
-  }
-  return isEn
-    ? 'The camera could not be started. You can still use “Upload image”.'
-    : 'No se pudo iniciar la cámara. También puedes usar “Subir imagen”.';
-}
-
-async function startPlanCamera(video, status, captureBtn, facingMode, sessionToken){
-  stopPlanCameraStream();
-  captureBtn.disabled = true;
-  status.textContent = currentLang === 'en' ? 'Starting camera…' : 'Iniciando cámara…';
-  if(!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    throw new Error('camera-unavailable');
-  }
-  const constraints = {
-    audio:false,
-    video:{
-      facingMode:{ideal:facingMode},
-      width:{ideal:1280},
-      height:{ideal:720}
-    }
-  };
-  const requestedStream = await navigator.mediaDevices.getUserMedia(constraints);
-  if(sessionToken !== planCameraSessionToken || !planCameraOverlay){
-    try{ requestedStream.getTracks().forEach(track=>track.stop()); }catch(_err){}
-    const aborted = new Error('camera-cancelled');
-    aborted.name = 'AbortError';
-    throw aborted;
-  }
-  planCameraStream = requestedStream;
-  video.srcObject = planCameraStream;
-  await new Promise((resolve,reject)=>{
-    const timer=setTimeout(()=>reject(new Error('camera-timeout')),10000);
-    const ready=()=>{clearTimeout(timer);resolve();};
-    if(video.readyState >= 2 && video.videoWidth) ready();
-    else video.addEventListener('loadedmetadata',ready,{once:true});
-  });
-  try{ await video.play(); }catch(_err){}
-  captureBtn.disabled = false;
-  status.textContent = currentLang === 'en'
-    ? 'Camera ready. Frame your evidence and press “Take photo”.'
-    : 'Cámara lista. Encuadra tu evidencia y pulsa “Tomar foto”.';
-}
+const CAMERA_TRANSFER_KEY = 'gcmed_camera_transfer_v2';
+const CAMERA_CHANNEL_NAME = 'gcmed_camera_channel_v2';
+let cameraCaptureSessionId = '';
+let cameraCaptureWindow = null;
+let cameraBroadcastChannel = null;
 
 function cameraEvidenceFilename(){
   const now = new Date();
@@ -3210,96 +3121,129 @@ function cameraEvidenceFilename(){
   return `evidencia_camara_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}.jpg`;
 }
 
-async function openPlanCamera(){
-  if(state.completed.plan) return;
-  closePlanCamera();
-  const sessionToken = ++planCameraSessionToken;
+function isEmbeddedCameraContext(){
+  try{ return window.self !== window.top; }catch(_err){ return true; }
+}
+
+function validCameraPayload(payload){
+  if(!payload || payload.type !== 'gc-camera-photo') return false;
+  if(typeof payload.dataUrl !== 'string' || !/^data:image\/(jpeg|jpg|png|webp);base64,/i.test(payload.dataUrl)) return false;
+  if(payload.sessionId && cameraCaptureSessionId && payload.sessionId !== cameraCaptureSessionId) return false;
+  const createdAt = Number(payload.createdAt || 0);
+  if(createdAt && Math.abs(Date.now() - createdAt) > 20 * 60 * 1000) return false;
+  return true;
+}
+
+function applyCameraEvidencePayload(payload){
+  if(!validCameraPayload(payload) || state.completed.plan) return false;
+  state.planData.photoData = payload.dataUrl;
+  state.planData.photoName = payload.fileName || cameraEvidenceFilename();
+  saveState();
+  renderPlanPhotoPreview();
+  renderPlanStatus();
+  try{ localStorage.removeItem(CAMERA_TRANSFER_KEY); }catch(_err){}
+  showToast(currentLang === 'en'
+    ? 'Photo received from the camera and added as evidence.'
+    : 'Foto recibida desde la cámara y agregada como evidencia.');
+  return true;
+}
+
+function readPendingCameraEvidence(){
+  try{
+    const raw = localStorage.getItem(CAMERA_TRANSFER_KEY);
+    if(!raw) return;
+    const payload = JSON.parse(raw);
+    applyCameraEvidencePayload(payload);
+  }catch(_err){}
+}
+
+function setupCameraEvidenceBridge(){
+  window.addEventListener('message', event=>{
+    if(event.origin !== window.location.origin) return;
+    applyCameraEvidencePayload(event.data);
+  });
+  window.addEventListener('storage', event=>{
+    if(event.key !== CAMERA_TRANSFER_KEY || !event.newValue) return;
+    try{ applyCameraEvidencePayload(JSON.parse(event.newValue)); }catch(_err){}
+  });
+  if('BroadcastChannel' in window){
+    try{
+      cameraBroadcastChannel = new BroadcastChannel(CAMERA_CHANNEL_NAME);
+      cameraBroadcastChannel.addEventListener('message', event=>applyCameraEvidencePayload(event.data));
+    }catch(_err){ cameraBroadcastChannel = null; }
+  }
+  window.addEventListener('focus', ()=>setTimeout(readPendingCameraEvidence, 120));
+  document.addEventListener('visibilitychange', ()=>{
+    if(!document.hidden) setTimeout(readPendingCameraEvidence, 120);
+  });
+  setTimeout(readPendingCameraEvidence, 350);
+}
+
+function closeCameraLaunchFallback(){
+  const overlay = document.getElementById('gc-camera-launch-fallback');
+  if(overlay) overlay.remove();
+}
+
+function showCameraLaunchFallback(url){
+  closeCameraLaunchFallback();
   const isEn = currentLang === 'en';
   const overlay = document.createElement('div');
+  overlay.id = 'gc-camera-launch-fallback';
   overlay.className = 'gc-camera-overlay';
   overlay.setAttribute('role','dialog');
   overlay.setAttribute('aria-modal','true');
-  overlay.setAttribute('aria-label',isEn ? 'Camera for evidence photo' : 'Cámara para foto de evidencia');
   overlay.innerHTML = `
-    <div class="gc-camera-panel">
+    <div class="gc-camera-panel" style="max-width:620px">
       <div class="gc-camera-head">
         <div>
-          <div class="gc-camera-title">${isEn ? '📷 Take evidence photo' : '📷 Tomar foto de evidencia'}</div>
-          <div class="gc-camera-help">${isEn ? 'Works with the built-in or connected camera on a computer, tablet, or phone.' : 'Funciona con la cámara integrada o conectada del computador, tableta o celular.'}</div>
+          <div class="gc-camera-title">${isEn ? '📷 Open camera in a new tab' : '📷 Abrir cámara en una pestaña nueva'}</div>
+          <div class="gc-camera-help">${isEn
+            ? 'Google Sites does not grant camera permission to the embedded activity. Open the secure camera page, take the photo, and return here.'
+            : 'Google Sites no concede el permiso de cámara a la actividad incrustada. Abre la página segura, toma la foto y regresa aquí.'}</div>
         </div>
-        <button type="button" class="gc-camera-close" aria-label="${isEn ? 'Close camera' : 'Cerrar cámara'}">✕</button>
-      </div>
-      <div class="gc-camera-stage">
-        <video class="gc-camera-video" autoplay playsinline muted></video>
-        <div class="gc-camera-status" role="status" aria-live="polite">${isEn ? 'Requesting camera permission…' : 'Solicitando permiso para usar la cámara…'}</div>
+        <button type="button" class="gc-camera-close" aria-label="${isEn ? 'Close' : 'Cerrar'}">✕</button>
       </div>
       <div class="gc-camera-actions">
-        <button type="button" class="btn btn-primary gc-camera-capture" disabled>${isEn ? '📸 Take photo' : '📸 Tomar foto'}</button>
-        <button type="button" class="btn btn-ghost gc-camera-switch">${isEn ? '🔄 Switch camera' : '🔄 Cambiar cámara'}</button>
+        <a class="btn btn-primary" href="${escapeHtml(url)}" target="_blank" rel="opener">${isEn ? '📷 Open secure camera' : '📷 Abrir cámara segura'}</a>
         <button type="button" class="btn btn-ghost gc-camera-cancel">${isEn ? 'Cancel' : 'Cancelar'}</button>
       </div>
+      <p class="gc-camera-help">${isEn
+        ? 'Keep this activity open. The captured photo will return automatically whenever the browser keeps the connection between both tabs.'
+        : 'Mantén esta actividad abierta. La foto capturada regresará automáticamente cuando el navegador conserve la conexión entre las dos pestañas.'}</p>
     </div>`;
   document.body.appendChild(overlay);
-  planCameraOverlay = overlay;
-  document.addEventListener('keydown',handlePlanCameraEscape);
+  overlay.querySelector('.gc-camera-close').addEventListener('click',closeCameraLaunchFallback);
+  overlay.querySelector('.gc-camera-cancel').addEventListener('click',closeCameraLaunchFallback);
+  overlay.addEventListener('click',event=>{ if(event.target === overlay) closeCameraLaunchFallback(); });
+}
 
-  const video = overlay.querySelector('.gc-camera-video');
-  const status = overlay.querySelector('.gc-camera-status');
-  const captureBtn = overlay.querySelector('.gc-camera-capture');
-  const switchBtn = overlay.querySelector('.gc-camera-switch');
-  const cancelBtn = overlay.querySelector('.gc-camera-cancel');
-  const closeBtn = overlay.querySelector('.gc-camera-close');
-
-  const close = ()=>closePlanCamera();
-  closeBtn.addEventListener('click',close);
-  cancelBtn.addEventListener('click',close);
-  overlay.addEventListener('click',event=>{ if(event.target === overlay) close(); });
-
-  captureBtn.addEventListener('click',()=>{
-    try{
-      const sourceWidth = video.videoWidth || 1280;
-      const sourceHeight = video.videoHeight || 720;
-      if(!sourceWidth || !sourceHeight) throw new Error('camera-no-frame');
-      const maxSide = 960;
-      const scale = Math.min(1,maxSide/Math.max(sourceWidth,sourceHeight));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1,Math.round(sourceWidth*scale));
-      canvas.height = Math.max(1,Math.round(sourceHeight*scale));
-      const ctx = canvas.getContext('2d');
-      if(!ctx) throw new Error('camera-canvas');
-      ctx.drawImage(video,0,0,canvas.width,canvas.height);
-      state.planData.photoData = canvas.toDataURL('image/jpeg',0.78);
-      state.planData.photoName = cameraEvidenceFilename();
-      saveState();
-      renderPlanPhotoPreview();
-      renderPlanStatus();
-      close();
-      showToast(isEn ? 'Photo taken and added as evidence.' : 'Foto tomada y agregada como evidencia.');
-    }catch(error){
-      console.error('Camera capture error',error);
-      status.textContent = isEn ? 'The photo could not be captured. Try again.' : 'No se pudo capturar la foto. Inténtalo nuevamente.';
-    }
-  });
-
-  switchBtn.addEventListener('click',async()=>{
-    planCameraFacingMode = planCameraFacingMode === 'environment' ? 'user' : 'environment';
-    try{
-      await startPlanCamera(video,status,captureBtn,planCameraFacingMode,sessionToken);
-    }catch(error){
-      console.error('Camera switch error',error);
-      status.textContent = planCameraErrorMessage(error);
-      captureBtn.disabled = true;
-    }
-  });
-
-  try{
-    await startPlanCamera(video,status,captureBtn,planCameraFacingMode,sessionToken);
-  }catch(error){
-    console.error('Camera start error',error);
-    status.textContent = planCameraErrorMessage(error);
-    captureBtn.disabled = true;
+function openPlanCamera(){
+  if(state.completed.plan) return;
+  const isEn = currentLang === 'en';
+  cameraCaptureSessionId = (window.crypto && typeof window.crypto.randomUUID === 'function')
+    ? window.crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const url = new URL('camera-capture.html', document.baseURI);
+  url.searchParams.set('lang', currentLang === 'en' ? 'en' : 'es');
+  url.searchParams.set('session', cameraCaptureSessionId);
+  url.searchParams.set('embedded', isEmbeddedCameraContext() ? '1' : '0');
+  const features = 'popup=yes,width=980,height=780,resizable=yes,scrollbars=yes';
+  cameraCaptureWindow = window.open(url.href, `gc_camera_${cameraCaptureSessionId.replace(/[^a-z0-9]/gi,'_')}`, features);
+  if(cameraCaptureWindow){
+    try{ cameraCaptureWindow.focus(); }catch(_err){}
+    showToast(isEn
+      ? 'The camera opened in a secure window. Take the photo and return to the activity.'
+      : 'La cámara se abrió en una ventana segura. Toma la foto y regresa a la actividad.');
+  }else{
+    showCameraLaunchFallback(url.href);
+    showToast(isEn
+      ? 'The browser blocked the camera window. Use the button shown on screen.'
+      : 'El navegador bloqueó la ventana de cámara. Usa el botón que aparece en pantalla.');
   }
 }
+
+setupCameraEvidenceBridge();
+
 
 function wirePlanInputs(){
   const builder = document.getElementById('plan-builder');

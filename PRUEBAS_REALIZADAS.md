@@ -43,3 +43,20 @@ El flujo completo de envío y confirmación fue probado contra un endpoint simul
 - Confirmado el nombre automático `evidencia_camara_YYYY-MM-DD_HH-MM.jpg`.
 - Validación de sintaxis de todos los archivos JavaScript y de todos los scripts inline.
 - Confirmado que la URL `/exec` y el destinatario institucional continúan configurados.
+
+
+## Pruebas v3.3 — cámara desde una actividad incrustada
+
+- Validación de sintaxis de todos los scripts inline de `index.html`.
+- Validación de sintaxis del JavaScript de `camera-capture.html`.
+- Prueba unitaria con API de cámara simulada y dos dispositivos: una cámara integrada y una cámara externa USB.
+- Confirmado que el selector muestra ambos dispositivos y permite alternarlos.
+- Confirmado que la captura produce una imagen JPEG y crea el nombre `evidencia_camara_YYYY-MM-DD_HH-MM.jpg`.
+- Confirmado que la página de cámara envía el resultado por `window.opener.postMessage`.
+- Confirmado el respaldo mediante almacenamiento local.
+- Prueba unitaria del receptor en `index.html`: guarda la fotografía en el estado del Plan, actualiza la vista previa y actualiza los requisitos del Plan Guardián.
+- Confirmado que la página de cámara se resuelve de forma relativa desde la misma raíz de `index.html`.
+- Confirmado que `js/email-config.js` conserva la URL `/exec` de producción.
+- Confirmado que el botón **Imprimir plan** continúa eliminado.
+
+La autorización física final depende del permiso que el usuario conceda en Chrome y de que la publicación se abra mediante HTTPS.

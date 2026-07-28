@@ -74,3 +74,37 @@
 - `CAMBIOS_REALIZADOS.md`
 - `README.md`
 - `VERSION.txt`
+
+
+## Actualización v3.3 — Cámara segura para aplicaciones incrustadas en Google Sites
+
+### Problema corregido
+
+La cámara directa mediante `getUserMedia()` podía ser bloqueada porque Google Sites presenta la aplicación dentro de un iframe de otro origen y el marco superior no delega necesariamente el permiso `camera`.
+
+### Solución aplicada
+
+- Se reemplazó la activación directa dentro del iframe por una página independiente: `camera-capture.html`.
+- El botón **Abrir cámara del equipo** abre esa página con una acción directa del usuario.
+- La página independiente funciona como contexto superior HTTPS y solicita el permiso de cámara al navegador.
+- Se añadió detección y listado de entradas `videoinput` para seleccionar cámara integrada o externa/USB.
+- Se añadió botón para alternar entre las cámaras detectadas y actualización ante conexión o retiro de dispositivos.
+- La foto vuelve automáticamente al Plan Guardián mediante `window.postMessage`; también existen respaldos con `BroadcastChannel` y almacenamiento local.
+- Si la ventana emergente es bloqueada, aparece un panel con un enlace visible para abrir la cámara segura.
+- Se mantiene la opción **Subir imagen** y la página de cámara permite descargar la foto como respaldo.
+- La cámara y sus pistas se detienen después de capturar, al cambiar de dispositivo y al cerrar.
+- Se conservaron la URL `/exec` y el destinatario institucional configurados.
+
+### Archivos modificados
+
+- `index.html`
+- `README.md`
+- `CAMBIOS_REALIZADOS.md`
+- `PRUEBAS_REALIZADAS.md`
+- `VERSION.txt`
+- `__inline_check.js`
+
+### Archivos creados
+
+- `camera-capture.html`
+- `CAMARA_GOOGLE_SITES.md`

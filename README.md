@@ -63,3 +63,19 @@ En el Plan Guardián ahora aparecen dos opciones para la evidencia:
 La cámara directa necesita que la aplicación se abra desde una conexión segura HTTPS. La publicación normal de GitHub Pages utiliza HTTPS. El navegador solicitará permiso la primera vez.
 
 El botón **Imprimir plan** fue retirado. El botón **Descargar plan** continúa generando el PDF y enviando la copia al correo institucional configurado.
+
+
+## Cámara compatible con Google Sites (v3.3)
+
+Google Sites carga la aplicación dentro de un marco externo. Los navegadores pueden bloquear el acceso directo a la cámara dentro de ese marco aunque la aplicación use HTTPS.
+
+La versión v3.3 aplica un flujo compatible:
+
+- **Abrir cámara del equipo** abre `camera-capture.html` en una ventana o pestaña segura del mismo sitio publicado.
+- La página independiente solicita el permiso directamente al navegador.
+- Muestra una lista de cámaras de video para elegir la webcam integrada o una cámara externa/USB.
+- Después de tomar la foto, la evidencia regresa automáticamente al Plan Guardián mediante comunicación segura entre ventanas.
+- Se conservan `Subir imagen` y la descarga manual de la foto como alternativas.
+- No se solicita micrófono. Las pistas de video se detienen al capturar, cambiar de cámara o cerrar la página.
+
+Para que esta función opere, publica también `camera-capture.html` en la misma raíz donde se encuentra `index.html`.

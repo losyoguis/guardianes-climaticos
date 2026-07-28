@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b5d32" />
+  <title>Cámara segura · Guardianes Climáticos</title>
+  <style>
+    :root{font-family:Arial,Helvetica,sans-serif;color-scheme:light;--green:#0b7a3e;--dark:#073b25;--sky:#eaf7ff;--ink:#123047}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(145deg,#dff7e5,#eaf7ff 48%,#fff8d8);color:var(--ink);padding:18px}
+    .shell{width:min(980px,100%);margin:0 auto;background:#fff;border:3px solid rgba(11,122,62,.22);border-radius:28px;box-shadow:0 24px 70px rgba(4,45,31,.2);overflow:hidden}
+    header{background:linear-gradient(135deg,#08783b,#22a559);color:#fff;padding:22px 24px}h1{margin:0;font-size:clamp(1.5rem,4vw,2.2rem)}header p{margin:8px 0 0;font-weight:700;line-height:1.45}
+    main{padding:20px;display:grid;gap:16px}.notice{padding:13px 15px;border-radius:16px;background:#eaf7ff;border:2px solid #b6ddf5;font-weight:750;line-height:1.45}.notice.warning{background:#fff4d6;border-color:#f1cd6a}.notice.success{background:#e8f8ec;border-color:#8fd29e;color:#0b5d32}.notice.error{background:#fff0f0;border-color:#eaa0a0;color:#842323}
+    .toolbar{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:12px;align-items:end}.field{display:grid;gap:6px}.field label{font-weight:900;color:#0b5d32}.field select{width:100%;min-height:48px;border:2px solid #a9c8b5;border-radius:14px;padding:10px 12px;background:#fff;font-size:1rem;font-weight:700}
+    .stage{position:relative;border-radius:22px;overflow:hidden;min-height:320px;background:#07131c;display:grid;place-items:center}.stage video,.stage img{display:block;width:100%;max-height:62vh;object-fit:contain;background:#07131c}.status{position:absolute;left:12px;right:12px;bottom:12px;background:rgba(0,0,0,.72);color:#fff;padding:11px 13px;border-radius:14px;text-align:center;font-weight:800;line-height:1.4}.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.btn{border:0;border-radius:16px;padding:13px 18px;min-height:50px;font-size:1rem;font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}.btn:disabled{opacity:.5;cursor:not-allowed}.primary{background:#119447;color:#fff;box-shadow:0 7px 0 #075c2d}.secondary{background:#e9f3fa;color:#174661;border:2px solid #b7d2e2}.danger{background:#fff0f0;color:#8a2828;border:2px solid #e8aaaa}.file-input{position:absolute;opacity:0;pointer-events:none}.small{font-size:.9rem;color:#49697b;line-height:1.5;text-align:center;margin:0}.hidden{display:none!important}
+    @media(max-width:650px){body{padding:8px}.shell{border-radius:19px}header{padding:18px 16px}main{padding:12px}.toolbar{grid-template-columns:1fr}.stage{min-height:240px}.actions{display:grid;grid-template-columns:1fr}.btn{width:100%}}
+  </style>
+</head>
+<body>
+  <section class="shell">
+    <header>
+      <h1 id="title">📷 Cámara segura</h1>
+      <p id="subtitle">Selecciona la cámara interna o externa, toma la evidencia y vuelve a la actividad.</p>
+    </header>
+    <main>
+      <div class="notice" id="contextNotice">Esta página se abre fuera del marco de Google Sites para que Chrome pueda solicitar el permiso de cámara.</div>
+      <div class="toolbar">
+        <div class="field">
+          <label for="cameraSelect" id="cameraLabel">Cámara disponible</label>
+          <select id="cameraSelect" disabled><option>Buscando cámaras…</option></select>
+        </div>
+        <button class="btn secondary" id="refreshBtn" type="button">🔄 Buscar cámaras</button>
+      </div>
+      <div class="stage" id="stage">
+        <video id="video" autoplay playsinline muted></video>
+        <img id="photoPreview" class="hidden" alt="Foto capturada" />
+        <div class="status" id="status" role="status" aria-live="polite">Preparando la cámara…</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="captureBtn" type="button" disabled>📸 Tomar foto</button>
+        <button class="btn secondary" id="switchBtn" type="button" disabled>🔁 Cambiar cámara</button>
+        <button class="btn secondary hidden" id="retryBtn" type="button">↩️ Tomar otra</button>
+        <button class="btn secondary hidden" id="downloadBtn" type="button">⬇️ Descargar foto</button>
+        <label class="btn secondary" for="fileInput" id="uploadLabel">🖼️ Usar imagen guardada</label>
+        <input class="file-input" id="fileInput" type="file" accept="image/*" />
+        <button class="btn danger" id="closeBtn" type="button">Cerrar</button>
+      </div>
+      <p class="small" id="privacyText">La cámara solo se activa después de tu permiso. La fotografía se envía a la actividad abierta y no se sube desde esta página a ningún servidor.</p>
+    </main>
+  </section>
+<script>
+(function(){
+  'use strict';
+  const params = new URLSearchParams(location.search);
+  const lang = params.get('lang') === 'en' ? 'en' : 'es';
+  const sessionId = params.get('session') || '';
+  const TRANSFER_KEY = 'gcmed_camera_transfer_v2';
+  const CHANNEL_NAME = 'gcmed_camera_channel_v2';
+  const $ = id=>document.getElementById(id);
+  const video=$('video'), preview=$('photoPreview'), status=$('status'), select=$('cameraSelect');
+  const captureBtn=$('captureBtn'), switchBtn=$('switchBtn'), retryBtn=$('retryBtn'), downloadBtn=$('downloadBtn');
+  const refreshBtn=$('refreshBtn'), closeBtn=$('closeBtn'), fileInput=$('fileInput');
+  let stream=null, devices=[], currentDeviceId='', capturedDataUrl='', channel=null;
+
+  const T = lang === 'en' ? {
+    title:'📷 Secure camera', subtitle:'Choose the built-in or external camera, capture the evidence, and return to the activity.',
+    context:'This page opens outside the Google Sites frame so Chrome can request camera permission.', label:'Available camera', search:'🔄 Find cameras',
+    capture:'📸 Take photo', switch:'🔁 Switch camera', retry:'↩️ Take another', download:'⬇️ Download photo', upload:'🖼️ Use saved image', close:'Close',
+    privacy:'The camera starts only after your permission. The photo is returned to the open activity and is not uploaded from this page to a server.',
+    preparing:'Preparing camera…', requesting:'Allow camera access in the browser message.', ready:'Camera ready. Frame your evidence and press “Take photo”.',
+    noDevices:'No camera was detected. Connect a USB camera or use a saved image.', denied:'Camera permission was denied. Click the camera icon in the address bar, allow access, and try again.',
+    busy:'The camera is busy in another app. Close it there and try again.', insecure:'The camera requires an HTTPS page opened directly in the browser.', unsupported:'This browser does not support camera access.',
+    captured:'Photo captured and sent to the activity. You may return now.', transferFallback:'Photo captured. Return to the activity; if it does not appear automatically, download it here and use “Upload image”.',
+    searching:'Searching for connected cameras…', choose:'Choose a camera', camera:'Camera', internal:'Built-in', external:'External / USB', processing:'Processing image…', badFile:'Choose a valid image file.'
+  } : {
+    title:'📷 Cámara segura', subtitle:'Selecciona la cámara interna o externa, toma la evidencia y vuelve a la actividad.',
+    context:'Esta página se abre fuera del marco de Google Sites para que Chrome pueda solicitar el permiso de cámara.', label:'Cámara disponible', search:'🔄 Buscar cámaras',
+    capture:'📸 Tomar foto', switch:'🔁 Cambiar cámara', retry:'↩️ Tomar otra', download:'⬇️ Descargar foto', upload:'🖼️ Usar imagen guardada', close:'Cerrar',
+    privacy:'La cámara solo se activa después de tu permiso. La fotografía se envía a la actividad abierta y no se sube desde esta página a ningún servidor.',
+    preparing:'Preparando la cámara…', requesting:'Permite el acceso a la cámara en el mensaje del navegador.', ready:'Cámara lista. Encuadra tu evidencia y pulsa “Tomar foto”.',
+    noDevices:'No se detectó ninguna cámara. Conecta una cámara USB o usa una imagen guardada.', denied:'Se negó el permiso. Pulsa el icono de cámara de la barra de direcciones, permite el acceso e inténtalo otra vez.',
+    busy:'La cámara está ocupada por otra aplicación. Ciérrala allí e inténtalo nuevamente.', insecure:'La cámara requiere una página HTTPS abierta directamente en el navegador.', unsupported:'Este navegador no permite acceder a la cámara.',
+    captured:'Foto capturada y enviada a la actividad. Ya puedes regresar.', transferFallback:'Foto capturada. Regresa a la actividad; si no aparece automáticamente, descárgala aquí y usa “Subir imagen”.',
+    searching:'Buscando cámaras conectadas…', choose:'Selecciona una cámara', camera:'Cámara', internal:'Integrada', external:'Externa / USB', processing:'Procesando imagen…', badFile:'Selecciona un archivo de imagen válido.'
+  };
+
+  document.documentElement.lang=lang;
+  $('title').textContent=T.title; $('subtitle').textContent=T.subtitle; $('contextNotice').textContent=T.context; $('cameraLabel').textContent=T.label;
+  refreshBtn.textContent=T.search; captureBtn.textContent=T.capture; switchBtn.textContent=T.switch; retryBtn.textContent=T.retry; downloadBtn.textContent=T.download;
+  $('uploadLabel').textContent=T.upload; closeBtn.textContent=T.close; $('privacyText').textContent=T.privacy;
+
+  function setStatus(message,kind){ status.textContent=message; const notice=$('contextNotice'); notice.className='notice'+(kind?' '+kind:''); if(kind) notice.textContent=message; }
+  function stopStream(){ if(stream){ stream.getTracks().forEach(track=>track.stop()); stream=null; } video.srcObject=null; }
+  function labelForDevice(device,index){
+    const raw=(device.label||'').trim();
+    const lower=raw.toLowerCase();
+    let kind='';
+    if(/facetime|built.?in|integrated|internal|frontal|interna|integrada/.test(lower)) kind=T.internal;
+    else if(/usb|external|externa|webcam|logitech|obs|capture/.test(lower)) kind=T.external;
+    return raw ? `${raw}${kind ? ' · '+kind : ''}` : `${T.camera} ${index+1}`;
+  }
+  async function enumerateCameras(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return [];
+    const all=await navigator.mediaDevices.enumerateDevices();
+    devices=all.filter(device=>device.kind==='videoinput');
+    select.innerHTML='';
+    if(!devices.length){
+      const opt=document.createElement('option'); opt.textContent=T.noDevices; opt.value=''; select.appendChild(opt); select.disabled=true; switchBtn.disabled=true; return devices;
+    }
+    devices.forEach((device,index)=>{ const opt=document.createElement('option'); opt.value=device.deviceId; opt.textContent=labelForDevice(device,index); select.appendChild(opt); });
+    select.disabled=devices.length<2; switchBtn.disabled=devices.length<2;
+    if(currentDeviceId && devices.some(d=>d.deviceId===currentDeviceId)) select.value=currentDeviceId;
+    else { const active=stream && stream.getVideoTracks()[0]; const settings=active && active.getSettings ? active.getSettings() : {}; currentDeviceId=settings.deviceId || devices[0].deviceId; select.value=currentDeviceId; }
+    return devices;
+  }
+  function cameraError(error){
+    if(!window.isSecureContext) return T.insecure;
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return T.unsupported;
+    const name=error&&error.name||'';
+    if(name==='NotAllowedError'||name==='SecurityError') return T.denied;
+    if(name==='NotFoundError'||name==='DevicesNotFoundError') return T.noDevices;
+    if(name==='NotReadableError'||name==='TrackStartError'||name==='AbortError') return T.busy;
+    return `${lang==='en'?'The camera could not start':'No se pudo iniciar la cámara'}${error&&error.message?': '+error.message:''}`;
+  }
+  async function startCamera(deviceId){
+    stopStream(); capturedDataUrl=''; preview.classList.add('hidden'); video.classList.remove('hidden'); retryBtn.classList.add('hidden'); downloadBtn.classList.add('hidden');
+    captureBtn.disabled=true; setStatus(T.requesting);
+    if(window.self!==window.top){ setStatus(T.insecure,'error'); return; }
+    if(!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ setStatus(cameraError(null),'error'); return; }
+    const videoConstraints=deviceId ? {deviceId:{exact:deviceId},width:{ideal:1920},height:{ideal:1080}} : {width:{ideal:1920},height:{ideal:1080},facingMode:{ideal:'environment'}};
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:false,video:videoConstraints});
+      video.srcObject=stream; await video.play().catch(()=>{});
+      const active=stream.getVideoTracks()[0], settings=active&&active.getSettings?active.getSettings():{}; currentDeviceId=settings.deviceId||deviceId||'';
+      await enumerateCameras();
+      captureBtn.disabled=false; setStatus(T.ready,'success');
+    }catch(error){ console.error(error); setStatus(cameraError(error),'error'); await enumerateCameras().catch(()=>{}); }
+  }
+  function makeDataUrl(source,width,height){
+    const maxSide=1280, scale=Math.min(1,maxSide/Math.max(width,height));
+    const canvas=document.createElement('canvas'); canvas.width=Math.max(1,Math.round(width*scale)); canvas.height=Math.max(1,Math.round(height*scale));
+    const ctx=canvas.getContext('2d'); if(!ctx) throw new Error('canvas'); ctx.drawImage(source,0,0,canvas.width,canvas.height); return canvas.toDataURL('image/jpeg',0.78);
+  }
+  function fileName(){ const d=new Date(),p=n=>String(n).padStart(2,'0'); return `evidencia_camara_${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}.jpg`; }
+  function publishPhoto(dataUrl){
+    const payload={type:'gc-camera-photo',sessionId,dataUrl,fileName:fileName(),createdAt:Date.now()};
+    let direct=false;
+    try{ if(window.opener && !window.opener.closed){ window.opener.postMessage(payload,location.origin); direct=true; } }catch(error){ console.warn('opener transfer',error); }
+    try{ localStorage.setItem(TRANSFER_KEY,JSON.stringify(payload)); }catch(error){ console.warn('storage transfer',error); }
+    try{ if(!channel && 'BroadcastChannel' in window) channel=new BroadcastChannel(CHANNEL_NAME); if(channel) channel.postMessage(payload); }catch(error){ console.warn('channel transfer',error); }
+    return direct;
+  }
+  function showCaptured(dataUrl){
+    capturedDataUrl=dataUrl; preview.src=dataUrl; preview.classList.remove('hidden'); video.classList.add('hidden'); captureBtn.disabled=true; switchBtn.disabled=true; select.disabled=true; retryBtn.classList.remove('hidden'); downloadBtn.classList.remove('hidden'); stopStream();
+    const direct=publishPhoto(dataUrl); setStatus(direct?T.captured:T.transferFallback,direct?'success':'warning');
+    if(direct) setTimeout(()=>{ try{ window.close(); }catch(_err){} },1800);
+  }
+  captureBtn.addEventListener('click',()=>{
+    try{ const w=video.videoWidth||1280,h=video.videoHeight||720; if(!w||!h) throw new Error('no-frame'); showCaptured(makeDataUrl(video,w,h)); }catch(error){ setStatus(lang==='en'?'The photo could not be captured. Try again.':'No se pudo capturar la foto. Inténtalo nuevamente.','error'); }
+  });
+  select.addEventListener('change',()=>{ if(select.value) startCamera(select.value); });
+  switchBtn.addEventListener('click',()=>{ if(!devices.length)return; let i=devices.findIndex(d=>d.deviceId===currentDeviceId); i=(i+1)%devices.length; startCamera(devices[i].deviceId); });
+  refreshBtn.addEventListener('click',async()=>{ setStatus(T.searching); await startCamera(currentDeviceId||''); });
+  retryBtn.addEventListener('click',()=>startCamera(currentDeviceId||''));
+  downloadBtn.addEventListener('click',()=>{ if(!capturedDataUrl)return; const a=document.createElement('a'); a.href=capturedDataUrl; a.download=fileName(); document.body.appendChild(a); a.click(); a.remove(); });
+  fileInput.addEventListener('change',()=>{
+    const file=fileInput.files&&fileInput.files[0]; if(!file)return; if(!/^image\//i.test(file.type)){setStatus(T.badFile,'error');return;}
+    setStatus(T.processing); const reader=new FileReader(); reader.onerror=()=>setStatus(T.badFile,'error'); reader.onload=()=>{ const img=new Image(); img.onerror=()=>setStatus(T.badFile,'error'); img.onload=()=>showCaptured(makeDataUrl(img,img.naturalWidth||img.width,img.naturalHeight||img.height)); img.src=reader.result; }; reader.readAsDataURL(file); fileInput.value='';
+  });
+  closeBtn.addEventListener('click',()=>{ stopStream(); try{window.close();}catch(_err){} });
+  window.addEventListener('beforeunload',stopStream);
+  navigator.mediaDevices && navigator.mediaDevices.addEventListener && navigator.mediaDevices.addEventListener('devicechange',()=>enumerateCameras().catch(()=>{}));
+  setStatus(T.preparing); startCamera('');
+})();
+</script>
+</body>
+</html>
