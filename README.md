@@ -32,3 +32,22 @@ Para activar el envío, sigue una sola vez las instrucciones de `CONFIGURAR_ENVI
 
 La descarga local sigue funcionando aunque el servicio de correo no esté disponible.
 
+
+## Corrección de exportación v3
+
+La versión v3 corrige los bloqueos de impresión y descarga e incorpora confirmación real del envío por Apps Script.
+
+- `configurar-correo.html`: asistente para probar la URL `/exec`, guardarla y generar `js/email-config.js`.
+- `js/pdf-email.js`: PDF, descarga con respaldo, envío y confirmación.
+- `apps-script/Code.gs`: recepción, validación, envío y consulta del estado.
+
+La generación, descarga e impresión funcionan sin backend. El envío automático necesita desplegar una vez `apps-script/Code.gs` en la cuenta institucional y registrar la URL `/exec`, como se explica en `CONFIGURAR_ENVIO_EMAIL.md`.
+
+
+## Configuración activa del correo — v3.1
+
+La URL `/exec` suministrada para Google Apps Script ya está registrada en `js/email-config.js`:
+
+`https://script.google.com/macros/s/AKfycbzCYfnSe8smEyeqXdixYghKkBTZhKieJPladoFWIBQ2GZUkJCIE3ha3ZBed2i_8elHf/exec`
+
+Al publicar esta carpeta completa, la aplicación intentará enviar automáticamente el Plan Guardián y el Diploma a `cd@iemanueljbetancur.edu.co`.

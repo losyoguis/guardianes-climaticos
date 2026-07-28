@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configurar correo — Guardianes Climáticos</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#eef6ff;color:#15304b;padding:20px}.card{max-width:820px;margin:auto;background:#fff;border-radius:24px;padding:24px;box-shadow:0 18px 50px rgba(0,0,0,.14)}h1{margin-top:0}.step{padding:16px;border:1px solid #cfe2f5;border-radius:16px;margin:14px 0;background:#f8fbff}label{display:block;font-weight:800;margin-bottom:8px}input{width:100%;padding:13px;border:2px solid #b9cee5;border-radius:12px;font-size:16px}button,a.btn{display:inline-block;border:0;border-radius:999px;padding:12px 18px;font-weight:800;font-size:16px;cursor:pointer;text-decoration:none;margin:6px 4px 0 0}.primary{background:#1565c0;color:#fff}.green{background:#00a86b;color:#fff}.ghost{background:#e8eef5;color:#15304b}.status{margin-top:12px;padding:12px;border-radius:12px;background:#eef6ff;font-weight:700;white-space:pre-wrap}.ok{background:#e8f7ef}.bad{background:#fff0f0}.warn{background:#fff8df}code{background:#edf3f9;padding:2px 5px;border-radius:5px}.small{font-size:14px;color:#486a8b;line-height:1.5}
+</style>
+</head>
+<body>
+<main class="card">
+<h1>📧 Configurar envío automático</h1>
+<p>Esta página guarda la URL de Google Apps Script en este navegador y también genera el archivo <code>js/email-config.js</code> listo para subir a GitHub.</p>
+<div class="step">
+<label for="url">URL de la aplicación web de Apps Script</label>
+<input id="url" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+<div class="small">La dirección debe terminar en <b>/exec</b>. No uses una URL terminada en <b>/dev</b>.</div>
+<div>
+<button class="primary" id="test">1. Probar conexión</button>
+<button class="green" id="save">2. Guardar en este navegador</button>
+<button class="primary" id="download">3. Descargar email-config.js</button>
+<a class="btn ghost" href="index.html">Abrir la app</a>
+</div>
+<div id="status" class="status">Esperando la URL…</div>
+</div>
+<div class="step small">
+<b>Para todos los estudiantes:</b> descarga el archivo generado, reemplaza <code>js/email-config.js</code> en el repositorio de GitHub y vuelve a publicar. Así no tendrás que configurar cada dispositivo.
+</div>
+</main>
+<script>
+(function(){
+  'use strict';
+  const TOKEN='L8UEHKN4iTLxc3PurPREbA-igOs--Gn4zQOaq4f76UBEzrXg';
+  const input=document.getElementById('url');
+  const status=document.getElementById('status');
+  try{ input.value=localStorage.getItem('gc_email_webapp_url')||''; }catch(_e){}
+  function endpoint(){ return input.value.trim(); }
+  function valid(url){ return /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec(?:\?.*)?$/i.test(url); }
+  function setStatus(message,kind){ status.textContent=message; status.className='status '+(kind||''); }
+  function jsonpHealth(url){
+    return new Promise((resolve,reject)=>{
+      const cb='__gcHealth_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+      const script=document.createElement('script');
+      let done=false;
+      const finish=()=>{if(done)return;done=true;clearTimeout(timer);try{delete window[cb]}catch(_e){};script.remove();};
+      window[cb]=(data)=>{finish();resolve(data||{})};
+      script.onerror=()=>{finish();reject(new Error('No se pudo abrir el servicio.'))};
+      script.src=url+(url.includes('?')?'&':'?')+'action=health&callback='+encodeURIComponent(cb)+'&_='+Date.now();
+      const timer=setTimeout(()=>{finish();reject(new Error('El servicio no respondió.'))},10000);
+      document.head.appendChild(script);
+    });
+  }
+  document.getElementById('test').addEventListener('click',async()=>{
+    const url=endpoint();
+    if(!valid(url)){setStatus('La URL no es válida o no termina en /exec.','bad');return;}
+    setStatus('Probando conexión…','warn');
+    try{
+      const result=await jsonpHealth(url);
+      if(result.ok){setStatus('✅ Servicio conectado. Destinatario: '+(result.recipient||'cd@iemanueljbetancur.edu.co')+'\nVersión: '+(result.version||'sin dato'),'ok');}
+      else setStatus('El servicio respondió, pero no confirmó que esté activo.','bad');
+    }catch(error){setStatus('❌ '+error.message+' Revisa que la implementación tenga acceso para “Cualquier persona”.','bad');}
+  });
+  document.getElementById('save').addEventListener('click',()=>{
+    const url=endpoint();
+    if(!valid(url)){setStatus('La URL no es válida o no termina en /exec.','bad');return;}
+    try{localStorage.setItem('gc_email_webapp_url',url);setStatus('✅ URL guardada en este navegador. Ya puedes probar la app.','ok');}
+    catch(error){setStatus('No se pudo guardar en este navegador. Usa el archivo descargable.','bad');}
+  });
+  document.getElementById('download').addEventListener('click',()=>{
+    const url=endpoint();
+    if(!valid(url)){setStatus('La URL no es válida o no termina en /exec.','bad');return;}
+    const content=`/* Configuración Guardianes Climáticos */\nwindow.GC_EMAIL_CONFIG = Object.freeze({\n  recipient: 'cd@iemanueljbetancur.edu.co',\n  webAppUrl: '${url.replace(/'/g,"\\'")}',\n  appToken: '${TOKEN}',\n  maxPdfBytes: 8 * 1024 * 1024\n});\n`;
+    const blob=new Blob([content],{type:'text/javascript;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='email-config.js';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    setStatus('✅ Archivo email-config.js generado. Súbelo a la carpeta js/ del repositorio.','ok');
+  });
+})();
+</script>
+</body>
+</html>

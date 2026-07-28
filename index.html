@@ -1788,20 +1788,20 @@ body.belt-on .belt-right{
       <div class="final-plan-title" data-i18n="end_plan_title">📌 Tu Plan Guardián</div>
       <div class="final-plan-summary" id="final-plan-summary"></div>
       <div class="final-plan-actions">
-        <button type="button" class="btn btn-primary" id="btn-print-plan" data-i18n="plan_print_btn">🖨️ Imprimir plan</button>
-        <button type="button" class="btn btn-ghost" id="btn-download-plan" data-i18n="plan_download_btn">⬇️ Descargar plan</button>
+        <button type="button" class="btn btn-primary" id="btn-print-plan" onclick="printPlanEvidence(); return false;" data-i18n="plan_print_btn">🖨️ Imprimir plan</button>
+        <button type="button" class="btn btn-ghost" id="btn-download-plan" onclick="downloadPlanEvidence(); return false;" data-i18n="plan_download_btn">⬇️ Descargar plan</button>
       </div>
-      <div class="pdf-email-note" data-i18n="pdf_email_note">📧 Al descargar el PDF, también se enviará automáticamente una copia a cd@iemanueljbetancur.edu.co.</div>
+      <div class="pdf-email-note">📧 Verificando el servicio de correo…</div>
     </div>
 
     <div class="final-cert-card" id="final-cert-card" style="display:none">
       <div class="final-cert-title" data-i18n="cert_title">🎓 Diploma Guardián Climático</div>
       <div class="final-cert-preview" id="final-cert-preview"></div>
       <div class="final-plan-actions">
-        <button type="button" class="btn btn-primary" id="btn-print-cert" data-i18n="cert_print_btn">🖨️ Imprimir diploma</button>
-        <button type="button" class="btn btn-ghost" id="btn-download-cert" data-i18n="cert_download_btn">⬇️ Descargar diploma</button>
+        <button type="button" class="btn btn-primary" id="btn-print-cert" onclick="printGuardianCertificate(); return false;" data-i18n="cert_print_btn">🖨️ Imprimir diploma</button>
+        <button type="button" class="btn btn-ghost" id="btn-download-cert" onclick="downloadGuardianCertificate(); return false;" data-i18n="cert_download_btn">⬇️ Descargar diploma</button>
       </div>
-      <div class="pdf-email-note" data-i18n="pdf_email_note">📧 Al descargar el PDF, también se enviará automáticamente una copia a cd@iemanueljbetancur.edu.co.</div>
+      <div class="pdf-email-note">📧 Verificando el servicio de correo…</div>
     </div>
 
     <div class="end-actions">
@@ -2836,87 +2836,67 @@ function downloadHtmlDocument(html, filename, okEs, okEn){
     showToast((currentLang==='en') ? 'The file could not be downloaded.' : 'No se pudo descargar el archivo.');
   }
 }
+function ensurePrintPreviewStyles(){
+  if(document.getElementById('gc-print-preview-style')) return;
+  const style=document.createElement('style');
+  style.id='gc-print-preview-style';
+  style.textContent=`
+    .gc-print-overlay{position:fixed;inset:0;z-index:2147483500;background:rgba(7,22,38,.82);display:flex;align-items:center;justify-content:center;padding:12px}
+    .gc-print-panel{width:min(1100px,100%);height:min(94vh,900px);background:#fff;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.42)}
+    .gc-print-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;background:#eef6ff;border-bottom:1px solid #cfe2f5;color:#15304b}
+    .gc-print-toolbar strong{font:900 17px Arial,sans-serif}.gc-print-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .gc-print-actions button{border:0;border-radius:999px;padding:10px 16px;font:800 15px Arial,sans-serif;cursor:pointer}
+    .gc-print-now{background:#1565c0;color:#fff}.gc-print-close{background:#dfe8f2;color:#15304b}
+    .gc-print-frame{width:100%;flex:1;border:0;background:#fff}
+    @media(max-width:560px){.gc-print-panel{height:96vh;border-radius:16px}.gc-print-toolbar{align-items:stretch}.gc-print-actions{width:100%}.gc-print-actions button{flex:1}}
+  `;
+  document.head.appendChild(style);
+}
+function closePrintPreview(){
+  const old=document.getElementById('gc-print-overlay');
+  if(old) old.remove();
+}
 function printHtmlDocument(html, title){
   try{
-    const iframe = document.createElement('iframe');
-    iframe.setAttribute('title', title || 'print-frame');
-    iframe.setAttribute('aria-hidden', 'true');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '1px';
-    iframe.style.height = '1px';
-    iframe.style.opacity = '0.01';
-    iframe.style.pointerEvents = 'none';
-    iframe.style.border = '0';
-    iframe.style.zIndex = '-1';
-    document.body.appendChild(iframe);
-
-    const cleanup = ()=>{
-      try{ iframe.onload = null; }catch(err){}
-      try{ if(iframe.parentNode) iframe.parentNode.removeChild(iframe); }catch(err){}
-    };
-
-    const startPrint = ()=>{
-      const win = iframe.contentWindow;
-      if(!win){
-        cleanup();
-        showToast((currentLang==='en') ? 'The print view could not be opened.' : 'No se pudo abrir la vista de impresión.');
-        return;
-      }
-      const safePrint = ()=>{
-        try{
-          win.focus();
-          win.print();
-        }catch(err){
-          console.error('printHtmlDocument print error', err);
-          showToast((currentLang==='en') ? 'Printing is not available on this device.' : 'La impresión no está disponible en este dispositivo.');
-        }
-        setTimeout(cleanup, 1200);
-      };
+    ensurePrintPreviewStyles();
+    closePrintPreview();
+    const overlay=document.createElement('div');
+    overlay.id='gc-print-overlay';
+    overlay.className='gc-print-overlay';
+    overlay.setAttribute('role','dialog');
+    overlay.setAttribute('aria-modal','true');
+    overlay.innerHTML=`<div class="gc-print-panel"><div class="gc-print-toolbar"><strong>${escapeHtml(title || ((currentLang==='en') ? 'Print preview' : 'Vista para imprimir'))}</strong><div class="gc-print-actions"><button type="button" class="gc-print-now">🖨️ ${(currentLang==='en') ? 'Print now' : 'Imprimir ahora'}</button><button type="button" class="gc-print-close">✖ ${(currentLang==='en') ? 'Close' : 'Cerrar'}</button></div></div><iframe class="gc-print-frame" title="${escapeHtml(title || 'print-frame')}"></iframe></div>`;
+    document.body.appendChild(overlay);
+    const frame=overlay.querySelector('.gc-print-frame');
+    const printBtn=overlay.querySelector('.gc-print-now');
+    const closeBtn=overlay.querySelector('.gc-print-close');
+    const runPrint=()=>{
       try{
-        const doc = win.document;
-        const images = Array.from(doc.images || []);
-        let pending = images.length;
-        if(!pending){
-          setTimeout(safePrint, 180);
-          return;
-        }
-        let resolved = false;
-        const done = ()=>{
-          if(resolved) return;
-          resolved = true;
-          setTimeout(safePrint, 180);
-        };
-        const tick = ()=>{ pending -= 1; if(pending <= 0) done(); };
-        images.forEach(img=>{
-          if(img.complete) tick();
-          else {
-            img.addEventListener('load', tick, { once:true });
-            img.addEventListener('error', tick, { once:true });
-          }
-        });
-        setTimeout(done, 1400);
+        const win=frame.contentWindow;
+        if(!win) throw new Error('print-window-unavailable');
+        win.focus();
+        win.print();
       }catch(err){
-        console.error('printHtmlDocument wait error', err);
-        setTimeout(safePrint, 220);
+        console.error('print preview error', err);
+        showToast((currentLang==='en') ? 'Printing is not available. Use the PDF download button.' : 'No se pudo abrir la impresión. Usa el botón de descarga PDF.');
       }
     };
-
-    iframe.onload = ()=>setTimeout(startPrint, 120);
-
-    const doc = iframe.contentWindow && iframe.contentWindow.document;
-    if(!doc){
-      cleanup();
-      showToast((currentLang==='en') ? 'The print view could not be opened.' : 'No se pudo abrir la vista de impresión.');
-      return;
+    printBtn.addEventListener('click', runPrint);
+    closeBtn.addEventListener('click', closePrintPreview);
+    overlay.addEventListener('click',(event)=>{ if(event.target===overlay) closePrintPreview(); });
+    frame.addEventListener('load',()=>{
+      printBtn.focus();
+      showToast((currentLang==='en') ? 'Preview ready. Press “Print now”.' : 'Vista lista. Pulsa “Imprimir ahora”.');
+    },{once:true});
+    if('srcdoc' in frame){
+      frame.srcdoc=html;
+    }else{
+      const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+      frame.src=URL.createObjectURL(blob);
     }
-    doc.open();
-    doc.write(html);
-    doc.close();
   }catch(err){
     console.error('printHtmlDocument error', err);
-    showToast((currentLang==='en') ? 'Printing could not be started.' : 'No se pudo iniciar la impresión.');
+    showToast((currentLang==='en') ? 'Printing could not be prepared.' : 'No se pudo preparar la impresión.');
   }
 }
 function printPlanEvidence(){
@@ -2981,37 +2961,65 @@ function buildDiplomaPdfData(){
   };
 }
 async function deliverPdfDocument(options){
-  const button = document.getElementById(options.buttonId);
-  const oldText = button ? button.textContent : '';
-  if(button){ button.disabled = true; button.textContent = (currentLang==='en') ? '⏳ Creating PDF...' : '⏳ Creando PDF...'; }
+  const button=document.getElementById(options.buttonId);
+  const oldText=button ? button.textContent : '';
+  if(button){
+    button.disabled=true;
+    button.textContent=(currentLang==='en') ? '⏳ Creating PDF...' : '⏳ Creando PDF...';
+  }
   try{
     if(!window.GCPdfEmail) throw new Error('pdf-module-unavailable');
-    const blob = await options.createPdf();
-    window.GCPdfEmail.downloadBlob(blob, options.filename);
-    showToast((currentLang==='en') ? 'PDF downloaded. Sending the email copy...' : 'PDF descargado. Enviando la copia por correo...');
+    const blob=await options.createPdf();
+    if(!(blob instanceof Blob) || !blob.size) throw new Error('empty-pdf');
+    window.GCPdfEmail.downloadBlob(blob,options.filename,{
+      title:(currentLang==='en') ? 'PDF ready' : 'PDF listo',
+      message:(currentLang==='en') ? 'The automatic download was requested. If your browser blocked it, use the blue download button.' : 'Se solicitó la descarga automática. Si el navegador la bloqueó, usa el botón azul para descargar.',
+      emailState:(currentLang==='en') ? '📧 Sending the email copy…' : '📧 Enviando la copia por correo…'
+    });
+    showToast((currentLang==='en') ? 'PDF ready. You can download it from the open panel.' : 'PDF listo. Puedes descargarlo desde el panel abierto.');
+
     try{
-      const sent = await window.GCPdfEmail.sendPdf(blob, {
+      const sent=await window.GCPdfEmail.sendPdf(blob,{
         filename:options.filename,
         documentType:options.documentType,
         studentName:options.studentName,
         generatedAt:new Date().toISOString()
       });
       if(sent.ok){
-        showToast((currentLang==='en') ? 'PDF downloaded and sent automatically by email.' : 'PDF descargado y enviado automáticamente por correo.');
+        window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '✅ Email confirmed and sent successfully.' : '✅ Correo confirmado y enviado correctamente.','ok');
+        showToast((currentLang==='en') ? 'PDF sent successfully by email.' : 'PDF enviado correctamente por correo.');
       }else if(!sent.configured){
-        showToast((currentLang==='en') ? 'PDF downloaded. The email service still needs its deployment URL.' : 'PDF descargado. Falta registrar la URL del servicio de correo.');
+        window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '⚠️ PDF ready, but the Apps Script /exec URL has not been configured.' : '⚠️ PDF listo, pero falta configurar la URL /exec de Google Apps Script.','warning');
+        showToast((currentLang==='en') ? 'PDF ready. Email service not configured.' : 'PDF listo. El servicio de correo no está configurado.');
       }else if(sent.reason==='too-large'){
-        showToast((currentLang==='en') ? 'PDF downloaded, but it is too large to email.' : 'PDF descargado, pero es demasiado grande para enviarlo por correo.');
+        window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '⚠️ The PDF is too large to email.' : '⚠️ El PDF es demasiado grande para enviarlo por correo.','warning');
+      }else if(sent.pending){
+        window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '⚠️ The request was delivered, but the server did not confirm it within 30 seconds. Check Apps Script executions and the inbox.' : '⚠️ La solicitud fue entregada, pero el servidor no la confirmó en 30 segundos. Revisa las ejecuciones de Apps Script y el correo.','warning');
+      }else{
+        const detail=sent.error ? ` ${sent.error}` : '';
+        window.GCPdfEmail.setPdfDialogEmailState(((currentLang==='en') ? '❌ The server rejected the email.' : '❌ El servidor rechazó el envío.')+detail,'error');
+        showToast((currentLang==='en') ? 'The PDF was created, but the email failed.' : 'El PDF se creó, pero falló el correo.');
       }
     }catch(emailError){
-      console.error('Automatic PDF email failed', emailError);
-      showToast((currentLang==='en') ? 'PDF downloaded, but the automatic email could not be sent.' : 'PDF descargado, pero no se pudo completar el envío automático.');
+      console.error('Automatic PDF email failed',emailError);
+      window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '❌ The PDF is available, but the email connection failed.' : '❌ El PDF está disponible, pero falló la conexión con el correo.','error');
+      showToast((currentLang==='en') ? 'PDF ready, but the email could not be sent.' : 'PDF listo, pero no se pudo enviar el correo.');
     }
   }catch(err){
-    console.error('PDF generation error', err);
+    console.error('PDF generation error',err);
     showToast((currentLang==='en') ? 'The PDF could not be created.' : 'No se pudo crear el PDF.');
   }finally{
-    if(button){ button.disabled = false; button.textContent = oldText; }
+    if(button){ button.disabled=false; button.textContent=oldText; }
+  }
+}
+function getBogotaDateStamp(){
+  try{
+    const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const map={}; parts.forEach(function(part){if(part.type!=='literal') map[part.type]=part.value;});
+    return `${map.year}-${map.month}-${map.day}`;
+  }catch(_e){
+    const now=new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   }
 }
 async function downloadPlanEvidence(){
@@ -3019,7 +3027,7 @@ async function downloadPlanEvidence(){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const stamp = new Date().toISOString().slice(0,10);
+  const stamp = getBogotaDateStamp();
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
   const data = buildPlanPdfData();
   await deliverPdfDocument({
@@ -3042,7 +3050,7 @@ async function downloadGuardianCertificate(){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const stamp = new Date().toISOString().slice(0,10);
+  const stamp = getBogotaDateStamp();
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
   const data = buildDiplomaPdfData();
   await deliverPdfDocument({
@@ -4521,10 +4529,6 @@ function wireButtons(){
     nav.go("cierre");
   });
 
-  document.getElementById("btn-print-plan").addEventListener("click", ()=>printPlanEvidence());
-  document.getElementById("btn-download-plan").addEventListener("click", ()=>downloadPlanEvidence());
-  document.getElementById("btn-print-cert").addEventListener("click", ()=>printGuardianCertificate());
-  document.getElementById("btn-download-cert").addEventListener("click", ()=>downloadGuardianCertificate());
 
   document.addEventListener("click",(e)=>{
     const resetBtn=e.target.closest('[data-action="reset"]');
@@ -5103,6 +5107,31 @@ window.GCQuick = {
     }
   }
   window.addEventListener('load', cleanupWebAppOnly, { once:true });
+})();
+</script>
+
+<script>
+(function(){
+  function refreshPdfEmailNotes(){
+    var configured=!!(window.GCPdfEmail && window.GCPdfEmail.isEmailConfigured && window.GCPdfEmail.isEmailConfigured());
+    document.querySelectorAll('.pdf-email-note').forEach(function(note){
+      if(configured){
+        note.textContent=(typeof currentLang!=='undefined' && currentLang==='en')
+          ? '📧 Active service: downloading also sends a confirmed copy to cd@iemanueljbetancur.edu.co.'
+          : '📧 Servicio activo: al descargar también se envía una copia confirmada a cd@iemanueljbetancur.edu.co.';
+        note.style.background='rgba(0,168,107,.12)';
+      }else{
+        note.innerHTML=((typeof currentLang!=='undefined' && currentLang==='en')
+          ? '⚠️ Email service pending. The PDF can be downloaded, but automatic email requires the Apps Script /exec URL. '
+          : '⚠️ Servicio de correo pendiente. El PDF se puede descargar, pero el envío automático requiere la URL /exec de Apps Script. ')
+          + '<a href="configurar-correo.html" target="_blank" rel="noopener">Configurar</a>';
+        note.style.background='rgba(255,193,7,.18)';
+      }
+    });
+  }
+  window.refreshPdfEmailNotes=refreshPdfEmailNotes;
+  window.addEventListener('load',function(){setTimeout(refreshPdfEmailNotes,100);});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshPdfEmailNotes();});
 })();
 </script>
 

@@ -1,92 +1,133 @@
-# Activar el envío automático de los PDF por correo
+# Estado de esta entrega
 
-La aplicación ya quedó preparada para realizar estas dos acciones con un solo clic:
+La URL de Google Apps Script ya quedó configurada en `js/email-config.js`:
 
-1. Descargar un **PDF real** en el dispositivo.
-2. Enviar automáticamente el mismo PDF como archivo adjunto a:
+`https://script.google.com/macros/s/AKfycbzCYfnSe8smEyeqXdixYghKkBTZhKieJPladoFWIBQ2GZUkJCIE3ha3ZBed2i_8elHf/exec`
+
+No necesitas repetir la conexión mientras esta implementación `/exec` continúe activa. Conserva las instrucciones siguientes para una futura actualización o un nuevo despliegue.
+
+---
+
+# Activar y comprobar el envío automático de PDF
+
+La aplicación puede generar, descargar e imprimir el **Plan Guardián** y el **Diploma Guardián Climático**. Cuando el servicio de correo está configurado, cada descarga también envía el mismo PDF como adjunto a:
 
 `cd@iemanueljbetancur.edu.co`
 
-El destinatario está bloqueado dentro del servicio y no puede ser cambiado por los estudiantes desde la aplicación.
+El destinatario está fijado en el servidor y no puede ser modificado por los estudiantes.
 
-## Archivos incluidos
+## Por qué existe un paso de activación
 
-- `js/pdf-email.js`: genera los PDF y solicita el envío.
-- `js/email-config.js`: guarda la URL de la aplicación web de Google Apps Script.
-- `apps-script/Code.gs`: recibe el PDF y lo envía mediante la cuenta de Google que despliega el servicio.
+GitHub Pages solo publica archivos estáticos y no puede enviar correos con adjuntos por sí mismo. Google debe generar una URL privada de implementación para la cuenta institucional que autoriza los envíos. Esa URL no puede venir creada de antemano dentro del ZIP.
 
-## Único paso externo obligatorio
+## 1. Crear el servicio en Google Apps Script
 
-Una aplicación alojada únicamente en GitHub Pages no puede enviar adjuntos por correo por sí sola. Por eso es necesario publicar una vez el servicio incluido en `apps-script/Code.gs` desde una cuenta institucional autorizada.
-
-## Paso a paso
-
-### 1. Crear el proyecto de Apps Script
-
-1. Ingresa a `script.google.com` con la cuenta institucional que enviará los correos.
+1. Entra a `https://script.google.com` con la cuenta institucional que enviará los mensajes.
 2. Selecciona **Nuevo proyecto**.
-3. Cambia el nombre por: `Guardianes Climáticos - Envío PDF`.
-4. Borra el contenido inicial del archivo `Código.gs`.
-5. Abre el archivo `apps-script/Code.gs` que viene dentro de este proyecto.
+3. Ponle el nombre `Guardianes Climáticos - Envío PDF`.
+4. Borra el contenido inicial de `Código.gs`.
+5. Abre `apps-script/Code.gs` dentro de este proyecto.
 6. Copia todo su contenido y pégalo en Apps Script.
-7. Guarda el proyecto.
+7. Guarda.
 
-### 2. Desplegar como aplicación web
+## 2. Implementarlo como aplicación web
 
-1. En Apps Script, selecciona **Implementar → Nueva implementación**.
-2. En el tipo de implementación, elige **Aplicación web**.
+1. Selecciona **Implementar → Nueva implementación**.
+2. En tipo, elige **Aplicación web**.
 3. Configura:
    - **Ejecutar como:** Yo.
    - **Quién tiene acceso:** Cualquier persona.
-4. Selecciona **Implementar**.
+4. Presiona **Implementar**.
 5. Autoriza el permiso para enviar correos.
-6. Copia la URL de la aplicación web. Debe terminar en `/exec`.
+6. Copia la URL generada. Debe terminar exactamente en `/exec`.
 
-> Si el dominio no permite la opción “Cualquier persona”, el administrador de Google Workspace debe habilitarla para este servicio. El envío desde una web pública necesita que la URL pueda recibir la solicitud sin pedir un inicio de sesión adicional.
+No uses una URL terminada en `/dev`.
 
-### 3. Registrar la URL en la aplicación
+## 3. Probar y configurar la URL
 
-1. Abre `js/email-config.js`.
-2. Busca esta línea:
+La forma más sencilla es abrir, desde el proyecto publicado, esta página:
+
+`configurar-correo.html`
+
+Allí puedes:
+
+1. Pegar la URL `/exec`.
+2. Probar la conexión.
+3. Guardarla temporalmente en ese navegador.
+4. Descargar un archivo `email-config.js` ya configurado.
+
+Para que funcione en todos los equipos, reemplaza en GitHub:
+
+`js/email-config.js`
+
+por el archivo descargado desde `configurar-correo.html`.
+
+También puedes editarlo manualmente y cambiar:
 
 ```js
 webAppUrl: '',
 ```
 
-3. Pega entre las comillas la URL que termina en `/exec`:
+por:
 
 ```js
 webAppUrl: 'https://script.google.com/macros/s/IDENTIFICADOR/exec',
 ```
 
-4. Guarda el archivo.
-5. Sube el proyecto completo a GitHub Pages.
+No cambies el token a menos que lo cambies exactamente igual en `apps-script/Code.gs` y `js/email-config.js`.
 
-El token de seguridad ya viene sincronizado entre `js/email-config.js` y `apps-script/Code.gs`. No es necesario modificarlo. Si se cambia, debe usarse exactamente el mismo valor en los dos archivos.
+## 4. Publicar los archivos actualizados
 
-## Prueba final
+Sube el proyecto completo a GitHub. Verifica que `index.html` esté en la raíz y que las carpetas `js` y `apps-script` conserven sus nombres.
 
-1. Abre la aplicación publicada.
-2. Completa las tres misiones y el Plan Guardián.
-3. Selecciona **Descargar plan**.
-4. Confirma que se descargó un archivo `.pdf`.
-5. Revisa la bandeja de entrada de `cd@iemanueljbetancur.edu.co`.
-6. Repite la prueba con **Descargar diploma**.
+Después de publicar, realiza una recarga forzada:
 
-El mensaje recibido incluirá:
+- Mac: `Command + Shift + R`
+- Windows: `Ctrl + F5`
 
-- Tipo de documento.
-- Nombre del estudiante.
-- Fecha de generación.
-- PDF como archivo adjunto.
+## 5. Prueba final
 
-## Funcionamiento ante fallos
+1. Completa la experiencia y finaliza el Plan Guardián.
+2. Presiona **Descargar plan**.
+3. Debe aparecer un panel con:
+   - descarga manual de respaldo;
+   - opción para abrir o imprimir;
+   - estado del envío por correo.
+4. El estado correcto es:
 
-- Si no hay internet o el servicio de correo falla, la descarga local del PDF se conserva.
-- Si la URL todavía no se ha configurado, el PDF se descarga y la app muestra un aviso de configuración pendiente.
-- El servicio rechaza archivos que no sean PDF, archivos mayores de 8 MB y solicitudes que no tengan el token correcto.
-- El destinatario siempre será `cd@iemanueljbetancur.edu.co`.
+`✅ Correo confirmado y enviado correctamente.`
 
-## Actualizar el servicio en el futuro
+5. Comprueba que el PDF llegó a `cd@iemanueljbetancur.edu.co`.
+6. Repite con **Descargar diploma**.
 
-Cuando se modifique `Code.gs`, crea una nueva versión de la implementación desde **Implementar → Administrar implementaciones → Editar → Nueva versión**. La URL `/exec` normalmente puede conservarse.
+## Diagnóstico de errores
+
+### El PDF se descarga, pero dice “servicio pendiente”
+
+La URL `/exec` no está escrita en `js/email-config.js` ni guardada en el navegador. Abre `configurar-correo.html`.
+
+### El servidor rechaza el envío
+
+En Apps Script, abre **Ejecuciones**. La nueva versión muestra el error real en la aplicación y registra un código de solicitud.
+
+### La conexión no se confirma
+
+Comprueba que:
+
+- la URL termina en `/exec`;
+- la implementación está publicada para **Cualquier persona**;
+- se autorizó `MailApp`;
+- se publicó una nueva versión después de modificar `Code.gs`;
+- el token coincide en ambos archivos.
+
+### Se modificó Code.gs
+
+Ve a **Implementar → Administrar implementaciones → Editar → Nueva versión → Implementar**.
+
+## Cambios de confiabilidad de esta versión
+
+- La descarga ya no depende únicamente de un clic automático: siempre aparece un enlace manual.
+- La impresión ya no utiliza un iframe oculto: abre una vista visible con el botón **Imprimir ahora**.
+- El envío usa un POST compatible con GitHub Pages.
+- La aplicación consulta al servidor mediante un código único y solo muestra éxito cuando Apps Script confirma el envío.
+- Si el correo falla, el PDF continúa disponible para descargar.
