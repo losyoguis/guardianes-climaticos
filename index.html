@@ -905,6 +905,22 @@ body.dark .plan-photo-placeholder{color:#d8f5dc}
 .plan-photo-placeholder .emoji{font-size:2.2rem}
 .plan-photo-meta{font-size:.95rem;font-weight:700;color:#2e7d32}
 body.dark .plan-photo-meta{color:#b9f6ca}
+.gc-camera-overlay{position:fixed;inset:0;z-index:2147483600;background:rgba(3,12,24,.86);display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(8px)}
+.gc-camera-panel{width:min(760px,100%);max-height:calc(100vh - 36px);overflow:auto;background:#fff;border-radius:24px;padding:18px;box-shadow:0 28px 90px rgba(0,0,0,.48);border:3px solid rgba(0,194,255,.34)}
+body.dark .gc-camera-panel{background:#101923;color:#f5fbff;border-color:rgba(38,198,218,.42)}
+.gc-camera-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:12px}
+.gc-camera-title{font-size:1.25rem;font-weight:950;color:#0d4771}
+body.dark .gc-camera-title{color:#bcecff}
+.gc-camera-close{border:0;background:#eef5fb;color:#18364e;border-radius:14px;width:44px;height:44px;font-size:1.25rem;font-weight:950;cursor:pointer;flex:0 0 auto}
+body.dark .gc-camera-close{background:#243342;color:#fff}
+.gc-camera-stage{position:relative;border-radius:20px;overflow:hidden;background:#07121d;min-height:260px;display:grid;place-items:center}
+.gc-camera-video{display:block;width:100%;max-height:58vh;object-fit:contain;background:#07121d}
+.gc-camera-status{position:absolute;left:12px;right:12px;bottom:12px;padding:10px 12px;border-radius:14px;background:rgba(0,0,0,.68);color:#fff;font-weight:850;text-align:center;line-height:1.35}
+.gc-camera-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.gc-camera-actions .btn{min-width:170px}
+.gc-camera-help{margin:12px 2px 0;color:#42627d;font-weight:750;line-height:1.4;text-align:center}
+body.dark .gc-camera-help{color:#bed4e4}
+@media(max-width:640px){.gc-camera-overlay{padding:8px}.gc-camera-panel{padding:12px;border-radius:18px;max-height:calc(100vh - 16px)}.gc-camera-stage{min-height:220px}.gc-camera-actions{display:grid;grid-template-columns:1fr}.gc-camera-actions .btn{width:100%;min-width:0}}
 .plan-ready-box{display:grid;gap:12px}
 .plan-ready-meter{padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(255,214,0,.18),rgba(255,167,38,.22));font-weight:900;color:#7a4a00}
 body.dark .plan-ready-meter{background:linear-gradient(135deg,rgba(255,214,0,.14),rgba(255,167,38,.16));color:#ffe082}
@@ -1748,7 +1764,7 @@ body.belt-on .belt-right{
         <div class="plan-photo-panel">
           <div class="plan-photo-head">
             <div class="plan-photo-title" data-i18n="plan_photo_title">📸 Evidencia del trabajo</div>
-            <div class="plan-help" data-i18n="plan_photo_help">Sube una foto de tu cartel, acción o evidencia final.</div>
+            <div class="plan-help" data-i18n="plan_photo_help">Toma una foto con la cámara del celular o del computador, o sube una imagen existente.</div>
           </div>
           <div class="plan-photo-preview" id="plan-photo-preview">
             <div class="plan-photo-placeholder">
@@ -1756,9 +1772,10 @@ body.belt-on .belt-right{
               <div data-i18n="plan_photo_empty">Aún no hay foto cargada.</div>
             </div>
           </div>
-          <input type="file" id="plan-photo-input" accept="image/*" capture="environment" hidden />
+          <input type="file" id="plan-photo-input" accept="image/*" hidden />
           <div class="small-actions">
-            <button type="button" class="btn btn-primary" id="btn-plan-photo" data-i18n="plan_photo_btn">📸 Subir foto</button>
+            <button type="button" class="btn btn-primary" id="btn-plan-camera" data-i18n="plan_camera_btn">📷 Abrir cámara</button>
+            <button type="button" class="btn btn-ghost" id="btn-plan-photo" data-i18n="plan_photo_btn">🖼️ Subir imagen</button>
             <button type="button" class="btn btn-ghost" id="btn-plan-photo-remove" data-i18n="plan_photo_remove">🗑️ Quitar foto</button>
           </div>
           <div class="plan-photo-meta" id="plan-photo-meta" data-i18n="plan_photo_meta_empty">Sin evidencia cargada todavía.</div>
@@ -1788,7 +1805,6 @@ body.belt-on .belt-right{
       <div class="final-plan-title" data-i18n="end_plan_title">📌 Tu Plan Guardián</div>
       <div class="final-plan-summary" id="final-plan-summary"></div>
       <div class="final-plan-actions">
-        <button type="button" class="btn btn-primary" id="btn-print-plan" onclick="printPlanEvidence(); return false;" data-i18n="plan_print_btn">🖨️ Imprimir plan</button>
         <button type="button" class="btn btn-ghost" id="btn-download-plan" onclick="downloadPlanEvidence(); return false;" data-i18n="plan_download_btn">⬇️ Descargar plan</button>
       </div>
       <div class="pdf-email-note">📧 Verificando el servicio de correo…</div>
@@ -1903,9 +1919,10 @@ const I18N = {
     plan_owner_ph_3:'Ejemplo: docente y dos estudiantes',
     plan_date_label:'📅 Fecha de realización',
     plan_photo_title:'📸 Evidencia del trabajo',
-    plan_photo_help:'Sube una foto de tu cartel, acción o evidencia final.',
+    plan_photo_help:'Toma una foto con la cámara del celular o del computador, o sube una imagen existente.',
     plan_photo_empty:'Aún no hay foto cargada.',
-    plan_photo_btn:'📸 Subir foto',
+    plan_camera_btn:'📷 Abrir cámara',
+    plan_photo_btn:'🖼️ Subir imagen',
     plan_photo_remove:'🗑️ Quitar foto',
     plan_photo_meta_empty:'Sin evidencia cargada todavía.',
     plan_ready_start:'Completa la problemática, las 3 acciones, responsables, fechas y la evidencia.',
@@ -2131,9 +2148,10 @@ const I18N = {
     plan_owner_ph_3:'Example: teacher and two students',
     plan_date_label:'📅 Date',
     plan_photo_title:'📸 Evidence photo',
-    plan_photo_help:'Upload a photo of your poster, action, or final evidence.',
+    plan_photo_help:'Take a photo with the phone or computer camera, or upload an existing image.',
     plan_photo_empty:'No photo uploaded yet.',
-    plan_photo_btn:'📸 Upload photo',
+    plan_camera_btn:'📷 Open camera',
+    plan_photo_btn:'🖼️ Upload image',
     plan_photo_remove:'🗑️ Remove photo',
     plan_photo_meta_empty:'No evidence uploaded yet.',
     plan_ready_start:'Complete the problem, the 3 actions, responsible people, dates, and the evidence.',
@@ -2679,8 +2697,10 @@ function lockPlanInputs(locked){
       if(el.type !== 'date') el.disabled = locked;
     }
   });
+  const cameraBtn = document.getElementById('btn-plan-camera');
   const uploadBtn = document.getElementById('btn-plan-photo');
   const removeBtn = document.getElementById('btn-plan-photo-remove');
+  if(cameraBtn) cameraBtn.disabled = locked;
   if(uploadBtn) uploadBtn.disabled = locked;
   if(removeBtn) removeBtn.disabled = locked || !state.planData.photoData;
 }
@@ -3088,6 +3108,199 @@ function downscaleImageFile(file){
     reader.readAsDataURL(file);
   });
 }
+let planCameraStream = null;
+let planCameraFacingMode = 'environment';
+let planCameraOverlay = null;
+let planCameraSessionToken = 0;
+
+function stopPlanCameraStream(){
+  if(planCameraStream){
+    try{ planCameraStream.getTracks().forEach(track=>track.stop()); }catch(_err){}
+    planCameraStream = null;
+  }
+}
+
+function closePlanCamera(){
+  planCameraSessionToken++;
+  stopPlanCameraStream();
+  if(planCameraOverlay){
+    try{ planCameraOverlay.remove(); }catch(_err){}
+    planCameraOverlay = null;
+  }
+  document.removeEventListener('keydown', handlePlanCameraEscape);
+}
+
+function handlePlanCameraEscape(event){
+  if(event.key === 'Escape') closePlanCamera();
+}
+
+function planCameraErrorMessage(error){
+  const isEn = currentLang === 'en';
+  if(!window.isSecureContext){
+    return isEn
+      ? 'The computer camera requires HTTPS. Open the published GitHub Pages site.'
+      : 'La cámara del computador requiere HTTPS. Abre la aplicación publicada en GitHub Pages.';
+  }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    return isEn
+      ? 'This browser does not support direct camera access. Use “Upload image”.'
+      : 'Este navegador no permite activar la cámara directamente. Usa “Subir imagen”.';
+  }
+  const name = error && error.name ? error.name : '';
+  if(name === 'NotAllowedError' || name === 'SecurityError'){
+    return isEn
+      ? 'Camera permission was denied. Allow camera access in the browser and try again.'
+      : 'Se negó el permiso de la cámara. Permite el acceso en el navegador y vuelve a intentarlo.';
+  }
+  if(name === 'NotFoundError' || name === 'DevicesNotFoundError'){
+    return isEn
+      ? 'No camera was detected on this device.'
+      : 'No se detectó ninguna cámara en este equipo.';
+  }
+  if(name === 'NotReadableError' || name === 'TrackStartError'){
+    return isEn
+      ? 'The camera is busy in another application. Close it there and try again.'
+      : 'La cámara está siendo utilizada por otra aplicación. Ciérrala allí y vuelve a intentarlo.';
+  }
+  return isEn
+    ? 'The camera could not be started. You can still use “Upload image”.'
+    : 'No se pudo iniciar la cámara. También puedes usar “Subir imagen”.';
+}
+
+async function startPlanCamera(video, status, captureBtn, facingMode, sessionToken){
+  stopPlanCameraStream();
+  captureBtn.disabled = true;
+  status.textContent = currentLang === 'en' ? 'Starting camera…' : 'Iniciando cámara…';
+  if(!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    throw new Error('camera-unavailable');
+  }
+  const constraints = {
+    audio:false,
+    video:{
+      facingMode:{ideal:facingMode},
+      width:{ideal:1280},
+      height:{ideal:720}
+    }
+  };
+  const requestedStream = await navigator.mediaDevices.getUserMedia(constraints);
+  if(sessionToken !== planCameraSessionToken || !planCameraOverlay){
+    try{ requestedStream.getTracks().forEach(track=>track.stop()); }catch(_err){}
+    const aborted = new Error('camera-cancelled');
+    aborted.name = 'AbortError';
+    throw aborted;
+  }
+  planCameraStream = requestedStream;
+  video.srcObject = planCameraStream;
+  await new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>reject(new Error('camera-timeout')),10000);
+    const ready=()=>{clearTimeout(timer);resolve();};
+    if(video.readyState >= 2 && video.videoWidth) ready();
+    else video.addEventListener('loadedmetadata',ready,{once:true});
+  });
+  try{ await video.play(); }catch(_err){}
+  captureBtn.disabled = false;
+  status.textContent = currentLang === 'en'
+    ? 'Camera ready. Frame your evidence and press “Take photo”.'
+    : 'Cámara lista. Encuadra tu evidencia y pulsa “Tomar foto”.';
+}
+
+function cameraEvidenceFilename(){
+  const now = new Date();
+  const pad = value=>String(value).padStart(2,'0');
+  return `evidencia_camara_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}.jpg`;
+}
+
+async function openPlanCamera(){
+  if(state.completed.plan) return;
+  closePlanCamera();
+  const sessionToken = ++planCameraSessionToken;
+  const isEn = currentLang === 'en';
+  const overlay = document.createElement('div');
+  overlay.className = 'gc-camera-overlay';
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-label',isEn ? 'Camera for evidence photo' : 'Cámara para foto de evidencia');
+  overlay.innerHTML = `
+    <div class="gc-camera-panel">
+      <div class="gc-camera-head">
+        <div>
+          <div class="gc-camera-title">${isEn ? '📷 Take evidence photo' : '📷 Tomar foto de evidencia'}</div>
+          <div class="gc-camera-help">${isEn ? 'Works with the built-in or connected camera on a computer, tablet, or phone.' : 'Funciona con la cámara integrada o conectada del computador, tableta o celular.'}</div>
+        </div>
+        <button type="button" class="gc-camera-close" aria-label="${isEn ? 'Close camera' : 'Cerrar cámara'}">✕</button>
+      </div>
+      <div class="gc-camera-stage">
+        <video class="gc-camera-video" autoplay playsinline muted></video>
+        <div class="gc-camera-status" role="status" aria-live="polite">${isEn ? 'Requesting camera permission…' : 'Solicitando permiso para usar la cámara…'}</div>
+      </div>
+      <div class="gc-camera-actions">
+        <button type="button" class="btn btn-primary gc-camera-capture" disabled>${isEn ? '📸 Take photo' : '📸 Tomar foto'}</button>
+        <button type="button" class="btn btn-ghost gc-camera-switch">${isEn ? '🔄 Switch camera' : '🔄 Cambiar cámara'}</button>
+        <button type="button" class="btn btn-ghost gc-camera-cancel">${isEn ? 'Cancel' : 'Cancelar'}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  planCameraOverlay = overlay;
+  document.addEventListener('keydown',handlePlanCameraEscape);
+
+  const video = overlay.querySelector('.gc-camera-video');
+  const status = overlay.querySelector('.gc-camera-status');
+  const captureBtn = overlay.querySelector('.gc-camera-capture');
+  const switchBtn = overlay.querySelector('.gc-camera-switch');
+  const cancelBtn = overlay.querySelector('.gc-camera-cancel');
+  const closeBtn = overlay.querySelector('.gc-camera-close');
+
+  const close = ()=>closePlanCamera();
+  closeBtn.addEventListener('click',close);
+  cancelBtn.addEventListener('click',close);
+  overlay.addEventListener('click',event=>{ if(event.target === overlay) close(); });
+
+  captureBtn.addEventListener('click',()=>{
+    try{
+      const sourceWidth = video.videoWidth || 1280;
+      const sourceHeight = video.videoHeight || 720;
+      if(!sourceWidth || !sourceHeight) throw new Error('camera-no-frame');
+      const maxSide = 960;
+      const scale = Math.min(1,maxSide/Math.max(sourceWidth,sourceHeight));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1,Math.round(sourceWidth*scale));
+      canvas.height = Math.max(1,Math.round(sourceHeight*scale));
+      const ctx = canvas.getContext('2d');
+      if(!ctx) throw new Error('camera-canvas');
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      state.planData.photoData = canvas.toDataURL('image/jpeg',0.78);
+      state.planData.photoName = cameraEvidenceFilename();
+      saveState();
+      renderPlanPhotoPreview();
+      renderPlanStatus();
+      close();
+      showToast(isEn ? 'Photo taken and added as evidence.' : 'Foto tomada y agregada como evidencia.');
+    }catch(error){
+      console.error('Camera capture error',error);
+      status.textContent = isEn ? 'The photo could not be captured. Try again.' : 'No se pudo capturar la foto. Inténtalo nuevamente.';
+    }
+  });
+
+  switchBtn.addEventListener('click',async()=>{
+    planCameraFacingMode = planCameraFacingMode === 'environment' ? 'user' : 'environment';
+    try{
+      await startPlanCamera(video,status,captureBtn,planCameraFacingMode,sessionToken);
+    }catch(error){
+      console.error('Camera switch error',error);
+      status.textContent = planCameraErrorMessage(error);
+      captureBtn.disabled = true;
+    }
+  });
+
+  try{
+    await startPlanCamera(video,status,captureBtn,planCameraFacingMode,sessionToken);
+  }catch(error){
+    console.error('Camera start error',error);
+    status.textContent = planCameraErrorMessage(error);
+    captureBtn.disabled = true;
+  }
+}
+
 function wirePlanInputs(){
   const builder = document.getElementById('plan-builder');
   if(!builder || builder.dataset.planBound === '1') return;
@@ -3103,9 +3316,16 @@ function wirePlanInputs(){
       el.addEventListener('change', updatePlanStateFromInputs);
     });
   });
+  const cameraBtn = document.getElementById('btn-plan-camera');
   const photoBtn = document.getElementById('btn-plan-photo');
   const photoInput = document.getElementById('plan-photo-input');
   const photoRemove = document.getElementById('btn-plan-photo-remove');
+  if(cameraBtn){
+    cameraBtn.addEventListener('click',()=>{
+      if(state.completed.plan) return;
+      openPlanCamera();
+    });
+  }
   if(photoBtn && photoInput){
     photoBtn.addEventListener('click', ()=>{
       if(state.completed.plan) return;

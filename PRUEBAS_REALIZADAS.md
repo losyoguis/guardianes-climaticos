@@ -29,3 +29,17 @@ Se probaron las cuatro acciones visibles de la pantalla final:
 No se realizó un envío real a la bandeja institucional porque el ZIP recibido no contiene una URL de implementación `/exec` generada por la cuenta de Google del usuario. Esa URL se crea únicamente al desplegar `apps-script/Code.gs`.
 
 El flujo completo de envío y confirmación fue probado contra un endpoint simulado. Para la prueba real final, despliega Apps Script, registra la URL mediante `configurar-correo.html` y verifica la llegada a `cd@iemanueljbetancur.edu.co`.
+
+
+## Pruebas v3.2 — cámara en computador
+
+- Confirmado que `btn-print-plan` ya no existe en la interfaz.
+- Confirmado que el botón `btn-plan-camera` está visible en el Plan Guardián.
+- Confirmado que el selector de archivos ya no fuerza `capture=environment`; permite escoger imágenes en computador.
+- Prueba automatizada de apertura de la cámara con `getUserMedia`.
+- Prueba automatizada de vista previa en vivo.
+- Prueba automatizada de captura en JPEG y almacenamiento como evidencia.
+- Confirmado que la pista de video se detiene al capturar o cerrar.
+- Confirmado el nombre automático `evidencia_camara_YYYY-MM-DD_HH-MM.jpg`.
+- Validación de sintaxis de todos los archivos JavaScript y de todos los scripts inline.
+- Confirmado que la URL `/exec` y el destinatario institucional continúan configurados.

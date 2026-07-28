@@ -51,3 +51,26 @@
 - El destinatario continúa bloqueado en `cd@iemanueljbetancur.edu.co`.
 - No se modificó el token compartido entre la aplicación y `apps-script/Code.gs`.
 - La descarga e impresión siguen funcionando aunque el envío de correo presente un error.
+
+
+## Actualización v3.2 — Cámara en computador y retiro de impresión del plan
+
+- Se eliminó de la interfaz el botón **Imprimir plan**.
+- Se conserva **Descargar plan**, que genera el PDF y envía la copia al correo configurado.
+- Se añadió el botón **Abrir cámara** en la evidencia del Plan Guardián.
+- La cámara funciona en computadores con webcam integrada o conectada, además de tabletas y celulares.
+- Se añadió vista previa en vivo, captura, cambio de cámara y cancelación.
+- Al cerrar la cámara se detienen todas las pistas de video para proteger la privacidad.
+- Se mantiene la alternativa **Subir imagen** para seleccionar una fotografía existente.
+- La cámara requiere HTTPS; GitHub Pages ya cumple este requisito.
+- Se agregaron mensajes específicos para permiso denegado, cámara inexistente o cámara ocupada.
+
+### Archivo modificado
+
+- `index.html`
+
+### Archivos de documentación actualizados
+
+- `CAMBIOS_REALIZADOS.md`
+- `README.md`
+- `VERSION.txt`

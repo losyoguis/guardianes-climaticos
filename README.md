@@ -51,3 +51,15 @@ La URL `/exec` suministrada para Google Apps Script ya está registrada en `js/e
 `https://script.google.com/macros/s/AKfycbzCYfnSe8smEyeqXdixYghKkBTZhKieJPladoFWIBQ2GZUkJCIE3ha3ZBed2i_8elHf/exec`
 
 Al publicar esta carpeta completa, la aplicación intentará enviar automáticamente el Plan Guardián y el Diploma a `cd@iemanueljbetancur.edu.co`.
+
+
+## Cámara de evidencia en computador (v3.2)
+
+En el Plan Guardián ahora aparecen dos opciones para la evidencia:
+
+- **Abrir cámara:** activa la webcam integrada o conectada del computador. También funciona en celular o tableta.
+- **Subir imagen:** permite escoger una fotografía ya guardada.
+
+La cámara directa necesita que la aplicación se abra desde una conexión segura HTTPS. La publicación normal de GitHub Pages utiliza HTTPS. El navegador solicitará permiso la primera vez.
+
+El botón **Imprimir plan** fue retirado. El botón **Descargar plan** continúa generando el PDF y enviando la copia al correo institucional configurado.

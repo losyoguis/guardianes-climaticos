@@ -1,4 +1,6 @@
+/* Archivo de verificación generado desde index.html. No se carga en producción. */
 
+/* ===== inline script 2 ===== */
 /* =========================
    I18N (ES/EN) – kids-friendly
 ========================= */
@@ -87,9 +89,10 @@ const I18N = {
     plan_owner_ph_3:'Ejemplo: docente y dos estudiantes',
     plan_date_label:'📅 Fecha de realización',
     plan_photo_title:'📸 Evidencia del trabajo',
-    plan_photo_help:'Sube una foto de tu cartel, acción o evidencia final.',
+    plan_photo_help:'Toma una foto con la cámara del celular o del computador, o sube una imagen existente.',
     plan_photo_empty:'Aún no hay foto cargada.',
-    plan_photo_btn:'📸 Subir foto',
+    plan_camera_btn:'📷 Abrir cámara',
+    plan_photo_btn:'🖼️ Subir imagen',
     plan_photo_remove:'🗑️ Quitar foto',
     plan_photo_meta_empty:'Sin evidencia cargada todavía.',
     plan_ready_start:'Completa la problemática, las 3 acciones, responsables, fechas y la evidencia.',
@@ -107,6 +110,7 @@ const I18N = {
     end_plan_title:'📌 Tu Plan Guardián',
     plan_print_btn:'🖨️ Imprimir plan',
     plan_download_btn:'⬇️ Descargar plan',
+    pdf_email_note:'📧 Al descargar el PDF, también se enviará automáticamente una copia a cd@iemanueljbetancur.edu.co.',
     plan_export_title:'Plan Guardián del Clima',
     plan_export_intro:'Ahora eres un Guardián del Clima. Este es tu plan final con acciones concretas para transformar una problemática de tu contexto.',
     plan_export_generated:'Fecha de generación',
@@ -314,9 +318,10 @@ const I18N = {
     plan_owner_ph_3:'Example: teacher and two students',
     plan_date_label:'📅 Date',
     plan_photo_title:'📸 Evidence photo',
-    plan_photo_help:'Upload a photo of your poster, action, or final evidence.',
+    plan_photo_help:'Take a photo with the phone or computer camera, or upload an existing image.',
     plan_photo_empty:'No photo uploaded yet.',
-    plan_photo_btn:'📸 Upload photo',
+    plan_camera_btn:'📷 Open camera',
+    plan_photo_btn:'🖼️ Upload image',
     plan_photo_remove:'🗑️ Remove photo',
     plan_photo_meta_empty:'No evidence uploaded yet.',
     plan_ready_start:'Complete the problem, the 3 actions, responsible people, dates, and the evidence.',
@@ -334,6 +339,7 @@ const I18N = {
     end_plan_title:'📌 Your Guardian Plan',
     plan_print_btn:'🖨️ Print plan',
     plan_download_btn:'⬇️ Download plan',
+    pdf_email_note:'📧 When the PDF is downloaded, a copy will also be sent automatically to cd@iemanueljbetancur.edu.co.',
     plan_export_title:'Climate Guardian Plan',
     plan_export_intro:'You are now a Climate Guardian. This is your final plan with concrete actions to improve a problem in your context.',
     plan_export_generated:'Date generated',
@@ -861,8 +867,10 @@ function lockPlanInputs(locked){
       if(el.type !== 'date') el.disabled = locked;
     }
   });
+  const cameraBtn = document.getElementById('btn-plan-camera');
   const uploadBtn = document.getElementById('btn-plan-photo');
   const removeBtn = document.getElementById('btn-plan-photo-remove');
+  if(cameraBtn) cameraBtn.disabled = locked;
   if(uploadBtn) uploadBtn.disabled = locked;
   if(removeBtn) removeBtn.disabled = locked || !state.planData.photoData;
 }
@@ -1018,87 +1026,67 @@ function downloadHtmlDocument(html, filename, okEs, okEn){
     showToast((currentLang==='en') ? 'The file could not be downloaded.' : 'No se pudo descargar el archivo.');
   }
 }
+function ensurePrintPreviewStyles(){
+  if(document.getElementById('gc-print-preview-style')) return;
+  const style=document.createElement('style');
+  style.id='gc-print-preview-style';
+  style.textContent=`
+    .gc-print-overlay{position:fixed;inset:0;z-index:2147483500;background:rgba(7,22,38,.82);display:flex;align-items:center;justify-content:center;padding:12px}
+    .gc-print-panel{width:min(1100px,100%);height:min(94vh,900px);background:#fff;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.42)}
+    .gc-print-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 14px;background:#eef6ff;border-bottom:1px solid #cfe2f5;color:#15304b}
+    .gc-print-toolbar strong{font:900 17px Arial,sans-serif}.gc-print-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .gc-print-actions button{border:0;border-radius:999px;padding:10px 16px;font:800 15px Arial,sans-serif;cursor:pointer}
+    .gc-print-now{background:#1565c0;color:#fff}.gc-print-close{background:#dfe8f2;color:#15304b}
+    .gc-print-frame{width:100%;flex:1;border:0;background:#fff}
+    @media(max-width:560px){.gc-print-panel{height:96vh;border-radius:16px}.gc-print-toolbar{align-items:stretch}.gc-print-actions{width:100%}.gc-print-actions button{flex:1}}
+  `;
+  document.head.appendChild(style);
+}
+function closePrintPreview(){
+  const old=document.getElementById('gc-print-overlay');
+  if(old) old.remove();
+}
 function printHtmlDocument(html, title){
   try{
-    const iframe = document.createElement('iframe');
-    iframe.setAttribute('title', title || 'print-frame');
-    iframe.setAttribute('aria-hidden', 'true');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '1px';
-    iframe.style.height = '1px';
-    iframe.style.opacity = '0.01';
-    iframe.style.pointerEvents = 'none';
-    iframe.style.border = '0';
-    iframe.style.zIndex = '-1';
-    document.body.appendChild(iframe);
-
-    const cleanup = ()=>{
-      try{ iframe.onload = null; }catch(err){}
-      try{ if(iframe.parentNode) iframe.parentNode.removeChild(iframe); }catch(err){}
-    };
-
-    const startPrint = ()=>{
-      const win = iframe.contentWindow;
-      if(!win){
-        cleanup();
-        showToast((currentLang==='en') ? 'The print view could not be opened.' : 'No se pudo abrir la vista de impresión.');
-        return;
-      }
-      const safePrint = ()=>{
-        try{
-          win.focus();
-          win.print();
-        }catch(err){
-          console.error('printHtmlDocument print error', err);
-          showToast((currentLang==='en') ? 'Printing is not available on this device.' : 'La impresión no está disponible en este dispositivo.');
-        }
-        setTimeout(cleanup, 1200);
-      };
+    ensurePrintPreviewStyles();
+    closePrintPreview();
+    const overlay=document.createElement('div');
+    overlay.id='gc-print-overlay';
+    overlay.className='gc-print-overlay';
+    overlay.setAttribute('role','dialog');
+    overlay.setAttribute('aria-modal','true');
+    overlay.innerHTML=`<div class="gc-print-panel"><div class="gc-print-toolbar"><strong>${escapeHtml(title || ((currentLang==='en') ? 'Print preview' : 'Vista para imprimir'))}</strong><div class="gc-print-actions"><button type="button" class="gc-print-now">🖨️ ${(currentLang==='en') ? 'Print now' : 'Imprimir ahora'}</button><button type="button" class="gc-print-close">✖ ${(currentLang==='en') ? 'Close' : 'Cerrar'}</button></div></div><iframe class="gc-print-frame" title="${escapeHtml(title || 'print-frame')}"></iframe></div>`;
+    document.body.appendChild(overlay);
+    const frame=overlay.querySelector('.gc-print-frame');
+    const printBtn=overlay.querySelector('.gc-print-now');
+    const closeBtn=overlay.querySelector('.gc-print-close');
+    const runPrint=()=>{
       try{
-        const doc = win.document;
-        const images = Array.from(doc.images || []);
-        let pending = images.length;
-        if(!pending){
-          setTimeout(safePrint, 180);
-          return;
-        }
-        let resolved = false;
-        const done = ()=>{
-          if(resolved) return;
-          resolved = true;
-          setTimeout(safePrint, 180);
-        };
-        const tick = ()=>{ pending -= 1; if(pending <= 0) done(); };
-        images.forEach(img=>{
-          if(img.complete) tick();
-          else {
-            img.addEventListener('load', tick, { once:true });
-            img.addEventListener('error', tick, { once:true });
-          }
-        });
-        setTimeout(done, 1400);
+        const win=frame.contentWindow;
+        if(!win) throw new Error('print-window-unavailable');
+        win.focus();
+        win.print();
       }catch(err){
-        console.error('printHtmlDocument wait error', err);
-        setTimeout(safePrint, 220);
+        console.error('print preview error', err);
+        showToast((currentLang==='en') ? 'Printing is not available. Use the PDF download button.' : 'No se pudo abrir la impresión. Usa el botón de descarga PDF.');
       }
     };
-
-    iframe.onload = ()=>setTimeout(startPrint, 120);
-
-    const doc = iframe.contentWindow && iframe.contentWindow.document;
-    if(!doc){
-      cleanup();
-      showToast((currentLang==='en') ? 'The print view could not be opened.' : 'No se pudo abrir la vista de impresión.');
-      return;
+    printBtn.addEventListener('click', runPrint);
+    closeBtn.addEventListener('click', closePrintPreview);
+    overlay.addEventListener('click',(event)=>{ if(event.target===overlay) closePrintPreview(); });
+    frame.addEventListener('load',()=>{
+      printBtn.focus();
+      showToast((currentLang==='en') ? 'Preview ready. Press “Print now”.' : 'Vista lista. Pulsa “Imprimir ahora”.');
+    },{once:true});
+    if('srcdoc' in frame){
+      frame.srcdoc=html;
+    }else{
+      const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+      frame.src=URL.createObjectURL(blob);
     }
-    doc.open();
-    doc.write(html);
-    doc.close();
   }catch(err){
     console.error('printHtmlDocument error', err);
-    showToast((currentLang==='en') ? 'Printing could not be started.' : 'No se pudo iniciar la impresión.');
+    showToast((currentLang==='en') ? 'Printing could not be prepared.' : 'No se pudo preparar la impresión.');
   }
 }
 function printPlanEvidence(){
@@ -1108,19 +1096,137 @@ function printPlanEvidence(){
   }
   printHtmlDocument(buildPlanEvidenceDocument(), (currentLang==='en') ? 'Guardian Plan' : 'Plan Guardián');
 }
-function downloadPlanEvidence(){
+function buildPlanPdfData(){
+  const pd = state.planData || defaultPlanData();
+  const generatedOn = new Intl.DateTimeFormat(currentLang==='en' ? 'en-US' : 'es-CO', { year:'numeric', month:'long', day:'numeric' }).format(new Date());
+  return {
+    title:t('plan_export_title'),
+    intro:t('plan_export_intro'),
+    generatedLabel:t('plan_export_generated'),
+    generatedOn,
+    scoreLabel:t('plan_export_score'),
+    score:Number(state.score || 0),
+    studentLabel:t('plan_export_student'),
+    studentName:(pd.studentName || '').trim() || t('cert_name_missing'),
+    problemLabel:t('plan_export_problem'),
+    problem:(pd.problem || '').trim(),
+    problemMissing:(currentLang==='en') ? 'No problem written yet.' : 'Todavía no hay una problemática escrita.',
+    contextLabel:t('plan_export_context'),
+    context:(pd.context || '').trim(),
+    actionsLabel:t('plan_export_actions'),
+    actionWord:(currentLang==='en') ? 'Action' : 'Acción',
+    actionMissing:(currentLang==='en') ? 'No action written.' : 'No se escribió la acción.',
+    ownerLabel:t('plan_owner_label').replace(/^\S+\s*/,''),
+    dateLabel:t('plan_date_label').replace(/^\S+\s*/,''),
+    actions:(pd.actions || []).map((item,index)=>({
+      title:`${(currentLang==='en') ? 'Action' : 'Acción'} ${index+1}`,
+      what:(item.what || '').trim(),
+      who:(item.who || '').trim(),
+      when:(item.when || '').trim()
+    })),
+    evidenceLabel:t('plan_export_evidence'),
+    noPhotoLabel:t('plan_export_no_photo'),
+    photoData:pd.photoData || '',
+    footer:t('plan_export_footer')
+  };
+}
+function buildDiplomaPdfData(){
+  const pd = state.planData || defaultPlanData();
+  const generatedOn = new Intl.DateTimeFormat(currentLang==='en' ? 'en-US' : 'es-CO', { year:'numeric', month:'long', day:'numeric' }).format(new Date());
+  return {
+    chip:t('cert_preview_chip'),
+    title:t('cert_export_title'),
+    subtitle:t('cert_export_subtitle'),
+    awardedTo:t('cert_awarded_to'),
+    studentName:(pd.studentName || '').trim() || t('cert_name_missing'),
+    forText:t('cert_for_text'),
+    problemLabel:t('cert_problem_label'),
+    problem:(pd.problem || '').trim(),
+    problemMissing:(currentLang==='en') ? 'No problem written yet.' : 'Todavía no hay una problemática escrita.',
+    dateLabel:t('cert_date_label'),
+    generatedOn,
+    scoreLabel:t('cert_score_label'),
+    score:Number(state.score || 0),
+    footer:t('cert_export_footer')
+  };
+}
+async function deliverPdfDocument(options){
+  const button=document.getElementById(options.buttonId);
+  const oldText=button ? button.textContent : '';
+  if(button){
+    button.disabled=true;
+    button.textContent=(currentLang==='en') ? '⏳ Creating PDF...' : '⏳ Creando PDF...';
+  }
+  try{
+    if(!window.GCPdfEmail) throw new Error('pdf-module-unavailable');
+    const blob=await options.createPdf();
+    if(!(blob instanceof Blob) || !blob.size) throw new Error('empty-pdf');
+    window.GCPdfEmail.downloadBlob(blob,options.filename,{
+      title:(currentLang==='en') ? 'PDF ready' : 'PDF listo',
+      message:(currentLang==='en') ? 'The automatic download was requested. If your browser blocked it, use the blue download button.' : 'Se solicitó la descarga automática. Si el navegador la bloqueó, usa el botón azul para descargar.',
+      emailState:(currentLang==='en') ? '📧 Sending the email copy…' : '📧 Enviando la copia por correo…'
+    });
+    showToast((currentLang==='en') ? 'PDF ready. You can download it from the open panel.' : 'PDF listo. Puedes descargarlo desde el panel abierto.');
+
+    try{
+      const sent=await window.GCPdfEmail.sendPdf(blob,{
+        filename:options.filename,
+        documentType:options.documentType,
+        studentName:options.studentName,
+        generatedAt:new Date().toISOString()
+      });
+      if(sent.ok){
+        window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '✅ Email confirmed and sent successfully.' : '✅ Correo confirmado y enviado correctamente.','ok');
+        showToast((currentLang==='en') ? 'PDF sent successfully by email.' : 'PDF enviado correctamente por correo.');
+      }else if(!sent.configured){
+        window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '⚠️ PDF ready, but the Apps Script /exec URL has not been configured.' : '⚠️ PDF listo, pero falta configurar la URL /exec de Google Apps Script.','warning');
+        showToast((currentLang==='en') ? 'PDF ready. Email service not configured.' : 'PDF listo. El servicio de correo no está configurado.');
+      }else if(sent.reason==='too-large'){
+        window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '⚠️ The PDF is too large to email.' : '⚠️ El PDF es demasiado grande para enviarlo por correo.','warning');
+      }else if(sent.pending){
+        window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '⚠️ The request was delivered, but the server did not confirm it within 30 seconds. Check Apps Script executions and the inbox.' : '⚠️ La solicitud fue entregada, pero el servidor no la confirmó en 30 segundos. Revisa las ejecuciones de Apps Script y el correo.','warning');
+      }else{
+        const detail=sent.error ? ` ${sent.error}` : '';
+        window.GCPdfEmail.setPdfDialogEmailState(((currentLang==='en') ? '❌ The server rejected the email.' : '❌ El servidor rechazó el envío.')+detail,'error');
+        showToast((currentLang==='en') ? 'The PDF was created, but the email failed.' : 'El PDF se creó, pero falló el correo.');
+      }
+    }catch(emailError){
+      console.error('Automatic PDF email failed',emailError);
+      window.GCPdfEmail.setPdfDialogEmailState((currentLang==='en') ? '❌ The PDF is available, but the email connection failed.' : '❌ El PDF está disponible, pero falló la conexión con el correo.','error');
+      showToast((currentLang==='en') ? 'PDF ready, but the email could not be sent.' : 'PDF listo, pero no se pudo enviar el correo.');
+    }
+  }catch(err){
+    console.error('PDF generation error',err);
+    showToast((currentLang==='en') ? 'The PDF could not be created.' : 'No se pudo crear el PDF.');
+  }finally{
+    if(button){ button.disabled=false; button.textContent=oldText; }
+  }
+}
+function getBogotaDateStamp(){
+  try{
+    const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+    const map={}; parts.forEach(function(part){if(part.type!=='literal') map[part.type]=part.value;});
+    return `${map.year}-${map.month}-${map.day}`;
+  }catch(_e){
+    const now=new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  }
+}
+async function downloadPlanEvidence(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const stamp = new Date().toISOString().slice(0,10);
+  const stamp = getBogotaDateStamp();
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
-  downloadHtmlDocument(
-    buildPlanEvidenceDocument(),
-    `${currentLang==='en' ? 'guardian_plan' : 'plan_guardian'}_${namePart}_${stamp}.html`,
-    'Plan descargado.',
-    'Plan downloaded.'
-  );
+  const data = buildPlanPdfData();
+  await deliverPdfDocument({
+    buttonId:'btn-download-plan',
+    filename:`${currentLang==='en' ? 'guardian_plan' : 'plan_guardian'}_${namePart}_${stamp}.pdf`,
+    documentType:(currentLang==='en') ? 'Climate Guardian Plan' : 'Plan Guardián del Clima',
+    studentName:data.studentName,
+    createPdf:()=>window.GCPdfEmail.createPlanPdf(data)
+  });
 }
 function printGuardianCertificate(){
   if(!state.completed.plan){
@@ -1129,19 +1235,21 @@ function printGuardianCertificate(){
   }
   printHtmlDocument(buildGuardianCertificateDocument(), (currentLang==='en') ? 'Climate Guardian Certificate' : 'Diploma Guardián Climático');
 }
-function downloadGuardianCertificate(){
+async function downloadGuardianCertificate(){
   if(!state.completed.plan){
     showToast((currentLang==='en') ? 'Finish your plan first.' : 'Primero finaliza tu plan.');
     return;
   }
-  const stamp = new Date().toISOString().slice(0,10);
+  const stamp = getBogotaDateStamp();
   const namePart = sanitizeFilenamePart(state.planData && state.planData.studentName);
-  downloadHtmlDocument(
-    buildGuardianCertificateDocument(),
-    `${currentLang==='en' ? 'guardian_certificate' : 'diploma_guardian'}_${namePart}_${stamp}.html`,
-    'Diploma descargado.',
-    'Certificate downloaded.'
-  );
+  const data = buildDiplomaPdfData();
+  await deliverPdfDocument({
+    buttonId:'btn-download-cert',
+    filename:`${currentLang==='en' ? 'guardian_certificate' : 'diploma_guardian'}_${namePart}_${stamp}.pdf`,
+    documentType:(currentLang==='en') ? 'Climate Guardian Certificate' : 'Diploma Guardián Climático',
+    studentName:data.studentName,
+    createPdf:()=>window.GCPdfEmail.createDiplomaPdf(data)
+  });
 }
 function downscaleImageFile(file){
   return new Promise((resolve, reject)=>{
@@ -1170,6 +1278,199 @@ function downscaleImageFile(file){
     reader.readAsDataURL(file);
   });
 }
+let planCameraStream = null;
+let planCameraFacingMode = 'environment';
+let planCameraOverlay = null;
+let planCameraSessionToken = 0;
+
+function stopPlanCameraStream(){
+  if(planCameraStream){
+    try{ planCameraStream.getTracks().forEach(track=>track.stop()); }catch(_err){}
+    planCameraStream = null;
+  }
+}
+
+function closePlanCamera(){
+  planCameraSessionToken++;
+  stopPlanCameraStream();
+  if(planCameraOverlay){
+    try{ planCameraOverlay.remove(); }catch(_err){}
+    planCameraOverlay = null;
+  }
+  document.removeEventListener('keydown', handlePlanCameraEscape);
+}
+
+function handlePlanCameraEscape(event){
+  if(event.key === 'Escape') closePlanCamera();
+}
+
+function planCameraErrorMessage(error){
+  const isEn = currentLang === 'en';
+  if(!window.isSecureContext){
+    return isEn
+      ? 'The computer camera requires HTTPS. Open the published GitHub Pages site.'
+      : 'La cámara del computador requiere HTTPS. Abre la aplicación publicada en GitHub Pages.';
+  }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    return isEn
+      ? 'This browser does not support direct camera access. Use “Upload image”.'
+      : 'Este navegador no permite activar la cámara directamente. Usa “Subir imagen”.';
+  }
+  const name = error && error.name ? error.name : '';
+  if(name === 'NotAllowedError' || name === 'SecurityError'){
+    return isEn
+      ? 'Camera permission was denied. Allow camera access in the browser and try again.'
+      : 'Se negó el permiso de la cámara. Permite el acceso en el navegador y vuelve a intentarlo.';
+  }
+  if(name === 'NotFoundError' || name === 'DevicesNotFoundError'){
+    return isEn
+      ? 'No camera was detected on this device.'
+      : 'No se detectó ninguna cámara en este equipo.';
+  }
+  if(name === 'NotReadableError' || name === 'TrackStartError'){
+    return isEn
+      ? 'The camera is busy in another application. Close it there and try again.'
+      : 'La cámara está siendo utilizada por otra aplicación. Ciérrala allí y vuelve a intentarlo.';
+  }
+  return isEn
+    ? 'The camera could not be started. You can still use “Upload image”.'
+    : 'No se pudo iniciar la cámara. También puedes usar “Subir imagen”.';
+}
+
+async function startPlanCamera(video, status, captureBtn, facingMode, sessionToken){
+  stopPlanCameraStream();
+  captureBtn.disabled = true;
+  status.textContent = currentLang === 'en' ? 'Starting camera…' : 'Iniciando cámara…';
+  if(!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    throw new Error('camera-unavailable');
+  }
+  const constraints = {
+    audio:false,
+    video:{
+      facingMode:{ideal:facingMode},
+      width:{ideal:1280},
+      height:{ideal:720}
+    }
+  };
+  const requestedStream = await navigator.mediaDevices.getUserMedia(constraints);
+  if(sessionToken !== planCameraSessionToken || !planCameraOverlay){
+    try{ requestedStream.getTracks().forEach(track=>track.stop()); }catch(_err){}
+    const aborted = new Error('camera-cancelled');
+    aborted.name = 'AbortError';
+    throw aborted;
+  }
+  planCameraStream = requestedStream;
+  video.srcObject = planCameraStream;
+  await new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>reject(new Error('camera-timeout')),10000);
+    const ready=()=>{clearTimeout(timer);resolve();};
+    if(video.readyState >= 2 && video.videoWidth) ready();
+    else video.addEventListener('loadedmetadata',ready,{once:true});
+  });
+  try{ await video.play(); }catch(_err){}
+  captureBtn.disabled = false;
+  status.textContent = currentLang === 'en'
+    ? 'Camera ready. Frame your evidence and press “Take photo”.'
+    : 'Cámara lista. Encuadra tu evidencia y pulsa “Tomar foto”.';
+}
+
+function cameraEvidenceFilename(){
+  const now = new Date();
+  const pad = value=>String(value).padStart(2,'0');
+  return `evidencia_camara_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}.jpg`;
+}
+
+async function openPlanCamera(){
+  if(state.completed.plan) return;
+  closePlanCamera();
+  const sessionToken = ++planCameraSessionToken;
+  const isEn = currentLang === 'en';
+  const overlay = document.createElement('div');
+  overlay.className = 'gc-camera-overlay';
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('aria-label',isEn ? 'Camera for evidence photo' : 'Cámara para foto de evidencia');
+  overlay.innerHTML = `
+    <div class="gc-camera-panel">
+      <div class="gc-camera-head">
+        <div>
+          <div class="gc-camera-title">${isEn ? '📷 Take evidence photo' : '📷 Tomar foto de evidencia'}</div>
+          <div class="gc-camera-help">${isEn ? 'Works with the built-in or connected camera on a computer, tablet, or phone.' : 'Funciona con la cámara integrada o conectada del computador, tableta o celular.'}</div>
+        </div>
+        <button type="button" class="gc-camera-close" aria-label="${isEn ? 'Close camera' : 'Cerrar cámara'}">✕</button>
+      </div>
+      <div class="gc-camera-stage">
+        <video class="gc-camera-video" autoplay playsinline muted></video>
+        <div class="gc-camera-status" role="status" aria-live="polite">${isEn ? 'Requesting camera permission…' : 'Solicitando permiso para usar la cámara…'}</div>
+      </div>
+      <div class="gc-camera-actions">
+        <button type="button" class="btn btn-primary gc-camera-capture" disabled>${isEn ? '📸 Take photo' : '📸 Tomar foto'}</button>
+        <button type="button" class="btn btn-ghost gc-camera-switch">${isEn ? '🔄 Switch camera' : '🔄 Cambiar cámara'}</button>
+        <button type="button" class="btn btn-ghost gc-camera-cancel">${isEn ? 'Cancel' : 'Cancelar'}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  planCameraOverlay = overlay;
+  document.addEventListener('keydown',handlePlanCameraEscape);
+
+  const video = overlay.querySelector('.gc-camera-video');
+  const status = overlay.querySelector('.gc-camera-status');
+  const captureBtn = overlay.querySelector('.gc-camera-capture');
+  const switchBtn = overlay.querySelector('.gc-camera-switch');
+  const cancelBtn = overlay.querySelector('.gc-camera-cancel');
+  const closeBtn = overlay.querySelector('.gc-camera-close');
+
+  const close = ()=>closePlanCamera();
+  closeBtn.addEventListener('click',close);
+  cancelBtn.addEventListener('click',close);
+  overlay.addEventListener('click',event=>{ if(event.target === overlay) close(); });
+
+  captureBtn.addEventListener('click',()=>{
+    try{
+      const sourceWidth = video.videoWidth || 1280;
+      const sourceHeight = video.videoHeight || 720;
+      if(!sourceWidth || !sourceHeight) throw new Error('camera-no-frame');
+      const maxSide = 960;
+      const scale = Math.min(1,maxSide/Math.max(sourceWidth,sourceHeight));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1,Math.round(sourceWidth*scale));
+      canvas.height = Math.max(1,Math.round(sourceHeight*scale));
+      const ctx = canvas.getContext('2d');
+      if(!ctx) throw new Error('camera-canvas');
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      state.planData.photoData = canvas.toDataURL('image/jpeg',0.78);
+      state.planData.photoName = cameraEvidenceFilename();
+      saveState();
+      renderPlanPhotoPreview();
+      renderPlanStatus();
+      close();
+      showToast(isEn ? 'Photo taken and added as evidence.' : 'Foto tomada y agregada como evidencia.');
+    }catch(error){
+      console.error('Camera capture error',error);
+      status.textContent = isEn ? 'The photo could not be captured. Try again.' : 'No se pudo capturar la foto. Inténtalo nuevamente.';
+    }
+  });
+
+  switchBtn.addEventListener('click',async()=>{
+    planCameraFacingMode = planCameraFacingMode === 'environment' ? 'user' : 'environment';
+    try{
+      await startPlanCamera(video,status,captureBtn,planCameraFacingMode,sessionToken);
+    }catch(error){
+      console.error('Camera switch error',error);
+      status.textContent = planCameraErrorMessage(error);
+      captureBtn.disabled = true;
+    }
+  });
+
+  try{
+    await startPlanCamera(video,status,captureBtn,planCameraFacingMode,sessionToken);
+  }catch(error){
+    console.error('Camera start error',error);
+    status.textContent = planCameraErrorMessage(error);
+    captureBtn.disabled = true;
+  }
+}
+
 function wirePlanInputs(){
   const builder = document.getElementById('plan-builder');
   if(!builder || builder.dataset.planBound === '1') return;
@@ -1185,9 +1486,16 @@ function wirePlanInputs(){
       el.addEventListener('change', updatePlanStateFromInputs);
     });
   });
+  const cameraBtn = document.getElementById('btn-plan-camera');
   const photoBtn = document.getElementById('btn-plan-photo');
   const photoInput = document.getElementById('plan-photo-input');
   const photoRemove = document.getElementById('btn-plan-photo-remove');
+  if(cameraBtn){
+    cameraBtn.addEventListener('click',()=>{
+      if(state.completed.plan) return;
+      openPlanCamera();
+    });
+  }
   if(photoBtn && photoInput){
     photoBtn.addEventListener('click', ()=>{
       if(state.completed.plan) return;
@@ -2611,10 +2919,6 @@ function wireButtons(){
     nav.go("cierre");
   });
 
-  document.getElementById("btn-print-plan").addEventListener("click", ()=>printPlanEvidence());
-  document.getElementById("btn-download-plan").addEventListener("click", ()=>downloadPlanEvidence());
-  document.getElementById("btn-print-cert").addEventListener("click", ()=>printGuardianCertificate());
-  document.getElementById("btn-download-cert").addEventListener("click", ()=>downloadGuardianCertificate());
 
   document.addEventListener("click",(e)=>{
     const resetBtn=e.target.closest('[data-action="reset"]');
@@ -2812,9 +3116,9 @@ window.addEventListener("load", ()=>{
     if(typeof showToast === "function") setTimeout(()=>showToast("La app cargó en modo seguro. Revisa la caché si ves algo raro."),800);
   }
 });
-
 ;
 
+/* ===== inline script 3 ===== */
 window.GCQuick = {
   toggleAudio: function(ev){
     try{
@@ -2840,9 +3144,9 @@ window.GCQuick = {
     return false;
   }
 };
-
 ;
 
+/* ===== inline script 4 ===== */
 (function(){
   const BUILD = 'gcfix9';
   const BG = {
@@ -3041,9 +3345,9 @@ window.GCQuick = {
     ensureCriticalBgs();
   });
 })();
-
 ;
 
+/* ===== inline script 5 ===== */
 (function(){
   function activeId(){
     var active = document.querySelector('.screen.active');
@@ -3115,9 +3419,9 @@ window.GCQuick = {
   window.addEventListener('hashchange', function(){ setTimeout(function(){ applyScrollFix(); }, 40); });
   window.addEventListener('pageshow', function(){ patchNav(); applyScrollFix(); });
 })();
-
 ;
 
+/* ===== inline script 6 ===== */
 (function(){
   function byId(id){ return document.getElementById(id); }
   function openPropuesta(){
@@ -3169,9 +3473,9 @@ window.GCQuick = {
     if(e.key==='Escape'){ closePropuesta(); }
   });
 })();
-
 ;
 
+/* ===== inline script 7 ===== */
 (function(){
   async function cleanupWebAppOnly(){
     try{
@@ -3189,9 +3493,34 @@ window.GCQuick = {
   }
   window.addEventListener('load', cleanupWebAppOnly, { once:true });
 })();
-
 ;
 
+/* ===== inline script 8 ===== */
+(function(){
+  function refreshPdfEmailNotes(){
+    var configured=!!(window.GCPdfEmail && window.GCPdfEmail.isEmailConfigured && window.GCPdfEmail.isEmailConfigured());
+    document.querySelectorAll('.pdf-email-note').forEach(function(note){
+      if(configured){
+        note.textContent=(typeof currentLang!=='undefined' && currentLang==='en')
+          ? '📧 Active service: downloading also sends a confirmed copy to cd@iemanueljbetancur.edu.co.'
+          : '📧 Servicio activo: al descargar también se envía una copia confirmada a cd@iemanueljbetancur.edu.co.';
+        note.style.background='rgba(0,168,107,.12)';
+      }else{
+        note.innerHTML=((typeof currentLang!=='undefined' && currentLang==='en')
+          ? '⚠️ Email service pending. The PDF can be downloaded, but automatic email requires the Apps Script /exec URL. '
+          : '⚠️ Servicio de correo pendiente. El PDF se puede descargar, pero el envío automático requiere la URL /exec de Apps Script. ')
+          + '<a href="configurar-correo.html" target="_blank" rel="noopener">Configurar</a>';
+        note.style.background='rgba(255,193,7,.18)';
+      }
+    });
+  }
+  window.refreshPdfEmailNotes=refreshPdfEmailNotes;
+  window.addEventListener('load',function(){setTimeout(refreshPdfEmailNotes,100);});
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)refreshPdfEmailNotes();});
+})();
+;
+
+/* ===== inline script 10 ===== */
 (function(){
   function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch(_e){} }
   function safeToast(msg){ try{ if(typeof showToast==='function'){ showToast(msg); return; } }catch(_e){} try{ var t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.add('show'); clearTimeout(window.__gcToastTimer2); window.__gcToastTimer2=setTimeout(function(){ t.classList.remove('show'); },2200); }catch(_e){} }
@@ -3208,3 +3537,4 @@ window.GCQuick = {
   function bindAll(){ updateUtilityButtonsHard(); bind('btn-lang', hardToggleLang); bind('btn-theme', hardToggleTheme); bind('btn-audio', hardToggleAudio); }
   window.addEventListener('DOMContentLoaded', bindAll); window.addEventListener('load', bindAll); setTimeout(bindAll,1200);
 })();
+;
